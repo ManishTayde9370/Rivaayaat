@@ -1,0 +1,46 @@
+/* Footer.css */
+
+.footer {
+  background-color: #4B1E0C;
+  font-family: 'Georgia', serif;
+}
+
+.footer-heading {
+  font-weight: bold;
+  font-size: 0.95rem;
+  color: #f4d9b6;
+  margin-bottom: 1rem;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-links li {
+  margin-bottom: 0.5rem;
+  color: #e0c3a3;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.footer-links li:hover {
+  color: #fff;
+}
+
+.footer-divider {
+  border-top: 1px solid #7a4d34;
+  margin: 2rem 0 1rem;
+}
+
+.social-icons svg {
+  font-size: 1.2rem;
+  margin-right: 10px;
+  color: #f4d9b6;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.social-icons svg:hover {
+  color: #fff;
+}

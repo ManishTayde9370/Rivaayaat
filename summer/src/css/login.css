@@ -1,0 +1,97 @@
+/* src/css/Login.css */
+
+/* Page background and layout */
+.login-page {
+  background-image: url('../assets/bg-login2.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-family: 'Georgia', serif;
+}
+
+/* Dark overlay */
+.login-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 0;
+}
+
+/* Login card container */
+.login-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  padding: 2rem;
+  border-radius: 15px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #fcecc5;
+  border: 1px solid #fcecc5;
+  box-shadow: 0 0 20px rgba(252, 236, 197, 0.3);
+}
+
+/* Headings */
+.login-card h2,
+.login-heading {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #fcecc5;
+  text-align: center;
+  font-family: Georgia, serif;
+  margin-bottom: 0.5rem;
+}
+
+.login-subheading {
+  text-align: center;
+  margin-bottom: 1rem;
+  letter-spacing: 1px;
+}
+
+/* Labels */
+.login-card label {
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* Inputs and placeholders */
+.login-card input::placeholder {
+  color: #e8e3d1;
+  opacity: 0.8;
+}
+
+.form-control {
+  background-color: transparent;
+  border-color: #fcecc5 ;
+  color: #fcecc5 ;
+}
+
+/* Icons inside input */
+.input-group-text {
+  background-color: transparent;
+  border-color: #fcecc5;
+  color: #fcecc5 ;
+}
+
+/* Button */
+.login-btn,
+.btn-login,
+button[type="submit"] {
+  background-color: #fcecc5;
+  color: #000;
+  font-weight: bold;
+}
+
+/* Links */
+.register-link,
+.forgot-link {
+  color: #fcecc5;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.9rem;
+}

@@ -1,0 +1,79 @@
+/* --- Dashboard Background --- */
+.dashboard-bg {
+   /* Optional: use a cultural or textile background */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  font-family: 'Georgia', serif;
+  position: relative;
+  padding-top: 60px;
+  padding-bottom: 60px;
+}
+
+/* --- Optional overlay --- */
+.dashboard-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 0;
+}
+
+/* --- Dashboard Header --- */
+.dashboard-header {
+  z-index: 1;
+  position: relative;
+  color: #fcecc5;
+  text-shadow: 1px 1px 2px #7b3f00;
+  font-size: 2rem;
+}
+
+/* --- Card Styles --- */
+.royal-card {
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fcecc5;
+  border: 2px solid #d4af37;
+  border-radius: 15px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+}
+
+.royal-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(212, 175, 55, 0.4);
+}
+
+/* --- Card Titles --- */
+.royal-card .card-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #f7d774;
+}
+
+/* --- Card Text --- */
+.royal-card .card-text {
+  color: #e8dcb5;
+}
+
+/* --- Button --- */
+.btn-gold {
+  background-color: #d4af37;
+  color: #3e1f1f;
+  font-weight: bold;
+  border: none;
+}
+
+.btn-gold:hover {
+  background-color: #b38e28;
+  color: #fff;
+  box-shadow: 0 0 10px #fcecc5;
+}
+
+/* --- Responsive Padding Fix --- */
+@media (max-width: 576px) {
+  .dashboard-header {
+    font-size: 1.6rem;
+    text-align: center;
+  }
+}

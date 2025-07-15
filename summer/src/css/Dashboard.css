@@ -1,0 +1,101 @@
+.dashboard-container {
+  font-family: 'Georgia', serif;
+  color: #4b3832;
+ 
+  padding: 2rem 1rem;
+  border-radius: 8px;
+}
+
+.card {
+  background-color: #fffdf5;
+  border: 1px solid #decba4;
+  border-radius: 16px;
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(139, 69, 19, 0.15);
+}
+
+.card-title {
+  color: #7b4f35;
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-text {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #8b4513;
+}
+
+.list-group-item {
+  font-size: 1rem;
+  background: transparent;
+  border: none;
+  color: #5a4231;
+  padding-left: 0;
+  padding-bottom: 0.75rem;
+  position: relative;
+}
+
+.list-group-item::before {
+  content: "•";
+  color: #c8ad7f;
+  font-weight: bold;
+  display: inline-block;
+  width: 1rem;
+  margin-left: -1rem;
+}
+
+h4 {
+  color: #7b4f35;
+  border-bottom: 2px solid #c8ad7f;
+  padding-bottom: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.btn-outline-danger {
+  border-color: #a0522d;
+  color: #a0522d;
+  font-weight: bold;
+}
+
+.btn-outline-danger:hover {
+  background-color: #a0522d;
+  color: #fff;
+}
+/* Dashboard.css */
+
+.stats-card {
+  background-color: #fffaf0;
+  border: 1px solid #e0cda9;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stats-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(139, 69, 19, 0.2);
+}
+
+.stats-icon {
+  color: #8B4513;
+}
+
+.list-group-item {
+  background-color: #fffdf7;
+  border-color: #e8d3b9;
+}
+
+
+@media (max-width: 768px) {
+  .card-text {
+    font-size: 1.6rem;
+  }
+
+  .dashboard-container {
+    padding: 1rem;
+  }
+}

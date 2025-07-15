@@ -1,0 +1,62 @@
+/* About.css */
+
+.about-container {
+  background: linear-gradient(to bottom, #fffdf7, #fefae0);
+  border: 1.5px solid #decba4;
+  padding: 3rem 2rem;
+  border-radius: 15px;
+  font-family: 'Georgia', serif;
+  color: #4b2e2e;
+  box-shadow: 0 4px 12px rgba(184, 134, 11, 0.2);
+}
+
+.about-title {
+  font-family: 'Cinzel', serif;
+  font-size: 2.8rem;
+  color: #8B4513;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 1px #e3c48f;
+}
+
+.about-subtitle {
+  font-style: italic;
+  color: #6c584c;
+  font-size: 1.2rem;
+}
+
+.section-heading {
+  color: #7b4f35;
+  font-weight: 600;
+  font-size: 1.4rem;
+  border-bottom: 2px solid #c8ad7f;
+  padding-bottom: 0.4rem;
+  margin-bottom: 1rem;
+  font-family: 'Playfair Display', serif;
+}
+
+.section-text {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: #3e2f2f;
+}
+
+ul.section-text li {
+  margin-bottom: 0.75rem;
+}
+
+.footer-text {
+  color: #8c6f5f;
+  font-size: 0.95rem;
+  font-style: italic;
+}
+
+/* Optional Animation or Accent Classes */
+.accent-icon {
+  color: #c97e4d;
+  font-size: 1.2rem;
+}
+
+.about-section {
+  margin-bottom: 3rem;
+}

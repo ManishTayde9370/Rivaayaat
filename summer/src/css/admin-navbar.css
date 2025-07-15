@@ -1,0 +1,37 @@
+/* Royal Admin Navbar */
+.royal-navbar {
+  background: linear-gradient(90deg, #3e1f1f, #7b3f00);
+  border-bottom: 2px solid #d4af37;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  font-family: 'Georgia', serif;
+}
+
+.royal-navbar .navbar-brand {
+  color: #fcecc5 !important;
+  font-size: 1.5rem;
+  text-shadow: 1px 1px 2px #000;
+}
+
+.royal-navbar .nav-link {
+  color: #fcecc5 !important;
+  font-weight: bold;
+  margin-left: 1rem;
+  transition: color 0.3s ease;
+}
+
+.royal-navbar .nav-link:hover {
+  color: #fff4b0 !important;
+  text-shadow: 0 0 5px #d4af37;
+}
+
+.royal-navbar .btn-outline-light {
+  border: 1px solid #fcecc5;
+  color: #fcecc5;
+  transition: all 0.3s ease;
+}
+
+.royal-navbar .btn-outline-light:hover {
+  background-color: #d4af37;
+  color: #3e1f1f;
+  box-shadow: 0 0 10px #fcecc5;
+}

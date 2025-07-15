@@ -1,0 +1,62 @@
+.splash-screen {
+  background: linear-gradient(135deg, #2e003e, #6b0034, #2e003e);
+  color: #fcecc5;
+  font-family: 'Playfair Display', serif;
+  animation: gradientShift 8s ease infinite;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.fade-in {
+  animation: fadeIn 2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Typography Enhancements */
+.splash-screen h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #ffdf91;
+  letter-spacing: 2px;
+  text-shadow: 0 0 8px rgba(255, 215, 160, 0.4);
+}
+
+.splash-screen p {
+  font-size: 1.25rem;
+  color: #ffdf91;
+  font-style: italic;
+}
+.brand-logo {
+  width: 160px;
+  height: auto;
+  margin-bottom: 20px;
+  animation: logoPulse 3s infinite;
+  filter: drop-shadow(0 0 10px rgba(255, 215, 160, 0.5));
+}
+
+@keyframes logoPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}

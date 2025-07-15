@@ -1,0 +1,107 @@
+/* --- Page Background --- */
+.royal-bg {
+  background-image: url('../assets/bg-login2.jpeg'); /* Optional heritage-themed image */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  position: relative;
+  font-family: 'Georgia', serif;
+}
+
+/* --- Semi-Transparent Overlay --- */
+.royal-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(20, 10, 10, 0.6);
+  z-index: 0;
+}
+
+/* --- Login Card --- */
+.royal-card {
+  position: relative;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.75);
+  border: 2px solid #d4af37;  /* Royal gold */
+  color: #fcecc5;
+  max-width: 420px;
+  width: 100%;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* --- Title --- */
+.royal-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #fcecc5;
+  text-shadow: 1px 1px 2px #d4af37;
+  font-family: 'Georgia', serif;
+}
+
+/* --- Input Group Icon Background --- */
+.input-group-text {
+  background-color: #d4af37;
+  color: #3e1f1f;
+  border: none;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+/* --- Input Fields --- */
+.form-control {
+  background-color: transparent;
+  color: #fcecc5;
+  border: 1px solid #fcecc5;
+  font-family: 'Georgia', serif;
+}
+
+.form-control::placeholder {
+  color: #fcecc5;
+  opacity: 0.7;
+}
+
+.form-control:focus {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: #d4af37;
+  box-shadow: 0 0 5px rgba(212, 175, 55, 0.7);
+  color: #fcecc5;
+}
+
+/* --- Button --- */
+.btn-dark {
+  background-color: #3e1f1f;
+  border: 1px solid #d4af37;
+  color: #fcecc5;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.btn-dark:hover {
+  background-color: #2a1515;
+  color: #f7d774;
+  box-shadow: 0 0 10px #d4af37;
+}
+
+/* --- Toastify Styling --- */
+.Toastify__toast {
+  font-family: 'Georgia', serif;
+  background-color: #3e1f1f;
+  color: #fcecc5;
+  border-left: 5px solid #d4af37;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 576px) {
+  .royal-card {
+    margin: 20px;
+    padding: 20px;
+  }
+
+  .royal-title {
+    font-size: 1.6rem;
+  }
+}
