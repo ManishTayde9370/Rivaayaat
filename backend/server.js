@@ -18,6 +18,7 @@ const publicProductRoutes = require('./src/routes/publicProductRoutes');
 const cartRoutes = require('./src/routes/cartRoutes');
 const wishlistRoutes = require('./src/routes/wishlistRoutes');
 const checkoutRoutes = require('./src/routes/checkoutRoutes');
+const contactRoutes = require('./src/routes/contactRoutes');
 
 // 🧱 Middleware
 app.use(cors({
@@ -48,6 +49,7 @@ app.use('/api/products', publicProductRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/checkout', checkoutRoutes);
+app.use('/api/contact', contactRoutes);
 
 // ✅ Health Check
 app.get('/', (req, res) => {

@@ -1,62 +1,82 @@
 /* About.css */
+[data-aos] {
+  transition-timing-function: ease-in-out;
+}
 
 .about-container {
   background: linear-gradient(to bottom, #fffdf7, #fefae0);
-  border: 1.5px solid #decba4;
-  padding: 3rem 2rem;
-  border-radius: 15px;
+  border: 1px solid #e8dcc0;
+  padding: 4rem 2rem;
   font-family: 'Georgia', serif;
   color: #4b2e2e;
-  box-shadow: 0 4px 12px rgba(184, 134, 11, 0.2);
+  box-shadow: 0 4px 12px rgba(184, 134, 11, 0.15);
 }
 
+/* Title Styling */
 .about-title {
-  font-family: 'Cinzel', serif;
-  font-size: 2.8rem;
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 3rem;
   color: #8B4513;
   font-weight: 700;
-  letter-spacing: 1px;
-  text-shadow: 1px 1px 1px #e3c48f;
+  letter-spacing: 1.5px;
+  text-shadow: 2px 2px 3px #e3c48f;
+  margin-bottom: 1rem;
+  text-align: center;
 }
 
 .about-subtitle {
   font-style: italic;
   color: #6c584c;
-  font-size: 1.2rem;
-}
-
-.section-heading {
-  color: #7b4f35;
-  font-weight: 600;
-  font-size: 1.4rem;
-  border-bottom: 2px solid #c8ad7f;
-  padding-bottom: 0.4rem;
-  margin-bottom: 1rem;
-  font-family: 'Playfair Display', serif;
-}
-
-.section-text {
-  font-size: 1.1rem;
-  line-height: 1.7;
-  color: #3e2f2f;
-}
-
-ul.section-text li {
-  margin-bottom: 0.75rem;
-}
-
-.footer-text {
-  color: #8c6f5f;
-  font-size: 0.95rem;
-  font-style: italic;
-}
-
-/* Optional Animation or Accent Classes */
-.accent-icon {
-  color: #c97e4d;
-  font-size: 1.2rem;
-}
-
-.about-section {
+  font-size: 1.25rem;
   margin-bottom: 3rem;
+  text-align: center;
+}
+
+/* Section Headings */
+.about-section h2 {
+  color: #7b4f35;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+  position: relative;
+  padding-left: 0.6rem;
+  border-left: 4px solid #c8ad7f;
+}
+
+/* Section Paragraphs */
+.about-section p {
+  font-size: 1.15rem;
+  line-height: 1.75;
+  color: #3e2f2f;
+  margin-bottom: 2rem;
+}
+
+/* Remove card look */
+.about-section {
+  margin-bottom: 2.5rem;
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .about-title {
+    font-size: 2.3rem;
+  }
+
+  .about-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .about-section h2 {
+    font-size: 1.3rem;
+  }
+
+  .about-section p {
+    font-size: 1.05rem;
+  }
 }

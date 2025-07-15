@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +11,12 @@ const Contact = () => {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    AOS.init({ duration: 1000, once: true });
+  }, []);
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -18,21 +25,38 @@ const Contact = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    setSubmitted(true);
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to send message.');
+      }
+      setSubmitted(true);
+      setFormData({ name: '', email: '', message: '' });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="container mt-5">
-      <h2 className="text-center mb-4">Contact Us</h2>
-      <p className="text-center text-muted mb-5">
+      <h2 className="text-center mb-4" data-aos="fade-down">Contact Us</h2>
+      <p className="text-center text-muted mb-5" data-aos="fade-down" data-aos-delay="100">
         We'd love to hear from you. Feel free to reach out using the form below.
       </p>
 
       <div className="row justify-content-center">
-        <div className="col-md-8">
+        <div className="col-md-8" data-aos="fade-up" data-aos-delay="200">
           {submitted ? (
             <div className="alert alert-success text-center">
               ✅ Message sent! We'll get back to you soon.
@@ -81,7 +105,12 @@ const Contact = () => {
                 ></textarea>
               </div>
 
-              <button type="submit" className="btn btn-primary px-4">Send</button>
+              {error && (
+                <div className="alert alert-danger text-center">{error}</div>
+              )}
+              <button type="submit" className="btn btn-primary px-4" disabled={loading}>
+                {loading ? 'Sending...' : 'Send'}
+              </button>
             </form>
           )}
         </div>

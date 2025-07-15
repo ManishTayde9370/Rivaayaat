@@ -1,83 +1,53 @@
-import React from 'react';      
-import 'bootstrap/dist/css/bootstrap.min.css';
-import '../css/About.css'; // Optional for styles
+import React, { useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import "../css/About.css";
 
 const About = () => {
+  useEffect(() => {
+    AOS.init({ duration: 1000, once: true });
+  }, []);
+
   return (
-    <div className="container mt-5">
-      <h2 className="text-center mb-4 about-title">About Rivaayat</h2>
-      <p className="lead text-center about-subtitle text-muted">
-        Bridging timeless traditions with tomorrow's technology.
-      </p>
-
-      {/* Brand Story */}
-      <section className="mt-5">
-        <h4 className="section-heading">📖 Our Brand Story</h4>
-        <p className="section-text">
-          The name “Rivaayat” is derived from the Urdu word for "tradition" — a fitting name for a platform born from a love for our rich cultural heritage.
-          Rivaayat was founded with a vision to bring together artisans, storytellers, and enthusiasts on a single platform where culture meets commerce and community.
+    <div className="about-container">
+      <div className="about-hero" data-aos="fade-down">
+        <h1 className="about-title">Our Story</h1>
+        <p className="about-subtitle">
+          Celebrating Traditions, Embracing Modernity
         </p>
-      </section>
-
-      {/* Mission and Vision */}
-      <section className="row mt-5">
-        <div className="col-md-6">
-          <h4 className="section-heading">🎯 Our Mission</h4>
-          <p className="section-text">
-            To preserve, promote, and pass on the richness of traditional Indian art, attire, and stories by enabling creators and curators through digital tools.
+      </div>
+      <div className="about-content">
+        <section className="about-section" data-aos="fade-up">
+          <h2>Brand Journey</h2>
+          <p>
+            Our journey began with a vision to redefine celebration wear, blending timeless traditions with contemporary style. What started as a small family initiative has blossomed into a thriving brand, cherished by thousands for its commitment to quality, elegance, and authenticity.
           </p>
-        </div>
-        <div className="col-md-6">
-          <h4 className="section-heading">👁️ Our Vision</h4>
-          <p className="section-text">
-            A world where heritage is not just remembered but lived every day, through fashion, stories, and community-led initiatives.
+        </section>
+        <section className="about-section" data-aos="fade-up" data-aos-delay="100">
+          <h2>Signature Collection</h2>
+          <p>
+            From exquisite sherwanis and royal bandhgalas to elegant sarees and festive lehengas, our collection is a one-stop destination for all your special moments. Each piece is crafted with care, reflecting the rich heritage and vibrant spirit of Indian celebrations.
           </p>
-        </div>
-      </section>
-
-      {/* What We Offer */}
-      <section className="mt-5">
-        <h4 className="section-heading">💡 What We Offer</h4>
-        <ul className="list-unstyled section-text ps-3">
-          <li>🛍️ A curated affiliate marketplace for ethnic & traditional products</li>
-          <li>🧵 Platforms for local artisans to sell and tell their story</li>
-          <li>📚 Articles, blogs, and documentaries on culture & crafts</li>
-          <li>📊 Personalized dashboards for shoppers and sellers</li>
-          <li>🔐 Secure authentication including Google login</li>
-          <li>📦 Reliable customer support and seamless order tracking</li>
-        </ul>
-      </section>
-
-      {/* Our Values */}
-      <section className="mt-5">
-        <h4 className="section-heading">🌿 Our Core Values</h4>
-        <ul className="list-unstyled section-text ps-3">
-          <li>🧡 Authenticity — We stay true to the roots of culture</li>
-          <li>🌍 Inclusivity — Open to all communities and creators</li>
-          <li>🚀 Innovation — Tradition meets modern design and tech</li>
-          <li>🤝 Empowerment — Supporting small businesses & artisans</li>
-        </ul>
-      </section>
-
-      {/* Why Choose Us */}
-      <section className="mt-5">
-        <h4 className="section-heading">✨ Why Choose Rivaayat?</h4>
-        <p className="section-text">
-          With Rivaayat, you’re not just buying a product — you’re supporting a legacy, contributing to artisan livelihoods, and reviving stories worth telling.
-          From traditional clothing to unique handcrafted goods, every item comes with cultural richness and ethical sourcing.
-        </p>
-      </section>
-
-      {/* Team */}
-      <section className="mt-5">
-        <h4 className="section-heading">👨‍👩‍👧‍👦 Meet the Team</h4>
-        <p className="section-text">
-          We're a passionate group of designers, technologists, and storytellers who believe in the power of cultural continuity through modern means.
-          Our team is spread across cities, united by one goal — to make heritage timeless.
-        </p>
-      </section>
-
-      
+        </section>
+        <section className="about-section" data-aos="fade-up" data-aos-delay="200">
+          <h2>Our Growth</h2>
+          <p>
+            Over the years, we have grown from a passionate team of a few to a dedicated family of many, expanding our presence across cities and countries. Our commitment to quality and customer delight has helped us earn the trust of a global clientele.
+          </p>
+        </section>
+        <section className="about-section" data-aos="fade-up" data-aos-delay="300">
+          <h2>Our Ethos</h2>
+          <p>
+            We believe in empowering artisans, ensuring assured quality, and delivering joy with every outfit. Our brand stands for authenticity, inclusivity, and the celebration of every unique story.
+          </p>
+        </section>
+        <section className="about-section" data-aos="fade-up" data-aos-delay="400">
+          <h2>Celebrating You</h2>
+          <p>
+            Whether it’s a wedding, festival, or a new beginning, we are honored to be a part of your cherished moments. Dress your best, celebrate your identity, and create memories that last a lifetime—because every occasion deserves to be extraordinary.
+          </p>
+        </section>
+      </div>
     </div>
   );
 };

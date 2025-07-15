@@ -61,6 +61,20 @@ const AdminDashboard = () => {
               </Card.Body>
             </Card>
           </Col>
+
+          <Col md={6} lg={4}>
+            <Card className="royal-card text-center h-100">
+              <Card.Body>
+                <Card.Title>✉️ Contact Messages</Card.Title>
+                <Card.Text>
+                  View and manage messages submitted via the Contact Us form.
+                </Card.Text>
+                <Link to="/admin/contact-messages">
+                  <Button className="btn-gold rounded-pill px-4">Go</Button>
+                </Link>
+              </Card.Body>
+            </Card>
+          </Col>
         </Row>
       </Container>
     </>
