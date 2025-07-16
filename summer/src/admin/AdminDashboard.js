@@ -53,7 +53,7 @@ const AdminDashboard = () => {
               <Card.Body>
                 <Card.Title>📦 Manage Orders</Card.Title>
                 <Card.Text>
-                  Track and update order statuses, view customer details.
+                  Track, analyze, and update order statuses. View customer and order analytics.
                 </Card.Text>
                 <Link to="/admin/orders">
                   <Button className="btn-gold rounded-pill px-4">Go</Button>

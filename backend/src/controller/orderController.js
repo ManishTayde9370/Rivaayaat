@@ -54,3 +54,26 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
     res.status(500).json({ success: false, message: 'Could not place order' });
   }
 };
+
+// Update order status by ID (admin)
+exports.updateOrderStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    if (!status) return res.status(400).json({ error: 'Status is required.' });
+    const order = await Order.findByIdAndUpdate(id, { status }, { new: true });
+    if (!order) return res.status(404).json({ error: 'Order not found.' });
+    res.json({ message: 'Order status updated.', order });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update order status.' });
+  }
+};
+
+exports.getAllOrders = async (req, res) => {
+  try {
+    const orders = await Order.find().sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch orders.' });
+  }
+};

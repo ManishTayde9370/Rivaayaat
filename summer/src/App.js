@@ -26,6 +26,7 @@ import AdminDashboard from './admin/AdminDashboard';
 import ManageProducts from './admin/ManageProducts';
 import AddProduct from './admin/AddProduct';
 import AdminContactMessages from './admin/AdminContactMessages';
+import ManageOrders from './admin/ManageOrders';
 
 import { serverEndpoint } from './components/config';
 import { SET_USER, CLEAR_USER } from './redux/user/actions';
@@ -265,6 +266,19 @@ function App() {
             isAdmin ? (
               <AdminLayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
                 <AdminContactMessages />
+              </AdminLayout>
+            ) : (
+              <Navigate to="/adminlogin" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/admin/orders"
+          element={
+            isAdmin ? (
+              <AdminLayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
+                <ManageOrders />
               </AdminLayout>
             ) : (
               <Navigate to="/adminlogin" replace />
