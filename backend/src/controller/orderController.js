@@ -71,9 +71,68 @@ exports.updateOrderStatus = async (req, res) => {
 
 exports.getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find().sort({ createdAt: -1 });
-    res.json(orders);
+    // Pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Filtering
+    const filter = {};
+    if (req.query.status) filter.status = req.query.status;
+    if (req.query.month) {
+      // month: 0-11 (JS Date)
+      const year = new Date().getFullYear();
+      const month = parseInt(req.query.month);
+      const start = new Date(year, month, 1);
+      const end = new Date(year, month + 1, 1);
+      filter.createdAt = { $gte: start, $lt: end };
+    }
+    if (req.query.email) {
+      // Will filter after population
+    }
+
+    // Query
+    let query = Order.find(filter)
+      .populate('user', 'email name')
+      .sort({ createdAt: -1 });
+
+    // Pagination
+    query = query.skip(skip).limit(limit);
+
+    let orders = await query.exec();
+
+    // Email filter (after population)
+    if (req.query.email) {
+      const email = req.query.email.toLowerCase();
+      orders = orders.filter(o =>
+        (o.user?.email && o.user.email.toLowerCase().includes(email)) ||
+        (o.shippingAddress?.email && o.shippingAddress.email.toLowerCase().includes(email))
+      );
+    }
+
+    // Total count for pagination
+    const total = await Order.countDocuments(filter);
+
+    res.json({
+      orders,
+      total,
+      page,
+      limit
+    });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch orders.' });
+  }
+};
+
+// Get latest 5 recent orders
+exports.getRecentOrders = async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate('user', 'email name')
+      .sort({ createdAt: -1 })
+      .limit(5);
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch recent orders.' });
   }
 };

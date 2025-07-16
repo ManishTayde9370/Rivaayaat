@@ -19,6 +19,7 @@ router.delete('/users/:id', requireAdmin, adminController.deleteUser);
 
 router.patch('/orders/:id/status', requireAdmin, orderController.updateOrderStatus);
 router.get('/orders', requireAdmin, orderController.getAllOrders);
+router.get('/orders/recent', requireAdmin, orderController.getRecentOrders);
 
 
 module.exports = router;

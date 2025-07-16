@@ -34,12 +34,16 @@ app.use(morgan('dev'));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 🌐 MongoDB Connection
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/rivaayat', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+// mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/rivaayat', {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+// })
+//   .then(() => console.log('✅ MongoDB connected'))
+//   .catch((err) => console.error('❌ MongoDB connection error:', err.message));
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/rivaayat')
   .then(() => console.log('✅ MongoDB connected'))
   .catch((err) => console.error('❌ MongoDB connection error:', err.message));
+
 
 // 🧭 API Routes
 app.use('/api/auth', authRoutes);
