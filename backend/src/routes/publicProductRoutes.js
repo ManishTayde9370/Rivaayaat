@@ -31,6 +31,34 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// Keyword search for products
+router.get('/search', async (req, res) => {
+  try {
+    const keyword = req.query.keyword || '';
+    if (!keyword.trim()) {
+      return res.status(400).json({ products: [] });
+    }
+    // Split keywords by whitespace, filter out empty strings
+    const keywords = keyword.split(/\s+/).filter(Boolean);
+    // Build an array of $or conditions for each keyword
+    const andConditions = keywords.map(kw => {
+      const regex = new RegExp(kw, 'i');
+      return {
+        $or: [
+          { name: regex },
+          { description: regex },
+          { category: regex },
+        ]
+      };
+    });
+    const products = await Product.find({ $and: andConditions }).sort({ createdAt: -1 });
+    return res.status(200).json({ products });
+  } catch (err) {
+    console.error('❌ Error searching products:', err);
+    return res.status(500).json({ message: 'Server Error', error: err.message });
+  }
+});
+
 // ✍️ POST a review for a product (Protected)
 router.post('/:id/reviews', requireAuth, async (req, res) => {
   const { rating, comment } = req.body;

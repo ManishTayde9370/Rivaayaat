@@ -3,3 +3,8 @@
   height: auto;
 }
 
+.custom-search-input::placeholder {
+  color: #333;
+  opacity: 1;
+}
+

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Zoom from 'react-medium-image-zoom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,6 +14,7 @@ const API_BASE_URL = 'http://localhost:5000';
 const ProductDetailPage = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
@@ -41,6 +42,11 @@ const ProductDetailPage = () => {
       position: 'top-right',
       autoClose: 2000,
     });
+  };
+
+  const handleBuyNow = () => {
+    dispatch(addToCart({ ...product, quantity: 1 }));
+    navigate('/checkout/shipping');
   };
 
   const handleToggleWishlist = () => {
@@ -126,7 +132,13 @@ const ProductDetailPage = () => {
             >
               {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
             </button>
-
+            <button
+              className="btn btn-warning rounded-pill px-4"
+              onClick={handleBuyNow}
+              disabled={product.stock === 0}
+            >
+              Buy Now
+            </button>
             <button
               className={`btn rounded-pill px-4 ${isInWishlist ? 'btn-outline-danger' : 'btn-outline-secondary'}`}
               onClick={handleToggleWishlist}

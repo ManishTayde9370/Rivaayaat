@@ -54,6 +54,9 @@ function App() {
           dispatch(clearCart());
         }
       } catch (err) {
+        if (!(err.response && err.response.status === 401)) {
+          console.error(err);
+        }
         dispatch({ type: CLEAR_USER });
         dispatch(clearCart());
       } finally {

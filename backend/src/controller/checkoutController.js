@@ -158,6 +158,15 @@ const formattedItems = cartItems.map((item, index) => {
 
     await newOrder.save();
 
+    // Decrement product stock for each item
+    for (const item of formattedItems) {
+      await require('../model/Product').findByIdAndUpdate(
+        item.productId,
+        { $inc: { stock: -item.quantity } },
+        { new: false }
+      );
+    }
+
     // Send invoice email to shipping address email
     try {
       if (shippingAddress.email) {

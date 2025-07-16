@@ -14,3 +14,16 @@ export const toggleWishlist = (productId) => async (dispatch, getState) => {
     console.error('Wishlist error:', err);
   }
 };
+
+export const fetchWishlist = () => async (dispatch) => {
+  try {
+    const res = await axios.get('http://localhost:5000/api/wishlist', { withCredentials: true });
+    dispatch({
+      type: 'SET_WISHLIST',
+      payload: res.data,
+    });
+  } catch (err) {
+    console.error('Fetch wishlist error:', err);
+    dispatch({ type: 'SET_WISHLIST', payload: [] });
+  }
+};
