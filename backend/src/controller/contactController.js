@@ -5,13 +5,13 @@ exports.submitContactMessage = async (req, res) => {
   try {
     const { name, email, message } = req.body;
     if (!name || !email || !message) {
-      return res.status(400).json({ error: 'All fields are required.' });
+      return res.status(400).json({ success: false, message: 'All fields are required.' });
     }
     const newMessage = new ContactMessage({ name, email, message });
     await newMessage.save();
-    res.status(201).json({ message: 'Message submitted successfully.' });
+    res.status(201).json({ success: true, message: 'Message submitted successfully.' });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to submit message.' });
+    res.status(500).json({ success: false, message: 'Failed to submit message.', error: err.message });
   }
 };
 
@@ -19,9 +19,9 @@ exports.submitContactMessage = async (req, res) => {
 exports.getAllContactMessages = async (req, res) => {
   try {
     const messages = await ContactMessage.find().sort({ createdAt: -1 });
-    res.json(messages);
+    res.json({ success: true, messages });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch messages.' });
+    res.status(500).json({ success: false, message: 'Failed to fetch messages.', error: err.message });
   }
 };
 
@@ -31,10 +31,10 @@ exports.deleteContactMessage = async (req, res) => {
     const { id } = req.params;
     const deleted = await ContactMessage.findByIdAndDelete(id);
     if (!deleted) {
-      return res.status(404).json({ error: 'Message not found.' });
+      return res.status(404).json({ success: false, message: 'Message not found.' });
     }
-    res.json({ message: 'Message deleted successfully.' });
+    res.json({ success: true, message: 'Message deleted successfully.' });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to delete message.' });
+    res.status(500).json({ success: false, message: 'Failed to delete message.', error: err.message });
   }
 }; 

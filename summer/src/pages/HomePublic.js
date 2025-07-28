@@ -24,6 +24,8 @@ const HomePublic = () => {
           borderRadius: '15px',
         }}
       >
+        
+
         <h1 className="mb-4 text-center" style={{ fontFamily: 'Georgia', color: '#fcecc5' }}>
           Welcome to <span style={{ fontWeight: 'bold' }}>Rivaayat</span>
         </h1>

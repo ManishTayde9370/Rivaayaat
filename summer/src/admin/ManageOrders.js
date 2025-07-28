@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Container, Spinner, Alert, Row, Col, Card } from 'react-bootstrap';
+import { Table, Container, Spinner, Alert, Row, Col } from 'react-bootstrap';
 import { Bar, Pie } from 'react-chartjs-2';
 import 'chart.js/auto';
 import axios from 'axios';
@@ -15,13 +15,11 @@ const ManageOrders = () => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const [recentOrders, setRecentOrders] = useState([]);
+  const [recentOrders, setRecentOrders] = useState([]); // Ensure it's always an array
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [statusFilter, setStatusFilter] = useState('');
   const [monthFilter, setMonthFilter] = useState('');
   const [emailFilter, setEmailFilter] = useState('');
-  const [updatingId, setUpdatingId] = useState(null);
   const [allOrders, setAllOrders] = useState([]);
 
   // Separate filter state for analytics and for all orders
@@ -34,7 +32,15 @@ const ManageOrders = () => {
     fetchOrders();
     fetchRecentOrders();
     fetchAllOrdersForStats().then(setAllOrders);
-  }, [page, limit, statusFilter, monthFilter, emailFilter]);
+  }, [page, limit, monthFilter, emailFilter]);
+
+  // ✅ Ensure recentOrders is always an array
+  useEffect(() => {
+    if (!Array.isArray(recentOrders)) {
+      console.log('recentOrders is not an array, resetting to empty array');
+      setRecentOrders([]);
+    }
+  }, [recentOrders]);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -44,13 +50,17 @@ const ManageOrders = () => {
         page,
         limit,
       };
-      if (statusFilter) params.status = statusFilter;
       if (monthFilter) params.month = monthFilter;
       if (emailFilter) params.email = emailFilter;
-      const res = await axios.get('/api/admin/orders', { params, withCredentials: true });
-      setOrders(res.data.orders || []);
-      setTotal(res.data.total || 0);
+      const res = await axios.get('http://localhost:5000/api/admin/orders', { params, withCredentials: true });
+      if (res.data.success) {
+        setOrders(res.data.orders || []);
+        setTotal(res.data.total || 0);
+      } else {
+        setError('Failed to fetch orders');
+      }
     } catch (err) {
+      console.error('Failed to fetch orders:', err);
       setError('Failed to fetch orders');
     } finally {
       setLoading(false);
@@ -59,30 +69,43 @@ const ManageOrders = () => {
 
   const fetchRecentOrders = async () => {
     try {
-      const res = await axios.get('/api/admin/orders/recent', { withCredentials: true });
-      setRecentOrders(res.data || []);
-    } catch {}
+      const res = await axios.get('http://localhost:5000/api/admin/orders/recent', { withCredentials: true });
+      console.log('Recent orders response:', res.data); // Debug log
+      if (res.data.success) {
+        const orders = res.data.orders || [];
+        console.log('Setting recentOrders to:', orders); // Debug log
+        setRecentOrders(Array.isArray(orders) ? orders : []);
+      } else {
+        console.log('API returned success: false, setting empty array'); // Debug log
+        setRecentOrders([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch recent orders:', error);
+      setRecentOrders([]);
+    }
   };
 
   // Filtering logic
-  const filteredOrders = orders.filter(o => {
+  const filteredOrders = Array.isArray(orders) ? orders.filter(o => {
     const d = new Date(o.createdAt);
     const matchesStatus = !ordersStatusFilter || o.status === ordersStatusFilter;
     const matchesMonth = !ordersMonthFilter || d.getMonth().toString() === ordersMonthFilter;
     const matchesEmail = !ordersEmailFilter || (o.user?.email || o.shippingAddress?.email || '').toLowerCase().includes(ordersEmailFilter.toLowerCase());
     return matchesStatus && matchesMonth && matchesEmail;
-  });
+  }) : [];
 
   // Update order status
   const handleStatusChange = async (id, newStatus) => {
-    setUpdatingId(id);
     try {
-      await axios.patch(`/api/admin/orders/${id}/status`, { status: newStatus }, { withCredentials: true });
-      setOrders(prev => prev.map(o => o._id === id ? { ...o, status: newStatus } : o));
+      const res = await axios.patch(`http://localhost:5000/api/admin/orders/${id}/status`, { status: newStatus }, { withCredentials: true });
+      if (res.data.success) {
+        setOrders(prev => prev.map(o => o._id === id ? { ...o, status: newStatus } : o));
+      } else {
+        alert('Failed to update status');
+      }
     } catch (err) {
+      console.error('Failed to update order status:', err);
       alert('Failed to update status');
-    } finally {
-      setUpdatingId(null);
     }
   };
 
@@ -103,52 +126,56 @@ const ManageOrders = () => {
   };
 
   // Analytics
-  const statusCounts = orders.reduce((acc, o) => {
-    acc[o.status] = (acc[o.status] || 0) + 1;
-    return acc;
-  }, {});
-
   const months = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
   ];
   const ordersByMonth = Array(12).fill(0);
-  orders.forEach(o => {
-    const d = new Date(o.createdAt);
-    ordersByMonth[d.getMonth()]++;
-  });
+  if (Array.isArray(orders)) {
+    orders.forEach(o => {
+      const d = new Date(o.createdAt);
+      ordersByMonth[d.getMonth()]++;
+    });
+  }
 
   // Repeat customers
   const customerCounts = {};
-  orders.forEach(o => {
-    const email = o.user?.email || o.shippingAddress?.email || 'Unknown';
-    customerCounts[email] = (customerCounts[email] || 0) + 1;
-  });
+  if (Array.isArray(orders)) {
+    orders.forEach(o => {
+      const email = o.user?.email || o.shippingAddress?.email || 'Unknown';
+      customerCounts[email] = (customerCounts[email] || 0) + 1;
+    });
+  }
   const repeatCustomers = Object.entries(customerCounts)
     .filter(([_, count]) => count > 1)
     .sort((a, b) => b[1] - a[1]);
 
   // Stats from all orders
-  const totalOrders = allOrders.length;
-  const totalRevenue = allOrders.reduce((sum, o) => sum + (o.amountPaid || o.totalAmount || 0), 0);
-  const pending = allOrders.filter(o => o.status === 'Pending').length;
-  const delivered = allOrders.filter(o => o.status === 'Delivered').length;
-  const cancelled = allOrders.filter(o => o.status === 'Cancelled').length;
+  const totalOrders = Array.isArray(allOrders) ? allOrders.length : 0;
+  const totalRevenue = Array.isArray(allOrders) ? allOrders.reduce((sum, o) => sum + (o.amountPaid || o.totalAmount || 0), 0) : 0;
+  const pending = Array.isArray(allOrders) ? allOrders.filter(o => o.status === 'Pending').length : 0;
+  const delivered = Array.isArray(allOrders) ? allOrders.filter(o => o.status === 'Delivered').length : 0;
+  const cancelled = Array.isArray(allOrders) ? allOrders.filter(o => o.status === 'Cancelled').length : 0;
 
   // Helper to fetch all orders for stats
   const fetchAllOrdersForStats = async () => {
     try {
-      const res = await axios.get('/api/admin/orders', { params: { page: 1, limit: 10000 }, withCredentials: true });
-      return res.data.orders || [];
-    } catch {
+      const res = await axios.get('http://localhost:5000/api/admin/orders', { params: { page: 1, limit: 10000 }, withCredentials: true });
+      if (res.data.success) {
+        return res.data.orders || [];
+      } else {
+        return [];
+      }
+    } catch (error) {
+      console.error('Failed to fetch all orders for stats:', error);
       return [];
     }
   };
 
   // For analytics, filter allOrders by analyticsStatusFilter
-  const filteredAnalyticsOrders = analyticsStatusFilter
+  const filteredAnalyticsOrders = Array.isArray(allOrders) ? (analyticsStatusFilter
     ? allOrders.filter(o => o.status === analyticsStatusFilter)
-    : allOrders;
+    : allOrders) : [];
   const analyticsStatusCounts = filteredAnalyticsOrders.reduce((acc, o) => {
     acc[o.status] = (acc[o.status] || 0) + 1;
     return acc;
@@ -259,15 +286,44 @@ const ManageOrders = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {recentOrders.slice(0, 10).map(o => (
-                        <tr key={o._id}>
-                          <td>{o._id}</td>
-                          <td>{o.user?.email || o.shippingAddress?.email || 'Guest'}</td>
-                          <td>{statusBadge(o.status)}</td>
-                          <td>₹{(o.amountPaid || o.totalAmount || 0).toLocaleString()}</td>
-                          <td>{new Date(o.createdAt).toLocaleString()}</td>
-                        </tr>
-                      ))}
+                      {(() => {
+                        // ✅ Comprehensive safety check
+                        if (!Array.isArray(recentOrders)) {
+                          console.log('recentOrders is not an array, rendering loading state');
+                          return (
+                            <tr>
+                              <td colSpan="5" className="text-center">Loading recent orders...</td>
+                            </tr>
+                          );
+                        }
+                        
+                        if (recentOrders.length === 0) {
+                          return (
+                            <tr>
+                              <td colSpan="5" className="text-center">No recent orders</td>
+                            </tr>
+                          );
+                        }
+                        
+                        try {
+                          return recentOrders.slice(0, 10).map(o => (
+                            <tr key={o._id || Math.random()}>
+                              <td>{o._id || 'N/A'}</td>
+                              <td>{o.user?.email || o.shippingAddress?.email || 'Guest'}</td>
+                              <td>{statusBadge(o.status)}</td>
+                              <td>₹{(o.amountPaid || o.totalAmount || 0).toLocaleString()}</td>
+                              <td>{new Date(o.createdAt).toLocaleString()}</td>
+                            </tr>
+                          ));
+                        } catch (error) {
+                          console.error('Error rendering recent orders:', error);
+                          return (
+                            <tr>
+                              <td colSpan="5" className="text-center">Error loading recent orders</td>
+                            </tr>
+                          );
+                        }
+                      })()}
                     </tbody>
                   </Table>
                 </div>

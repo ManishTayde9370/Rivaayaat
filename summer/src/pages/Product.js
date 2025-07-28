@@ -4,7 +4,6 @@ import Zoom from 'react-medium-image-zoom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../redux/cart/actions';
 import { toggleWishlist, fetchWishlist } from '../redux/wishlist/actions';
-import { toast } from 'react-toastify';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 
@@ -14,9 +13,18 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 import '../css/ProductPage.css';
+import LoadingBar from '../components/LoadingBar';
+import ProductFilters from '../components/ProductFilters';
+import { cartNotifications } from '../utils/notifications';
 
 const Product = () => {
   const [products, setProducts] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({});
+  const [pagination, setPagination] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  
   const dispatch = useDispatch();
   const location = useLocation();
   const searchResults = location.state?.searchResults;
@@ -24,20 +32,45 @@ const Product = () => {
   const notFound = location.state?.notFound;
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await axios.get('http://localhost:5000/api/products', {
-          withCredentials: true,
-        });
-        setProducts(res.data.products || []);
-      } catch (err) {
-        console.error('Error fetching products:', err);
-      }
-    };
-
     fetchProducts();
     dispatch(fetchWishlist());
-  }, [dispatch]);
+  }, [dispatch, currentPage, filters]);
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      // Build query parameters
+      const params = new URLSearchParams({
+        page: currentPage,
+        limit: 12,
+        ...filters
+      });
+
+      const res = await axios.get(`http://localhost:5000/api/products?${params}`, {
+        withCredentials: true,
+      });
+      
+      if (res.data.success) {
+        setProducts(res.data.products || []);
+        setPagination(res.data.pagination || {});
+        setError(null);
+      } else {
+        setError('Failed to load products');
+      }
+    } catch (err) {
+      setError('Failed to load products. Please try again later.');
+    }
+    setLoading(false);
+  };
+
+  const handleFiltersChange = (newFilters) => {
+    setFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
 
   const displayProducts = searchResults || products;
 
@@ -46,16 +79,76 @@ const Product = () => {
       <h2 className="section-heading text-center mb-5">
         {searchTerm ? `Search Results for "${searchTerm}"` : '👑 Explore Our Royal Collection'}
       </h2>
+      
+      {/* Product Filters */}
+      <ProductFilters 
+        onFiltersChange={handleFiltersChange}
+        currentFilters={filters}
+      />
+
+      {/* Loading and Error States */}
+      {loading && <div className="d-flex justify-content-center my-5"><LoadingBar /></div>}
+      {error && <div className="alert alert-danger text-center" role="alert">{error}</div>}
       {notFound && (
         <div className="alert alert-warning text-center" role="alert">
           No products found for "{searchTerm}".
         </div>
       )}
+
+      {/* Products Grid */}
       <div className="row justify-content-center">
         {displayProducts.map((product, i) => (
           <ProductCard key={product._id || i} product={product} />
         ))}
       </div>
+
+      {/* Pagination */}
+      {pagination.totalPages > 1 && (
+        <div className="d-flex justify-content-center mt-5">
+          <nav aria-label="Product pagination">
+            <ul className="pagination">
+              <li className={`page-item ${pagination.currentPage === 1 ? 'disabled' : ''}`}>
+                <button 
+                  className="page-link" 
+                  onClick={() => handlePageChange(pagination.currentPage - 1)}
+                  disabled={pagination.currentPage === 1}
+                >
+                  Previous
+                </button>
+              </li>
+              
+              {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(page => (
+                <li key={page} className={`page-item ${page === pagination.currentPage ? 'active' : ''}`}>
+                  <button 
+                    className="page-link" 
+                    onClick={() => handlePageChange(page)}
+                  >
+                    {page}
+                  </button>
+                </li>
+              ))}
+              
+              <li className={`page-item ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''}`}>
+                <button 
+                  className="page-link" 
+                  onClick={() => handlePageChange(pagination.currentPage + 1)}
+                  disabled={pagination.currentPage === pagination.totalPages}
+                >
+                  Next
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      )}
+
+      {/* No Products Found */}
+      {!loading && !error && displayProducts.length === 0 && (
+        <div className="text-center py-5">
+          <h4 className="text-muted">No products found</h4>
+          <p className="text-muted">Try adjusting your filters or search terms.</p>
+        </div>
+      )}
     </div>
   );
 };
@@ -71,10 +164,7 @@ const ProductCard = ({ product }) => {
 
   const handleAddToCart = () => {
     dispatch(addToCart({ ...product, quantity: 1 }));
-    toast.success(`${product.name} added to cart!`, {
-      position: 'top-right',
-      autoClose: 2000,
-    });
+    cartNotifications.added(product.name);
   };
 
   const handleBuyNow = () => {
@@ -82,72 +172,112 @@ const ProductCard = ({ product }) => {
     navigate('/checkout/shipping');
   };
 
-  const handleToggleWishlist = () => {
-    dispatch(toggleWishlist(product._id));
-    toast.info(`${product.name} ${isInWishlist ? 'removed from' : 'added to'} wishlist`, {
-      position: 'top-right',
-      autoClose: 2000,
-    });
+  const handleToggleWishlist = async () => {
+    try {
+      await dispatch(toggleWishlist(product._id));
+    } catch (err) {
+      console.error('Wishlist toggle error:', err);
+    }
   };
 
   return (
-    <div className="col-md-4 col-sm-6 mb-4">
-      <div className={`product-card shadow royal-border ${isOutOfStock ? 'out-of-stock-card' : ''}`} style={{ minHeight: 420, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-        <div className="text-center p-3 position-relative" style={{ minHeight: 220 }}>
-          {isOutOfStock && (
-            <span className="badge bg-danger out-of-stock-badge position-absolute top-0 start-0 m-2">
-              Out of Stock
-            </span>
+    <div className="col-lg-3 col-md-4 col-sm-6 mb-4">
+      <div className="card h-100 product-card">
+        <div className="product-image-container position-relative">
+          {product.images && product.images.length > 0 ? (
+            <Zoom>
+              <img
+                src={product.images[activeIndex] || fallbackImage}
+                className="card-img-top product-image"
+                alt={product.name}
+                onError={(e) => {
+                  e.target.src = fallbackImage;
+                }}
+              />
+            </Zoom>
+          ) : (
+            <img
+              src={fallbackImage}
+              className="card-img-top product-image"
+              alt="Product placeholder"
+            />
           )}
+
+          {/* Image Navigation */}
+          {product.images && product.images.length > 1 && (
+            <div className="image-nav">
+              {product.images.map((_, index) => (
+                <button
+                  key={index}
+                  className={`image-nav-dot ${index === activeIndex ? 'active' : ''}`}
+                  onClick={() => setActiveIndex(index)}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Wishlist Button */}
           <button
-            className="btn btn-link position-absolute top-0 end-0 m-2 p-0"
-            style={{ fontSize: 24, color: isInWishlist ? '#e63946' : '#bbb', zIndex: 2 }}
+            className="wishlist-btn position-absolute top-0 end-0 m-2"
             onClick={handleToggleWishlist}
             aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
           >
-            {isInWishlist ? <FaHeart /> : <FaRegHeart />}
+            {isInWishlist ? <FaHeart className="text-danger" /> : <FaRegHeart />}
           </button>
-          <Zoom>
-            <img
-              src={product.images[activeIndex] || fallbackImage}
-              alt={product.name}
-              onError={(e) => (e.target.src = fallbackImage)}
-              className="main-product-image"
-            />
-          </Zoom>
+
+          {/* Out of Stock Badge */}
+          {isOutOfStock && (
+            <div className="position-absolute top-0 start-0 m-2">
+              <span className="badge bg-danger">Out of Stock</span>
+            </div>
+          )}
+
+          {/* Rating Badge */}
+          {product.averageRating > 0 && (
+            <div className="position-absolute bottom-0 start-0 m-2">
+              <span className="badge bg-warning text-dark">
+                ⭐ {product.averageRating} ({product.numReviews})
+              </span>
+            </div>
+          )}
         </div>
 
-        <div className="thumbnail-row">
-          {product.images.map((img, index) => (
-            <img
-              key={index}
-              src={img}
-              alt={`thumb-${index}`}
-              onClick={() => setActiveIndex(index)}
-              onError={(e) => (e.target.src = fallbackImage)}
-              className={`thumbnail-img ${index === activeIndex ? 'active' : ''}`}
-            />
-          ))}
-        </div>
+        <div className="card-body d-flex flex-column">
+          <h5 className="card-title product-title">
+            <Link to={`/product/${product._id}`} className="text-decoration-none">
+              {product.name}
+            </Link>
+          </h5>
+          
+          {product.category && (
+            <p className="card-text text-muted small mb-2">
+              Category: {product.category}
+            </p>
+          )}
+          
+          <p className="card-text product-description flex-grow-1">
+            {product.description?.length > 100
+              ? `${product.description.substring(0, 100)}...`
+              : product.description}
+          </p>
+          
+          <div className="product-price mb-3">
+            <span className="h5 text-primary">₹{product.price}</span>
+            {product.stock > 0 && (
+              <small className="text-muted ms-2">({product.stock} in stock)</small>
+            )}
+          </div>
 
-        <div className="card-body text-center" style={{ minHeight: 120, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <Link to={`/product/${product._id}`} className="product-link">
-            <h5 className="product-name">{product.name}</h5>
-          </Link>
-
-          {/* Removed product description here */}
-
-          <h6 className="product-price">₹{product.price}</h6>
-          <div className="d-flex justify-content-center gap-2 mt-2">
+          <div className="product-actions">
             <button
-              className={`btn add-to-cart-btn ${isOutOfStock ? 'disabled-btn' : ''}`}
+              className="btn btn-primary btn-sm me-2"
               onClick={handleAddToCart}
               disabled={isOutOfStock}
             >
-              {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+              Add to Cart
             </button>
             <button
-              className={`btn btn-warning rounded-pill px-3 ${isOutOfStock ? 'disabled-btn' : ''}`}
+              className="btn btn-outline-primary btn-sm"
               onClick={handleBuyNow}
               disabled={isOutOfStock}
             >

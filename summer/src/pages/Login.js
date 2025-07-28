@@ -6,7 +6,7 @@ import { GoogleLogin } from '@react-oauth/google';
 
 import { useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
-import {  ToastContainer } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 
 import { FaUserAlt, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 
@@ -18,6 +18,7 @@ import bgImage from '../assets/bg-login2.jpeg';
 import SplashScreen from '../components/SplashScreen';
 import { serverEndpoint } from '../components/config';
 import { SET_USER } from '../redux/user/actions';
+import { authNotifications } from '../utils/notifications';
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -63,6 +64,7 @@ const Login = () => {
               const user = userRes.data.userDetails;
               dispatch({ type: SET_USER, payload: user });
               setShowSplash(false);
+              authNotifications.loginSuccess();
               navigate('/dashboard'); // ✅ Always go to dashboard (no admin condition)
             } catch (err) {
               console.error('User check error:', err);
@@ -75,7 +77,9 @@ const Login = () => {
         }
       } catch (err) {
         console.error('Login error:', err);
-        setMessage(err.response?.data?.message || 'Server error. Try again.');
+        const errorMessage = err.response?.data?.message || 'Server error. Try again.';
+        authNotifications.loginFailed(errorMessage);
+        setMessage(errorMessage);
       }
     }
   };

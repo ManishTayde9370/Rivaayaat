@@ -4,7 +4,7 @@ const { cloudinary } = require('../utils/cloudinary'); // 👈 Make sure this is
 // ➕ Add Product
 exports.createProduct = async (req, res) => {
   try {
-    const { name, description, price, stock, category } = req.body;
+    const { name, description, price, stock, category, artisan, artisanName } = req.body;
 
     if (!name?.trim() || !description?.trim() || !price || !stock) {
       return res.status(400).json({
@@ -24,6 +24,8 @@ exports.createProduct = async (req, res) => {
       stock: Number(stock),
       category: category?.trim() || '',
       images,
+      artisan: artisan || undefined, // ObjectId reference
+      artisanName: artisanName || '', // fallback for legacy
     });
 
     await newProduct.save();
@@ -35,18 +37,18 @@ exports.createProduct = async (req, res) => {
     });
   } catch (err) {
     console.error('❌ Product creation error:', err);
-    return res.status(500).json({ success: false, message: 'Error creating product' });
+    return res.status(500).json({ success: false, message: 'Error creating product', error: err.message });
   }
 };
 
 // 📄 Get All Products
 exports.getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find().sort({ createdAt: -1 });
+    const products = await Product.find().populate('artisan').sort({ createdAt: -1 });
     return res.status(200).json({ success: true, products });
   } catch (err) {
     console.error('❌ Fetch products error:', err);
-    return res.status(500).json({ success: false, message: 'Error fetching products' });
+    return res.status(500).json({ success: false, message: 'Error fetching products', error: err.message });
   }
 };
 
@@ -98,7 +100,7 @@ exports.updateProduct = async (req, res) => {
     });
   } catch (err) {
     console.error('❌ Update product error:', err);
-    return res.status(500).json({ success: false, message: 'Update failed' });
+    return res.status(500).json({ success: false, message: 'Update failed', error: err.message });
   }
 };
 
@@ -135,6 +137,6 @@ exports.deleteProduct = async (req, res) => {
     });
   } catch (err) {
     console.error('❌ Delete product error:', err);
-    return res.status(500).json({ success: false, message: 'Delete failed' });
+    return res.status(500).json({ success: false, message: 'Delete failed', error: err.message });
   }
 };

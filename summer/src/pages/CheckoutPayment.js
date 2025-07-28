@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { clearCart } from '../redux/cart/actions';
 import { serverEndpoint } from '../components/config';
+import { orderNotifications } from '../utils/notifications';
 
 function CheckoutPayment() {
   const cartItems = useSelector((state) => state?.cart?.items || []);
@@ -37,16 +38,17 @@ function CheckoutPayment() {
     });
 
   const handlePayment = async () => {
+    if (isLoading || isRazorpayOpen) return;
+
     setIsLoading(true);
-
-    const loaded = await loadRazorpayScript();
-    if (!loaded) {
-      alert('Razorpay SDK failed to load. Please try again.');
-      setIsLoading(false);
-      return;
-    }
-
     try {
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        alert('Failed to load payment gateway. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+
       const { data: keyData } = await axios.get(
         `${serverEndpoint}/api/checkout/razorpay-key`
       );
@@ -93,17 +95,17 @@ function CheckoutPayment() {
               { withCredentials: true }
             );
 
-            dispatch(clearCart());
+            // Don't clear cart - let users keep their items for potential re-ordering
+            // dispatch(clearCart());
             paymentSuccessRef.current = true;
+            orderNotifications.paymentSuccess();
             navigate('/checkout-success', { state: { order: result.order } });
           } catch (error) {
             console.error(
               'Payment verification failed:',
               error.response?.data || error.message
             );
-            alert(
-              'Payment was successful, but verification failed. Please contact support.'
-            );
+            orderNotifications.verificationFailed();
           }
         },
         prefill: {
@@ -119,14 +121,14 @@ function CheckoutPayment() {
 
       rzp.on('payment.failed', function (response) {
         console.error('Payment failed:', response.error);
-        alert('Payment failed. Please try again.');
+        orderNotifications.paymentFailed();
       });
 
       rzp.open();
       setIsRazorpayOpen(true);
     } catch (err) {
       console.error('Error during payment:', err);
-      alert('Payment initiation failed. Please try again.');
+      orderNotifications.paymentFailed();
     } finally {
       setIsLoading(false);
     }

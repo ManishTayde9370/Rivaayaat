@@ -40,6 +40,13 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false // Normal users are not admins
   },
+  isBlocked: {
+    type: Boolean,
+    default: false
+  },
+  lastLogin: {
+    type: Date
+  },
   wishlist: [
     {
       product: {

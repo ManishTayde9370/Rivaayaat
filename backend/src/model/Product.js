@@ -57,6 +57,18 @@ const productSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
+  artisanName: {
+    type: String,
+    trim: true,
+  },
+  artisan: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Artisan',
+  },
+  bundleItems: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product',
+  }],
 
   // ⭐ Reviews
   reviews: {

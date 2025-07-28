@@ -3,10 +3,12 @@ import {
   REMOVE_FROM_CART,
   CLEAR_CART,
   SET_CART,
+  SET_CART_LOADING,
 } from './actions';
 
 const initialState = {
   items: [],
+  loading: false,
 };
 
 const reducer = (state = initialState, action) => {
@@ -14,12 +16,18 @@ const reducer = (state = initialState, action) => {
 
   switch (action.type) {
     case ADD_TO_CART: {
-      const existingItem = items.find(item => item._id === action.payload._id);
+      const existingItem = items.find(item => 
+        item._id === action.payload._id || 
+        item.productId === action.payload.productId ||
+        item.productId === action.payload._id
+      );
       if (existingItem) {
         return {
           ...state,
           items: items.map(item =>
-            item._id === action.payload._id
+            item._id === action.payload._id || 
+            item.productId === action.payload.productId ||
+            item.productId === action.payload._id
               ? { ...item, quantity: item.quantity + 1 }
               : item
           ),
@@ -34,7 +42,10 @@ const reducer = (state = initialState, action) => {
     case REMOVE_FROM_CART:
       return {
         ...state,
-        items: items.filter(item => item._id !== action.payload && item.productId !== action.payload),
+        items: items.filter(item => 
+          item._id !== action.payload && 
+          item.productId !== action.payload
+        ),
       };
 
     case CLEAR_CART:
@@ -47,6 +58,12 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         items: Array.isArray(action.payload) ? action.payload : [],
+      };
+
+    case SET_CART_LOADING:
+      return {
+        ...state,
+        loading: action.payload,
       };
 
     default:

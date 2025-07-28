@@ -1,118 +1,49 @@
-import React, { useState, useEffect } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import React, { useState } from 'react';
 
 const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: ''
-  });
-
+  const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    AOS.init({ duration: 1000, once: true });
-  }, []);
-
-  const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-  };
-
-  const handleSubmit = async (e) => {
+  const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleSubmit = e => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Failed to send message.');
-      }
-      setSubmitted(true);
-      setFormData({ name: '', email: '', message: '' });
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    setSubmitted(true);
+    setTimeout(() => setSubmitted(false), 3000);
   };
 
   return (
-    <div className="container mt-5">
-      <h2 className="text-center mb-4" data-aos="fade-down">Contact Us</h2>
-      <p className="text-center text-muted mb-5" data-aos="fade-down" data-aos-delay="100">
-        We'd love to hear from you. Feel free to reach out using the form below.
-      </p>
-
-      <div className="row justify-content-center">
-        <div className="col-md-8" data-aos="fade-up" data-aos-delay="200">
-          {submitted ? (
-            <div className="alert alert-success text-center">
-              ✅ Message sent! We'll get back to you soon.
+    <div className="container py-5">
+      <h1 className="mb-4">Contact Us</h1>
+      <div className="row">
+        <div className="col-md-6 mb-4">
+          <form onSubmit={handleSubmit} style={{ maxWidth: 400 }}>
+            <div className="mb-3">
+              <label htmlFor="name" className="form-label">Name</label>
+              <input type="text" className="form-control" id="name" name="name" value={form.name} onChange={handleChange} required />
             </div>
-          ) : (
-            <form onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <label htmlFor="name" className="form-label">Your Name</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  style={{ color: 'black' }}
-                />
-              </div>
-
-              <div className="mb-3">
-                <label htmlFor="email" className="form-label">Your Email</label>
-                <input
-                  type="email"
-                  className="form-control"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  style={{ color: 'black' }}
-                />
-              </div>
-
-              <div className="mb-3">
-                <label htmlFor="message" className="form-label">Message</label>
-                <textarea
-                  className="form-control"
-                  id="message"
-                  name="message"
-                  rows="5"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                  style={{ color: 'black' }}
-                ></textarea>
-              </div>
-
-              {error && (
-                <div className="alert alert-danger text-center">{error}</div>
-              )}
-              <button type="submit" className="btn btn-primary px-4" disabled={loading}>
-                {loading ? 'Sending...' : 'Send'}
-              </button>
-            </form>
-          )}
+            <div className="mb-3">
+              <label htmlFor="email" className="form-label">Email</label>
+              <input type="email" className="form-control" id="email" name="email" value={form.email} onChange={handleChange} required />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="message" className="form-label">Message</label>
+              <textarea className="form-control" id="message" name="message" rows={4} value={form.message} onChange={handleChange} required />
+            </div>
+            <button type="submit" className="btn btn-dark">Send Message</button>
+            {submitted && <div className="alert alert-success mt-3">Thank you! We'll get back to you soon.</div>}
+          </form>
+        </div>
+        <div className="col-md-6 mb-4">
+          <h5>Our Address</h5>
+          <p>123 Heritage Lane, Mumbai, India</p>
+          <h5>Phone</h5>
+          <p>+91 98765 43210</p>
+          <h5>Email</h5>
+          <p>care@rivaayaat.com</p>
+          <h5>Find Us</h5>
+          <div style={{ width: '100%', height: 200, background: '#eee', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888' }}>
+            [Map Placeholder]
+          </div>
         </div>
       </div>
     </div>

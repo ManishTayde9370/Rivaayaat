@@ -52,36 +52,6 @@ const NavbarPrivate = ({ username, onLogout }) => {
             
           </Nav>
 
-          {/* Middle section - Search */}
-          <Form className="d-flex align-items-center me-3 flex-column" onSubmit={e => e.preventDefault()} style={{ minWidth: 250 }}>
-            <div className="d-flex align-items-center w-100">
-              <FormControl
-                type="search"
-                placeholder="Search products (e.g. red silk saree)"
-                className="me-2 black-placeholder custom-search-input"
-                aria-label="Search"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ border: '2px solid black', minWidth: 180 }}
-              />
-              <FaSearch
-                style={{ cursor: 'pointer', color: 'black' }}
-                size={18}
-                onClick={handleSearch}
-                title="Search"
-              />
-            </div>
-            {/* Keyword chips */}
-            <div className="d-flex flex-wrap mt-1 mb-1" style={{ minHeight: 28 }}>
-              {keywords.map((kw, idx) => (
-                <span key={kw + idx} className="badge bg-secondary me-1 mb-1 d-flex align-items-center" style={{ fontSize: '0.9em' }}>
-                  {kw}
-                  <CloseButton onClick={() => handleRemoveKeyword(kw)} className="ms-1 p-0" style={{ fontSize: '0.8em' }} />
-                </span>
-              ))}
-            </div>
-          </Form>
-
           {/* Right section - Greeting & Logout */}
           <div className="d-flex align-items-center gap-3">
             <span className="text-dark">👋 Hello, <strong>{username}</strong></span>

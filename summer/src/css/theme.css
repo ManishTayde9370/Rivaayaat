@@ -1,0 +1,81 @@
+/* Rivaayat Traditional Theme */
+:root {
+  --primary-color: #8D5524; /* Deep brown */
+  --secondary-color: #E1B382; /* Sand gold */
+  --accent-color: #A94438; /* Terracotta red */
+  --background-color: #FFF8F0; /* Creamy background */
+  --border-color: #C68642; /* Muted gold */
+  --heading-font: 'Tangerine', cursive, serif;
+  --body-font: 'Merriweather', serif;
+}
+
+body {
+  background: var(--background-color);
+  font-family: var(--body-font);
+  color: var(--primary-color);
+}
+
+/* Global placeholder color override */
+::placeholder {
+  color: #000 !important;
+  opacity: 1 !important;
+}
+
+/* For Firefox */
+::-moz-placeholder {
+  color: #000 !important;
+  opacity: 1 !important;
+}
+
+/* For Edge */
+::-ms-input-placeholder {
+  color: #000 !important;
+}
+
+.rivaayat-heading {
+  font-family: var(--heading-font);
+  font-size: 2.5rem;
+  color: var(--accent-color);
+  letter-spacing: 2px;
+  border-bottom: 3px double var(--border-color);
+  padding-bottom: 0.3em;
+  margin-bottom: 1em;
+}
+
+.rivaayat-card {
+  background: #fff;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(141,85,36,0.08);
+  padding: 1.5em;
+  margin: 1em 0;
+  transition: box-shadow 0.2s;
+}
+
+.rivaayat-card:hover {
+  box-shadow: 0 4px 16px rgba(141,85,36,0.18);
+}
+
+.rivaayat-motif {
+  background-image: url('../assets/bg-royal1.jpg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  border-radius: 8px;
+  padding: 1em;
+}
+
+.rivaayat-btn {
+  background: var(--accent-color);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5em 1.5em;
+  font-family: var(--body-font);
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.rivaayat-btn:hover {
+  background: var(--primary-color);
+} 

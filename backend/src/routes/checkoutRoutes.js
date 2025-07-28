@@ -5,10 +5,12 @@ const {
   createOrder,
   verifyPaymentAndPlaceOrder,
   getRazorpayKey,
+  getUserOrders,
+  updateOrderStatus,
+  getAllOrders,
 } = require('../controller/checkoutController');
 
-const { requireAuth } = require('../middleware/authMiddleware');
-const Order = require('../model/Order');
+const { requireAuth, requireAdmin } = require('../middleware/authMiddleware');
 
 // ✅ PUBLIC: Get Razorpay key (no auth required)
 router.get('/razorpay-key', getRazorpayKey);
@@ -20,15 +22,13 @@ router.post('/create-order', requireAuth, createOrder);
 router.post('/verify-and-place-order', requireAuth, verifyPaymentAndPlaceOrder);
 
 // ✅ USER: Get all orders for the logged-in user
-router.get('/orders', requireAuth, async (req, res) => {
-  try {
-    const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
-    res.json(orders);
-  } catch (err) {
-    console.error('❌ Error fetching user orders:', err);
-    res.status(500).json({ message: 'Failed to fetch orders' });
-  }
-});
+router.get('/orders', requireAuth, getUserOrders);
+
+// ✅ ADMIN: Get all orders (admin only)
+router.get('/admin/orders', requireAdmin, getAllOrders);
+
+// ✅ ADMIN: Update order status (admin only)
+router.patch('/admin/orders/:id/status', requireAdmin, updateOrderStatus);
 
 // ✅ USER: Get user messages (placeholder, returns empty array)
 router.get('/messages', requireAuth, async (req, res) => {

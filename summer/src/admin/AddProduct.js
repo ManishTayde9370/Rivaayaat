@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { toast, ToastContainer } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { adminNotifications } from '../utils/notifications';
 
 const AddProduct = () => {
   const [form, setForm] = useState({
@@ -24,7 +25,7 @@ const AddProduct = () => {
     if (name === 'images') {
       const fileArray = Array.from(files);
       if (fileArray.length > 5) {
-        toast.warn('You can upload up to 5 images.');
+        adminNotifications.productError('You can upload up to 5 images.');
         return;
       }
       setForm({ ...form, images: fileArray });
@@ -39,12 +40,12 @@ const AddProduct = () => {
   const { name, description, price, stock, images, category } = form;
 
   if (!name || !description || !price || !stock || images.length === 0) {
-    toast.error('All fields and at least one image are required.');
+    adminNotifications.productError('All fields and at least one image are required.');
     return;
   }
 
   if (price < 0 || stock < 0) {
-    toast.error('Price and stock cannot be negative.');
+    adminNotifications.productError('Price and stock cannot be negative.');
     return;
   }
 
@@ -73,10 +74,11 @@ const AddProduct = () => {
       }
     );
 
-    toast.success('✅ Product added');
+    adminNotifications.productAdded();
     setTimeout(() => navigate('/admin/products'), 1500);
   } catch (err) {
-    toast.error(err.response?.data?.message || 'Failed to add product');
+    const errorMessage = err.response?.data?.message || 'Failed to add product';
+    adminNotifications.productError(errorMessage);
   } finally {
     setUploading(false);
   }

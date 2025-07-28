@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   removeFromCart,
-  clearCart,
+  clearCartFromBackend,
   persistCartToBackend,
 } from '../redux/cart/actions';
 
@@ -29,7 +29,7 @@ function CartPage() {
   };
 
   const handleClearCart = () => {
-    dispatch(clearCart());
+    dispatch(clearCartFromBackend());
   };
 
   const handleCheckout = () => {

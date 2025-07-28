@@ -9,14 +9,16 @@ const CheckoutShipping = () => {
   const [postalCode, setPostalCode] = useState('');
   const [email, setEmail] = useState('');
   const [mobile, setMobile] = useState('');
+  const [formError, setFormError] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setFormError(null);
 
     if (!address.trim() || !city.trim() || !postalCode.trim() || !email.trim() || !mobile.trim()) {
-      alert('Please fill out all fields');
+      setFormError('Please fill out all fields');
       return;
     }
 
@@ -37,6 +39,7 @@ const CheckoutShipping = () => {
   return (
     <div className="container py-5">
       <h2 className="mb-4">Shipping Address</h2>
+      {formError && <div className="alert alert-danger">{formError}</div>}
       <form onSubmit={handleSubmit} className="d-flex flex-column gap-3" style={{ maxWidth: '400px' }}>
         <div>
           <label htmlFor="address">Address</label>

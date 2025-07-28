@@ -1,205 +1,231 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { serverEndpoint } from '../components/config';
-import { SET_USER, CLEAR_USER } from '../redux/user/actions';
-import StatsCard from '../components/StatsCard';
-import ActivityList from '../components/ActivityList';
-import OrderItem from '../components/OrderItem';
+import axios from 'axios';
+import { FaUser, FaEnvelope, FaPhone, FaEdit, FaSignOutAlt, FaBoxOpen, FaHeart } from 'react-icons/fa';
+import { Modal, Button } from 'react-bootstrap';
+import { SET_USER } from '../redux/user/actions';
+import { fetchWishlist } from '../redux/wishlist/actions';
+import LoadingBar from '../components/LoadingBar';
 import WishlistItem from '../components/WishlistItem';
-import { Tab, Tabs } from 'react-bootstrap';
-import '../css/Dashboard.css';
 
-const Dashboard = () => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const userDetails = useSelector((state) => state.user);
-  const reduxWishlist = useSelector((state) => state.wishlist.items);
-
-  const [loading, setLoading] = useState(true);
+const Dashboard = ({ onLogout }) => {
+  const userDetails = useSelector(state => state.user);
+  const wishlist = useSelector(state => state.wishlist.items) || [];
+  const wishlistLoading = useSelector(state => state.wishlist.loading);
   const [orders, setOrders] = useState([]);
-  const [wishlist, setWishlist] = useState([]);
-  const [messages, setMessages] = useState([]);
-  const [activities, setActivities] = useState([]);
-
-  // Pagination
-  const itemsPerPage = 5;
-  const [orderPage, setOrderPage] = useState(1);
-  const [wishlistPage, setWishlistPage] = useState(1);
-  const paginatedOrders = orders.slice((orderPage - 1) * itemsPerPage, orderPage * itemsPerPage);
-  const paginatedWishlist = wishlist.slice((wishlistPage - 1) * itemsPerPage, wishlistPage * itemsPerPage);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await axios.post(`${serverEndpoint}/api/auth/is-user-logged-in`, {}, {
-          withCredentials: true,
-        });
-
-        if (res.data.userDetails) {
-          dispatch({ type: SET_USER, payload: res.data.userDetails });
-        } else {
-          dispatch({ type: CLEAR_USER });
-          navigate('/login');
-        }
-      } catch (error) {
-        console.error('Not logged in or token expired:', error);
-        dispatch({ type: CLEAR_USER });
-        navigate('/login');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (!userDetails || !userDetails.username) {
-      fetchUser();
-    } else {
-      setLoading(false);
-    }
-  }, [userDetails, dispatch, navigate]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [edit, setEdit] = useState(false);
+  const [profile, setProfile] = useState({
+    name: userDetails?.name || '',
+    email: userDetails?.email || '',
+    phone: userDetails?.phone || ''
+  });
+  const [profileMsg, setProfileMsg] = useState(null);
+  const [profileError, setProfileError] = useState(null);
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const [ordersRes, wishlistRes, messagesRes] = await Promise.all([
-          axios.get(`${serverEndpoint}/api/checkout/orders`, { withCredentials: true }),
-          axios.get(`${serverEndpoint}/api/wishlist`, { withCredentials: true }),
-          axios.get(`${serverEndpoint}/api/checkout/messages`, { withCredentials: true }),
-        ]);
+    if (!userDetails?._id) return;
+    
+    // Fetch orders
+    setOrdersLoading(true);
+    axios.get(`/api/orders?userId=${userDetails._id}`)
+      .then(res => setOrders(res.data.orders || []))
+      .catch(() => setOrders([]))
+      .finally(() => setOrdersLoading(false));
+    
+    // Fetch wishlist
+    dispatch(fetchWishlist());
+  }, [userDetails, dispatch]);
 
-        setOrders(ordersRes.data);
-        setWishlist(wishlistRes.data);
-        setMessages(messagesRes.data);
-
-        setActivities([
-          ...ordersRes.data.map(order => ({
-            id: order._id,
-            action: `Placed an order for ${order.items.length} item(s)`,
-            time: new Date(order.createdAt).toLocaleString(),
-          })),
-          ...wishlistRes.data.map(item => ({
-            id: item._id,
-            action: `Added "${item.name}" to wishlist`,
-            time: new Date(item.addedAt).toLocaleDateString(),
-          }))
-        ]);
-      } catch (err) {
-        console.error("Failed to fetch dashboard data", err);
-      }
-    };
-
-    fetchDashboardData();
-  }, []);
-
-  // Sync local wishlist with Redux wishlist for real-time updates
-  useEffect(() => {
-    setWishlist(reduxWishlist);
-  }, [reduxWishlist]);
-
-  const handleLogout = async () => {
+  const handleChange = e => setProfile({ ...profile, [e.target.name]: e.target.value });
+  
+  const handleEdit = async e => {
+    e.preventDefault();
+    setProfileMsg(null);
+    setProfileError(null);
     try {
-      const response = await axios.post(`${serverEndpoint}/api/auth/logout`, {}, {
-        withCredentials: true
-      });
-
-      if (response.data.success) {
-        dispatch({ type: CLEAR_USER });
-        navigate('/login');
-      } else {
-        console.error('Unexpected logout response:', response.data);
+      const res = await axios.patch('/api/auth/me', profile, { withCredentials: true });
+      setProfileMsg(res.data.message || 'Profile updated');
+      setEdit(false);
+      if (res.data.user) {
+        setProfile(res.data.user);
+        dispatch({ type: SET_USER, payload: { ...userDetails, ...res.data.user } });
       }
-    } catch (error) {
-      console.error('Logout failed:', error.response?.data || error.message);
+    } catch (err) {
+      setProfileError(err.response?.data?.message || 'Failed to update profile');
     }
   };
 
-  if (loading) return <div className="text-center mt-5">Loading...</div>;
+  const handleShowOrder = (order) => {
+    setSelectedOrder(order);
+    setShowOrderModal(true);
+  };
+  
+  const handleCloseOrder = () => {
+    setShowOrderModal(false);
+    setSelectedOrder(null);
+  };
 
   return (
-    <>
-      <style>{`
-        input, textarea, select { color: #111 !important; }
-        input::placeholder, textarea::placeholder { color: #111 !important; opacity: 1; }
-      `}</style>
-      <div className="container py-5 dashboard-container" style={{ background: 'linear-gradient(135deg, #fcecc5 0%, #fffbe6 100%)', minHeight: '100vh', borderRadius: 24 }}>
-        <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-          <h2 className="dashboard-title" style={{ color: '#5e3d19', fontFamily: 'Georgia', fontWeight: 'bold', letterSpacing: 1 }}>Welcome, {userDetails.username}</h2>
-          <button className="btn btn-outline-danger btn-sm rounded-pill px-4" onClick={handleLogout}>
-            Logout
+    <div className="container py-5">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h1 className="rivaayat-heading mb-0">My Account</h1>
+        {onLogout && (
+          <button className="rivaayat-btn d-flex align-items-center" onClick={onLogout} style={{ minWidth: 110 }} aria-label="Logout">
+            <FaSignOutAlt className="me-2" /> Logout
           </button>
+        )}
+      </div>
+      
+      <div className="row g-4 mb-4">
+        <div className="col-md-4">
+          <div className="rivaayat-card h-100">
+            <div className="d-flex align-items-center mb-3">
+              <FaUser size={28} style={{ color: 'var(--accent-color)', marginRight: 10 }} />
+              <h5 className="mb-0" style={{ fontWeight: 600, color: 'var(--primary-color)' }}>Profile</h5>
+            </div>
+            {edit ? (
+              <form onSubmit={handleEdit}>
+                <div className="mb-2">
+                  <label>Name</label>
+                  <input className="form-control" name="name" value={profile.name} onChange={handleChange} />
+                </div>
+                <div className="mb-2">
+                  <label>Email</label>
+                  <input className="form-control" name="email" value={profile.email} onChange={handleChange} />
+                </div>
+                <div className="mb-2">
+                  <label>Phone</label>
+                  <input className="form-control" name="phone" value={profile.phone} onChange={handleChange} />
+                </div>
+                <button className="rivaayat-btn btn-sm mt-2" type="submit" aria-label="Save Profile" tabIndex={0}>Save</button>
+                {profileMsg && <div className="alert alert-success mt-2">{profileMsg}</div>}
+                {profileError && <div className="alert alert-danger mt-2">{profileError}</div>}
+              </form>
+            ) : (
+              <>
+                <p className="mb-2"><FaUser className="me-2" /> <strong>Name:</strong> {profile.name || 'N/A'}</p>
+                <p className="mb-2"><FaEnvelope className="me-2" /> <strong>Email:</strong> {profile.email || 'N/A'}</p>
+                <p className="mb-2"><FaPhone className="me-2" /> <strong>Phone:</strong> {profile.phone || 'N/A'}</p>
+                <button className="rivaayat-btn btn-sm mt-2" style={{ background: 'var(--secondary-color)', color: 'var(--primary-color)' }} onClick={() => setEdit(true)} aria-label="Edit Profile" tabIndex={0}><FaEdit className="me-1" /> Edit</button>
+                {profileMsg && <div className="alert alert-success mt-2">{profileMsg}</div>}
+                {profileError && <div className="alert alert-danger mt-2">{profileError}</div>}
+              </>
+            )}
+          </div>
         </div>
-
-        <div className="card shadow-lg p-4 mb-5" style={{ borderRadius: 20, background: 'rgba(255,255,255,0.97)' }}>
-          <Tabs defaultActiveKey="overview" id="dashboard-tabs" className="mb-4 justify-content-center" style={{ borderBottom: '2px solid #fcecc5' }}>
-            <Tab eventKey="overview" title="📊 Overview">
-              <div className="row text-center mb-4">
-                <div className="col-md-4">
-                  <StatsCard title="Orders" icon="📦" count={orders.length} />
-                </div>
-                <div className="col-md-4">
-                  <StatsCard title="Wishlist" icon="❤️" count={wishlist.length} />
-                </div>
-                <div className="col-md-4">
-                  <StatsCard title="Messages" icon="💬" count={messages.length} />
-                </div>
-              </div>
-              <hr style={{ borderTop: '1px solid #fcecc5' }} />
-              <h5 className="mt-4" style={{ color: '#5e3d19' }}>🕒 Recent Activity</h5>
-              <ActivityList activities={activities} />
-            </Tab>
-
-            <Tab eventKey="orders" title="🧾 My Orders">
-              <div className="mt-4">
-                {paginatedOrders.length === 0 ? (
-                  <p>You haven't placed any orders yet.</p>
-                ) : (
-                  <>
-                    {paginatedOrders.map(order => (
-                      <OrderItem key={order._id} order={order} />
-                    ))}
-                    <div className="d-flex justify-content-between align-items-center mt-3">
-                      <button className="btn btn-outline-secondary rounded-pill px-3" disabled={orderPage === 1} onClick={() => setOrderPage(orderPage - 1)}>Prev</button>
-                      <span>Page {orderPage}</span>
-                      <button className="btn btn-outline-secondary rounded-pill px-3" disabled={orderPage * itemsPerPage >= orders.length} onClick={() => setOrderPage(orderPage + 1)}>Next</button>
-                    </div>
-                  </>
-                )}
-              </div>
-            </Tab>
-
-            <Tab eventKey="wishlist" title="💖 Wishlist">
-              <div className="mt-4">
-                {paginatedWishlist.length === 0 ? (
-                  <p>Your wishlist is currently empty.</p>
-                ) : (
-                  <>
-                    {paginatedWishlist.map(item => (
-                      <WishlistItem key={item._id} item={item} />
-                    ))}
-                    <div className="d-flex justify-content-between align-items-center mt-3">
-                      <button className="btn btn-outline-secondary rounded-pill px-3" disabled={wishlistPage === 1} onClick={() => setWishlistPage(wishlistPage - 1)}>Prev</button>
-                      <span>Page {wishlistPage}</span>
-                      <button className="btn btn-outline-secondary rounded-pill px-3" disabled={wishlistPage * itemsPerPage >= wishlist.length} onClick={() => setWishlistPage(wishlistPage + 1)}>Next</button>
-                    </div>
-                  </>
-                )}
-              </div>
-            </Tab>
-
-            <Tab eventKey="account" title="👤 Account Info">
-              <div className="mt-4">
-                <div className="card p-4 shadow-sm" style={{ borderRadius: 16, background: '#fffbe6' }}>
-                  <h6 style={{ color: '#5e3d19' }}>Name: {userDetails.username}</h6>
-                  <p>Email: {userDetails.email || 'N/A'}</p>
-                  <p>Member since: {userDetails.createdAt ? new Date(userDetails.createdAt).toLocaleDateString() : 'N/A'}</p>
-                </div>
-              </div>
-            </Tab>
-          </Tabs>
+        
+        <div className="col-md-8">
+          <div className="rivaayat-card h-100">
+            <div className="d-flex align-items-center mb-3">
+              <FaBoxOpen size={26} style={{ color: 'var(--accent-color)', marginRight: 10 }} />
+              <h5 className="mb-0" style={{ fontWeight: 600, color: 'var(--primary-color)' }}>Account Settings</h5>
+            </div>
+            <p>Update your password, address, and preferences here. <span className="text-muted">(Feature coming soon!)</span></p>
+          </div>
         </div>
       </div>
-    </>
+      
+      <div className="row g-4 mb-4">
+        <div className="col-md-7">
+          <div className="rivaayat-card h-100">
+            <div className="d-flex align-items-center mb-3">
+              <FaBoxOpen size={24} style={{ color: 'var(--accent-color)', marginRight: 10 }} />
+              <h5 className="mb-0" style={{ fontWeight: 600, color: 'var(--primary-color)' }}>Order History</h5>
+            </div>
+            <div className="table-responsive">
+              <table className="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Amount</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ordersLoading ? (
+                    <tr><td colSpan={5} className="text-center"><LoadingBar /></td></tr>
+                  ) : orders.length === 0 ? (
+                    <tr><td colSpan={5} className="text-center">No orders found.</td></tr>
+                  ) : orders.map(o => (
+                    <tr key={o._id || o.id}>
+                      <td>{o._id || o.id}</td>
+                      <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString() : o.date}</td>
+                      <td><span className="badge bg-success" style={{ fontSize: '1em' }}>{o.status || o.orderStatus}</span></td>
+                      <td>₹{o.amountPaid || o.amount}</td>
+                      <td>
+                        <button className="btn btn-outline-primary btn-sm" onClick={() => handleShowOrder(o)} aria-label="View Order Details">View Details</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        
+        <div className="col-md-5">
+          <div className="rivaayat-card h-100">
+            <div className="d-flex align-items-center mb-3">
+              <FaHeart size={22} style={{ color: 'var(--accent-color)', marginRight: 10 }} />
+              <h5 className="mb-0" style={{ fontWeight: 600, color: 'var(--primary-color)' }}>Wishlist</h5>
+            </div>
+            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              {wishlistLoading ? (
+                <div className="text-center py-3">
+                  <LoadingBar />
+                </div>
+              ) : wishlist.length === 0 ? (
+                <p className="text-muted text-center py-3">No items in wishlist.</p>
+              ) : (
+                wishlist.map((item, i) => (
+                  <WishlistItem key={item._id || i} item={item} />
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Order Details Modal */}
+      <Modal show={showOrderModal} onHide={handleCloseOrder} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Order Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedOrder && (
+            <div>
+              <p><strong>Order ID:</strong> {selectedOrder._id || selectedOrder.id}</p>
+              <p><strong>Date:</strong> {selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleDateString() : selectedOrder.date}</p>
+              <p><strong>Status:</strong> {selectedOrder.status || selectedOrder.orderStatus}</p>
+              <p><strong>Amount:</strong> ₹{selectedOrder.amountPaid || selectedOrder.amount}</p>
+              {selectedOrder.items && (
+                <div>
+                  <h6>Items:</h6>
+                  <ul>
+                    {selectedOrder.items.map((item, index) => (
+                      <li key={index}>
+                        {item.name} - Qty: {item.quantity} - ₹{item.price}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseOrder}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </div>
   );
 };
 

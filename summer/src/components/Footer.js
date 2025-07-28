@@ -2,6 +2,7 @@ import React from 'react';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube, FaPinterest } from 'react-icons/fa';
 import '../css/Footer.css';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -24,29 +25,29 @@ const Footer = () => {
               <Col md={3}>
                 <h6 className="footer-heading">SUPPORT</h6>
                 <ul className="footer-links">
-                  <li>Track Order</li>
-                  <li>Contact Us</li>
-                  <li>My Account</li>
+                  <li><Link to="/track-order">Track Order</Link></li>
+                  <li><Link to="/contact">Contact Us</Link></li>
+                  <li><Link to="/dashboard">My Account</Link></li>
                 </ul>
               </Col>
               <Col md={3}>
                 <h6 className="footer-heading">QUICK LINKS</h6>
                 <ul className="footer-links">
-                  <li>About Us</li>
-                  <li>Brand Story</li>
-                  <li>Blogs</li>
-                  <li>Careers</li>
-                  <li>Store Locator</li>
+                  <li><Link to="/about">About Us</Link></li>
+                  <li><Link to="/brand-story">Brand Story</Link></li>
+                  <li><Link to="/blogs">Blogs</Link></li>
+                  <li><Link to="/careers">Careers</Link></li>
+                  <li><Link to="/store-locator">Store Locator</Link></li>
                 </ul>
               </Col>
               <Col md={3}>
                 <h6 className="footer-heading">OUR POLICIES</h6>
                 <ul className="footer-links">
-                  <li>FAQs</li>
-                  <li>Shipping Details</li>
-                  <li>Return & Refund Policy</li>
-                  <li>Terms of Use</li>
-                  <li>Privacy Policy</li>
+                  <li><Link to="/faqs">FAQs</Link></li>
+                  <li><Link to="/shipping-details">Shipping Details</Link></li>
+                  <li><Link to="/return-refund-policy">Return & Refund Policy</Link></li>
+                  <li><Link to="/terms-of-use">Terms of Use</Link></li>
+                  <li><Link to="/privacy-policy">Privacy Policy</Link></li>
                 </ul>
               </Col>
             </Row>

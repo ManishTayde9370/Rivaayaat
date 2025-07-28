@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { toast, ToastContainer } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaUser, FaEnvelope, FaPhone, FaLock, FaUserTag } from 'react-icons/fa';
@@ -8,6 +8,7 @@ import { FaUser, FaEnvelope, FaPhone, FaLock, FaUserTag } from 'react-icons/fa';
 import '../css/login.css';
 import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { authNotifications } from '../utils/notifications';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -31,12 +32,12 @@ const Register = () => {
       });
 
       if (res.data.success) {
-        toast.success(res.data.message || "Registration successful!");
+        authNotifications.registerSuccess();
         setTimeout(() => navigate('/login'), 2000);
       }
     } catch (error) {
       const msg = error.response?.data?.message || "Registration failed.";
-      toast.error(msg);
+      authNotifications.registerFailed(msg);
     }
   };
 

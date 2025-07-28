@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Table, Button, Modal, Form, Image } from 'react-bootstrap';
-import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+import { adminNotifications } from '../utils/notifications';
 
 const API = 'http://localhost:5000/api/admin/products';
 
@@ -25,7 +26,7 @@ const ManageProducts = () => {
       const res = await axios.get(API, { withCredentials: true });
       setProducts(res.data.products || []);
     } catch (err) {
-      toast.error('❌ Failed to load products');
+      adminNotifications.productError('Failed to load products');
     }
   };
 
@@ -49,12 +50,12 @@ const ManageProducts = () => {
 
     // Basic validation
     if (!name || !description || !price || !stock) {
-      toast.error('Please fill all required fields');
+      adminNotifications.productError('Please fill all required fields');
       return;
     }
 
     if (price < 0 || stock < 0) {
-      toast.error('Price and stock cannot be negative');
+      adminNotifications.productError('Price and stock cannot be negative');
       return;
     }
 
@@ -69,16 +70,16 @@ const ManageProducts = () => {
     try {
       if (editingProduct) {
         await axios.put(`${API}/${editingProduct._id}`, data, { withCredentials: true });
-        toast.success('✅ Product updated');
+        adminNotifications.productUpdated();
       } else {
         await axios.post(API, data, { withCredentials: true });
-        toast.success('✅ Product added');
+        adminNotifications.productAdded();
       }
       setShowModal(false);
       resetForm();
       fetchProducts();
     } catch (err) {
-      toast.error('❌ Error saving product');
+      adminNotifications.productError('Error saving product');
     }
   };
 
@@ -87,10 +88,10 @@ const ManageProducts = () => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
         await axios.delete(`${API}/${id}`, { withCredentials: true });
-        toast.success('🗑️ Product deleted');
+        adminNotifications.productDeleted();
         fetchProducts();
       } catch (err) {
-        toast.error('❌ Failed to delete product');
+        adminNotifications.productError('Failed to delete product');
       }
     }
   };

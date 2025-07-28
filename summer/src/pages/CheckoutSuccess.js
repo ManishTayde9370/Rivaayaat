@@ -24,7 +24,6 @@ function CheckoutSuccess() {
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
     const imgProps = pdf.getImageProperties(imgData);
     const pdfWidth = pageWidth - 20;
     const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;

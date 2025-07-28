@@ -91,6 +91,10 @@ const authController = {
         return res.status(401).json({ success: false, message: 'Invalid credentials' });
       }
 
+      // Update lastLogin
+      user.lastLogin = new Date();
+      await user.save();
+
       const payload = {
         _id: user._id,
         username: user.username,

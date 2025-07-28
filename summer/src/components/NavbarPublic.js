@@ -3,9 +3,13 @@ import { Navbar, Nav, Container } from 'react-bootstrap';
 import { FaUserPlus, FaSignInAlt, FaHome } from 'react-icons/fa';
 import logo from '../assets/brandlogo.png'; // Adjust path if needed
 import '../css/NavbarPublic.css';
+import { useState } from 'react';
+import { FaSearch } from 'react-icons/fa';
+import axios from 'axios';
 
 
 const NavbarPublic = () => {
+  // Remove searchTerm, setSearchTerm, handleSearch
   return (
     <Navbar bg="light" expand="lg" className="shadow-sm py-2">
       <Container>
@@ -17,7 +21,7 @@ const NavbarPublic = () => {
           />
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="navbar-nav" />
-        <Navbar.Collapse id="navbar-nav">
+        <Navbar.Collapse id="navbar-nav" className="justify-content-between align-items-center">
           <Nav className="ms-auto align-items-center gap-3">
             <Nav.Link as={Link} to="/" className="d-flex align-items-center gap-1">
               <FaHome /> Home
@@ -29,6 +33,7 @@ const NavbarPublic = () => {
               <FaUserPlus /> Register
             </Nav.Link>
           </Nav>
+          {/* Search bar removed */}
         </Navbar.Collapse>
       </Container>
     </Navbar>

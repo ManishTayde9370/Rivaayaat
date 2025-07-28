@@ -1,36 +1,216 @@
 // src/Layout/AdminLayout.js
-import React from 'react';
-import { Container, Navbar, Nav } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Container, Navbar, Nav, Dropdown, Badge } from 'react-bootstrap';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { 
+  FaBars, 
+  FaTimes, 
+  FaHome, 
+  FaUsers, 
+  FaBox, 
+  FaShoppingCart, 
+  FaEnvelope, 
+  FaChartBar, 
+  FaCog, 
+  FaSignOutAlt,
+  FaBell,
+  FaUser,
+  FaChevronDown,
+  FaCrown
+} from 'react-icons/fa';
 
 const AdminLayout = ({ children, userDetails, onLogout }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = () => {
-    // 🔄 Clear admin state & redirect
     if (onLogout) onLogout();
-    navigate('/login', { replace: true }); // ✅ redirect after logout
+    navigate('/login', { replace: true });
+  };
+
+  const navigationItems = [
+    {
+      title: 'Dashboard',
+      path: '/admin',
+      icon: <FaHome />,
+      badge: null
+    },
+    {
+      title: 'Products',
+      path: '/admin/products',
+      icon: <FaBox />,
+      badge: null
+    },
+    {
+      title: 'Users',
+      path: '/admin/users',
+      icon: <FaUsers />,
+      badge: null
+    },
+    {
+      title: 'Orders',
+      path: '/admin/orders',
+      icon: <FaShoppingCart />,
+      badge: '3'
+    },
+    {
+      title: 'Messages',
+      path: '/admin/contact-messages',
+      icon: <FaEnvelope />,
+      badge: '2'
+    },
+    {
+      title: 'Analytics',
+      path: '/admin/analytics',
+      icon: <FaChartBar />,
+      badge: null
+    },
+    {
+      title: 'Settings',
+      path: '/admin/settings',
+      icon: <FaCog />,
+      badge: null
+    }
+  ];
+
+  const isActiveRoute = (path) => {
+    if (path === '/admin') {
+      return location.pathname === '/admin';
+    }
+    return location.pathname.startsWith(path);
   };
 
   return (
-    <>
-      <Navbar bg="dark" variant="dark" expand="lg" className="mb-4">
-        <Container>
-          <Navbar.Brand>Rivaayat Admin</Navbar.Brand>
-          <Navbar.Toggle />
-          <Navbar.Collapse className="justify-content-end">
-            <Nav>
-              <Nav.Link onClick={() => navigate('/admin')}>Dashboard</Nav.Link>
-              <Nav.Link onClick={() => navigate('/admin/users')}>Users</Nav.Link>
-              <Nav.Link onClick={() => navigate('/admin/products')}>Products</Nav.Link>
-              <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
-            </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
+    <div className="admin-layout">
+      {/* Enhanced Sidebar */}
+      <div className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
+        <div className="sidebar-header">
+          <div className="brand">
+            <FaCrown className="brand-icon" />
+            <span className="brand-text">Rivaayat Admin</span>
+          </div>
+          <button 
+            className="sidebar-toggle"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <FaTimes />
+          </button>
+        </div>
 
-      <Container fluid>{children}</Container>
-    </>
+        <div className="sidebar-content">
+          <nav className="sidebar-nav">
+            {navigationItems.map((item, index) => (
+              <div key={index} className="nav-item-wrapper">
+                <button
+                  className={`nav-item ${isActiveRoute(item.path) ? 'active' : ''}`}
+                  onClick={() => {
+                    navigate(item.path);
+                    setSidebarOpen(false);
+                  }}
+                >
+                  <span className="nav-icon">{item.icon}</span>
+                  <span className="nav-text">{item.title}</span>
+                  {item.badge && (
+                    <Badge bg="danger" className="nav-badge">
+                      {item.badge}
+                    </Badge>
+                  )}
+                </button>
+              </div>
+            ))}
+          </nav>
+        </div>
+
+        <div className="sidebar-footer">
+          <div className="user-info">
+            <div className="user-avatar">
+              <FaUser />
+            </div>
+            <div className="user-details">
+              <div className="user-name">
+                {userDetails?.name || 'Admin User'}
+              </div>
+              <div className="user-role">Administrator</div>
+            </div>
+          </div>
+          <button className="logout-btn" onClick={handleLogout}>
+            <FaSignOutAlt />
+            Logout
+          </button>
+        </div>
+      </div>
+
+      {/* Enhanced Main Content */}
+      <div className="admin-main">
+        {/* Enhanced Top Navigation */}
+        <div className="admin-top-nav">
+          <div className="nav-left">
+            <button 
+              className="sidebar-toggle-btn"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <FaBars />
+            </button>
+            <div className="breadcrumb">
+              {navigationItems.find(item => isActiveRoute(item.path))?.title || 'Dashboard'}
+            </div>
+          </div>
+
+          <div className="nav-right">
+            <div className="nav-actions">
+              <button className="notification-btn">
+                <FaBell />
+                <Badge bg="danger" className="notification-badge">
+                  3
+                </Badge>
+              </button>
+              
+              <Dropdown className="user-dropdown">
+                <Dropdown.Toggle as="div" className="user-toggle">
+                  <div className="user-avatar-small">
+                    <FaUser />
+                  </div>
+                  <span className="user-name-small">
+                    {userDetails?.name || 'Admin'}
+                  </span>
+                  <FaChevronDown className="dropdown-arrow" />
+                </Dropdown.Toggle>
+                
+                <Dropdown.Menu className="user-dropdown-menu">
+                  <Dropdown.Item onClick={() => navigate('/admin/profile')}>
+                    <FaUser className="me-2" />
+                    Profile
+                  </Dropdown.Item>
+                  <Dropdown.Item onClick={() => navigate('/admin/settings')}>
+                    <FaCog className="me-2" />
+                    Settings
+                  </Dropdown.Item>
+                  <Dropdown.Divider />
+                  <Dropdown.Item onClick={handleLogout}>
+                    <FaSignOutAlt className="me-2" />
+                    Logout
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            </div>
+          </div>
+        </div>
+
+        {/* Enhanced Content Area */}
+        <div className="admin-content">
+          {children}
+        </div>
+      </div>
+
+      {/* Sidebar Overlay for Mobile */}
+      {sidebarOpen && (
+        <div 
+          className="sidebar-overlay"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+    </div>
   );
 };
 

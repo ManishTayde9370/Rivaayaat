@@ -4,6 +4,7 @@ const Order = require('../model/Order');
 require('dotenv').config();
 const User = require('../model/Users');
 const sendOrderConfirmationEmail = require('../utils/sendOrderConfirmationEmail');
+const Product = require('../model/Product');
 
 // ✅ Initialize Razorpay instance
 const razorpay = new Razorpay({
@@ -102,44 +103,36 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
       });
     }
 
+    // 🛑 Stock validation before placing order
+    const stockValidationResults = [];
+    for (const item of cartItems) {
+      const productId = item.productId || item._id;
+      const product = await Product.findById(productId);
+      if (!product) {
+        return res.status(404).json({ success: false, message: `Product not found: ${productId}` });
+      }
+      if (product.stock < item.quantity) {
+        return res.status(400).json({ success: false, message: `Insufficient stock for ${product.name}. Only ${product.stock} left.` });
+      }
+      stockValidationResults.push({ product, item });
+    }
+
     // 📦 Prepare order items
-    // const formattedItems = cartItems.map(item => ({
-    //   product: item.product, // must be ObjectId
-    //   quantity: item.quantity,
-    //   price: item.price,
-    // }));
-    console.log("🧾 Incoming cart items:", cartItems);
+    const formattedItems = cartItems.map((item, index) => {
+      if (!item.productId && !item._id) {
+        console.warn(`❌ Item at index ${index} is missing productId/_id:`, item);
+      }
 
-const formattedItems = cartItems.map((item, index) => {
-  if (!item.productId && !item._id) {
-    console.warn(`❌ Item at index ${index} is missing productId/_id:`, item);
-  }
-
-  return {
-    productId: item.productId || item._id, // Ensure productId is always present
-    name: item.name,
-    price: item.price,
-    quantity: item.quantity,
-    image: item.image || '',
-  };
-});
-
-
+      return {
+        productId: item.productId || item._id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image || '',
+      };
+    });
 
     // 🧾 Create and save order
-    // const newOrder = new Order({
-    //   user: req.user._id.toString(),
-    //   items: formattedItems,
-    //   total: calculatedTotal,
-    //   amountPaid: calculatedTotal,
-    //   paymentId: razorpay_payment_id,
-    //   razorpayOrderId: razorpay_order_id,
-    //   shippingAddress,
-    //   status: 'Processing', // Must match enum in your Order schema
-    //   paymentStatus: 'Verified', // Must match enum
-    // });
-    console.log('✅ Formatted Items:', formattedItems);
-
     const newOrder = new Order({
       user: req.user._id.toString(),
       items: formattedItems,
@@ -155,40 +148,229 @@ const formattedItems = cartItems.map((item, index) => {
       status: 'Processing',
     });
 
-
     await newOrder.save();
 
-    // Decrement product stock for each item
-    for (const item of formattedItems) {
-      await require('../model/Product').findByIdAndUpdate(
-        item.productId,
-        { $inc: { stock: -item.quantity } },
-        { new: false }
-      );
+    // 📉 Decrement product stock for each item
+    for (const { product, item } of stockValidationResults) {
+      product.stock -= item.quantity;
+      await product.save();
     }
 
-    // Send invoice email to shipping address email
+    // Emit real-time event to user (only for order updates, not notifications)
+    const io = req.app.get('io');
+    const userSockets = req.app.get('userSockets');
+    const socketId = userSockets.get(req.user._id.toString());
+    
+    if (io && socketId) {
+      io.to(socketId).emit('orderUpdated', { order: newOrder });
+      // Removed duplicate notification emit - frontend handles toasts
+    }
+
+    // 📧 Send order confirmation email (optional)
     try {
-      if (shippingAddress.email) {
-        await sendOrderConfirmationEmail(shippingAddress.email, newOrder);
+      const user = await User.findById(req.user._id);
+      if (user?.email) {
+        await sendOrderConfirmationEmail(user.email, newOrder);
       }
-    } catch (emailErr) {
-      console.error('Failed to send order confirmation email:', emailErr);
+    } catch (emailError) {
+      console.warn('⚠️ Failed to send order confirmation email:', emailError.message);
     }
 
     return res.status(200).json({
       success: true,
+      message: 'Order placed successfully',
       order: newOrder,
-      message: shippingAddress.mobile
-        ? `A confirmation has been sent to your email. For your records, your payment was made with mobile number: ${shippingAddress.mobile}`
-        : 'A confirmation has been sent to your email.'
     });
+
   } catch (error) {
-    console.error('🔴 Verification or order placement error:', error);
+    console.error('❌ Order placement error:', error);
     return res.status(500).json({
       success: false,
-      message:
-        error?.message || 'Server error during payment verification or order placement',
+      message: 'Failed to place order. Please try again.',
+      error: error.message,
+    });
+  }
+};
+
+// ✅ Get all orders for the logged-in user
+exports.getUserOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
+    return res.status(200).json({ success: true, orders });
+  } catch (error) {
+    console.error('❌ Error fetching user orders:', error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch orders' });
+  }
+};
+
+// ✅ Update order status (admin only)
+exports.updateOrderStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    if (!status) {
+      return res.status(400).json({ success: false, message: 'Status is required.' });
+    }
+    
+    const order = await Order.findByIdAndUpdate(id, { status }, { new: true });
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+    
+    return res.status(200).json({ success: true, message: 'Order status updated.', order });
+  } catch (error) {
+    console.error('❌ Error updating order status:', error);
+    return res.status(500).json({ success: false, message: 'Failed to update order status.' });
+  }
+};
+
+// ✅ Get all orders (admin only)
+exports.getAllOrders = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    
+    // ✅ Validate pagination parameters
+    if (page < 1 || limit < 1 || limit > 1000) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid pagination parameters. Page must be >= 1, limit must be between 1 and 1000.' 
+      });
+    }
+    
+    const skip = (page - 1) * limit;
+
+    const filter = {};
+    if (req.query.status) filter.status = req.query.status;
+    if (req.query.month) {
+      const year = new Date().getFullYear();
+      const month = parseInt(req.query.month);
+      if (month < 0 || month > 11) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Invalid month parameter. Must be between 0 and 11.' 
+        });
+      }
+      const start = new Date(year, month, 1);
+      const end = new Date(year, month + 1, 1);
+      filter.createdAt = { $gte: start, $lt: end };
+    }
+
+    let query = Order.find(filter)
+      .populate('user', 'email name')
+      .sort({ createdAt: -1 });
+
+    query = query.skip(skip).limit(limit);
+    let orders = await query.exec();
+
+    if (req.query.email) {
+      const email = req.query.email.toLowerCase();
+      orders = orders.filter(o =>
+        (o.user?.email && o.user.email.toLowerCase().includes(email)) ||
+        (o.shippingAddress?.email && o.shippingAddress.email.toLowerCase().includes(email))
+      );
+    }
+
+    const total = await Order.countDocuments(filter);
+
+    return res.status(200).json({
+      success: true,
+      orders,
+      total,
+      page,
+      limit,
+      pages: Math.ceil(total / limit)
+    });
+  } catch (error) {
+    console.error('❌ Error fetching all orders:', error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch orders.' });
+  }
+};
+
+// ✅ Get recent orders (admin only)
+exports.getRecentOrders = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 5;
+    
+    if (limit < 1 || limit > 50) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid limit parameter. Must be between 1 and 50.' 
+      });
+    }
+
+    const orders = await Order.find()
+      .populate('user', 'email name')
+      .sort({ createdAt: -1 })
+      .limit(limit);
+
+    return res.status(200).json({
+      success: true,
+      orders
+    });
+  } catch (error) {
+    console.error('❌ Error fetching recent orders:', error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch recent orders.' });
+  }
+};
+
+// ✅ Get order analytics (admin only)
+exports.getOrderAnalytics = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    
+    const match = {};
+    if (startDate || endDate) {
+      match.createdAt = {};
+      if (startDate) match.createdAt.$gte = new Date(startDate);
+      if (endDate) match.createdAt.$lte = new Date(endDate);
+    }
+
+    const analytics = await Order.aggregate([
+      { $match: match },
+      {
+        $group: {
+          _id: null,
+          totalOrders: { $sum: 1 },
+          totalRevenue: { $sum: { $ifNull: ['$amountPaid', 0] } },
+          averageOrderValue: { $avg: { $ifNull: ['$amountPaid', 0] } },
+          pendingOrders: {
+            $sum: { $cond: [{ $eq: ['$status', 'Pending'] }, 1, 0] }
+          },
+          processingOrders: {
+            $sum: { $cond: [{ $eq: ['$status', 'Processing'] }, 1, 0] }
+          },
+          deliveredOrders: {
+            $sum: { $cond: [{ $eq: ['$status', 'Delivered'] }, 1, 0] }
+          },
+          cancelledOrders: {
+            $sum: { $cond: [{ $eq: ['$status', 'Cancelled'] }, 1, 0] }
+          }
+        }
+      }
+    ]);
+
+    const result = analytics[0] || {
+      totalOrders: 0,
+      totalRevenue: 0,
+      averageOrderValue: 0,
+      pendingOrders: 0,
+      processingOrders: 0,
+      deliveredOrders: 0,
+      cancelledOrders: 0
+    };
+
+    res.json({
+      success: true,
+      analytics: result
+    });
+  } catch (error) {
+    console.error('❌ Order analytics error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch order analytics',
+      error: error.message
     });
   }
 };
