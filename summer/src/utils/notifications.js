@@ -46,7 +46,10 @@ export const cartNotifications = {
   cleared: () => showNotification.success('✅ Cart cleared successfully'),
   loadError: () => showNotification.error('❌ Failed to load cart. Please refresh the page.'),
   saveError: () => showNotification.error('❌ Failed to save cart to server'),
-  clearError: () => showNotification.error('❌ Failed to clear cart from server')
+  clearError: () => showNotification.error('❌ Failed to clear cart from server'),
+  addError: (message = 'Failed to add item to cart') => showNotification.error(`❌ ${message}`),
+  removeError: () => showNotification.error('❌ Failed to remove item from cart'),
+  stockError: (productName, availableStock) => showNotification.warning(`⚠️ Only ${availableStock} ${productName} available in stock`)
 };
 
 // ❤️ Wishlist-specific notifications
