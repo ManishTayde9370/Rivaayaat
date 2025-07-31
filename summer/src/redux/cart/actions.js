@@ -9,10 +9,29 @@ export const CLEAR_CART = 'CLEAR_CART';
 export const SET_CART = 'SET_CART';
 export const SET_CART_LOADING = 'SET_CART_LOADING';
 
+// Helper function to validate cart item
+const validateCartItem = (item) => {
+  const requiredFields = ['name', 'price'];
+  const hasId = item._id || item.productId;
+  const hasRequiredFields = requiredFields.every(field => 
+    item[field] !== undefined && item[field] !== null && item[field] !== ''
+  );
+  
+  return hasId && hasRequiredFields && typeof item.price === 'number' && item.price >= 0;
+};
+
+// Helper function to normalize cart item
+const normalizeCartItem = (item) => ({
+  ...item,
+  productId: item.productId || item._id,
+  quantity: Math.max(1, parseInt(item.quantity) || 1),
+  price: parseFloat(item.price) || 0,
+});
+
 // Action creators
 export const addToCart = (product) => ({
   type: ADD_TO_CART,
-  payload: product,
+  payload: normalizeCartItem(product),
 });
 
 export const removeFromCart = (productId) => ({
@@ -56,7 +75,17 @@ export const fetchCartFromBackend = () => async (dispatch) => {
     const res = await axios.get(`${serverEndpoint}/api/cart`, {
       withCredentials: true,
     });
-    dispatch(setCart(res.data.items || []));
+    
+    // Validate and normalize cart items from backend
+    const validItems = (res.data.items || [])
+      .filter(validateCartItem)
+      .map(normalizeCartItem);
+    
+    if (validItems.length !== (res.data.items || []).length) {
+      console.warn('Some invalid cart items were filtered out');
+    }
+    
+    dispatch(setCart(validItems));
   } catch (err) {
     console.error('Failed to load cart:', err);
     if (err.response?.status === 401) {
@@ -64,6 +93,8 @@ export const fetchCartFromBackend = () => async (dispatch) => {
       dispatch(setCart([]));
     } else {
       cartNotifications.loadError();
+      // Set empty cart on error to prevent undefined state
+      dispatch(setCart([]));
     }
   } finally {
     dispatch(setCartLoading(false));
@@ -75,38 +106,64 @@ export const persistCartToBackend = () => async (dispatch, getState) => {
   try {
     const rawCartItems = getState().cart.items;
 
-    // 🔧 Construct items with required fields
-    const cartItems = rawCartItems.map((item) => ({
-      productId: item.productId || item._id,
-      name: item.name,
-      price: item.price,
-      quantity: item.quantity,
-    }));
+    // 🔧 Validate and construct items with required fields
+    const validCartItems = rawCartItems
+      .filter(validateCartItem)
+      .map((item) => ({
+        productId: item.productId || item._id,
+        name: item.name,
+        price: parseFloat(item.price),
+        quantity: parseInt(item.quantity),
+        image: item.image || '',
+      }));
 
-    // ❗ Validate each item before sending to backend
-    const invalidItems = cartItems.filter(
-      (item) =>
-        !item.productId ||
-        typeof item.name !== 'string' ||
-        typeof item.price !== 'number' ||
-        typeof item.quantity !== 'number'
-    );
+    if (validCartItems.length !== rawCartItems.length) {
+      console.warn('⚠️ Some invalid cart items were excluded from save');
+      // Update frontend state to match what we're saving
+      dispatch(setCart(validCartItems));
+    }
 
-    if (invalidItems.length > 0) {
-      console.warn('⚠️ Skipping save. Invalid cart items found:', invalidItems);
+    if (validCartItems.length === 0) {
+      console.log('No valid items to save');
       return;
     }
 
-    await axios.put(`${serverEndpoint}/api/cart`, { items: cartItems }, { withCredentials: true });
+    await axios.put(`${serverEndpoint}/api/cart`, { items: validCartItems }, { withCredentials: true });
   } catch (err) {
     console.error('Failed to save cart:', err);
-    cartNotifications.saveError();
+    if (err.response?.status === 401) {
+      // User not authenticated, clear cart
+      dispatch(clearCart());
+    } else {
+      cartNotifications.saveError();
+    }
   }
 };
 
 // 🛒 Add to cart with validation and persistence
 export const addToCartWithValidation = (product) => async (dispatch, getState) => {
   try {
+    // Validate product before adding
+    if (!validateCartItem(product)) {
+      console.error('Invalid product data:', product);
+      cartNotifications.addError('Invalid product data');
+      return;
+    }
+    
+    // Check current cart state for stock validation
+    const currentCart = getState().cart.items;
+    const existingItem = currentCart.find(item => 
+      (item.productId || item._id) === (product.productId || product._id)
+    );
+    
+    const newQuantity = (existingItem?.quantity || 0) + 1;
+    
+    // Basic stock check (should be validated on backend as well)
+    if (product.stock && newQuantity > product.stock) {
+      cartNotifications.stockError(product.name, product.stock);
+      return;
+    }
+    
     // Add to frontend state first
     dispatch(addToCart(product));
     
@@ -117,7 +174,21 @@ export const addToCartWithValidation = (product) => async (dispatch, getState) =
     await dispatch(persistCartToBackend());
   } catch (err) {
     console.error('Failed to add to cart:', err);
-    cartNotifications.saveError();
+    cartNotifications.addError();
+  }
+};
+
+// 🗑️ Remove from cart with persistence
+export const removeFromCartWithPersistence = (productId) => async (dispatch) => {
+  try {
+    // Remove from frontend state first
+    dispatch(removeFromCart(productId));
+    
+    // Persist to backend
+    await dispatch(persistCartToBackend());
+  } catch (err) {
+    console.error('Failed to remove from cart:', err);
+    cartNotifications.removeError();
   }
 };
 

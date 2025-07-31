@@ -5,6 +5,7 @@ require('dotenv').config();
 const User = require('../model/Users');
 const sendOrderConfirmationEmail = require('../utils/sendOrderConfirmationEmail');
 const Product = require('../model/Product');
+const mongoose = require('mongoose'); // Added for transaction
 
 // ✅ Initialize Razorpay instance
 const razorpay = new Razorpay({
@@ -45,9 +46,14 @@ exports.createOrder = async (req, res) => {
 
 // ✅ Verify Payment and Place Order
 exports.verifyPaymentAndPlaceOrder = async (req, res) => {
+  // Start a database transaction to prevent race conditions
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  
   try {
     // 👤 Make sure user is authenticated
     if (!req.user || !req.user._id) {
+      await session.abortTransaction();
       return res.status(401).json({ success: false, message: 'Access denied. Please log in.' });
     }
 
@@ -62,6 +68,7 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
 
     // 🔍 Validate cart items
     if (!Array.isArray(cartItems) || cartItems.length === 0) {
+      await session.abortTransaction();
       return res.status(400).json({ success: false, message: 'Cart is empty or missing' });
     }
 
@@ -71,6 +78,7 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
       !shippingAddress?.city ||
       !shippingAddress?.postalCode
     ) {
+      await session.abortTransaction();
       return res.status(400).json({
         success: false,
         message: 'Shipping address is incomplete',
@@ -84,6 +92,7 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
       .digest('hex');
 
     if (generatedSignature !== razorpay_signature) {
+      await session.abortTransaction();
       return res.status(400).json({
         success: false,
         message: 'Payment signature verification failed',
@@ -96,28 +105,66 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
       0
     );
 
-    if (calculatedTotal !== amount) {
+    if (Math.abs(calculatedTotal - amount) > 0.01) { // Allow for minor floating point differences
+      await session.abortTransaction();
       return res.status(400).json({
         success: false,
         message: 'Amount mismatch. Please try again.',
       });
     }
 
-    // 🛑 Stock validation before placing order
+    // 🛑 Stock validation and reservation with atomic operations
     const stockValidationResults = [];
+    const productUpdates = [];
+    
     for (const item of cartItems) {
       const productId = item.productId || item._id;
-      const product = await Product.findById(productId);
+      
+      if (!productId) {
+        await session.abortTransaction();
+        return res.status(400).json({ 
+          success: false, 
+          message: `Invalid product ID in cart item: ${item.name}` 
+        });
+      }
+      
+      // Use findOneAndUpdate with session to ensure atomic stock checking and updating
+      const product = await Product.findOneAndUpdate(
+        { 
+          _id: productId, 
+          stock: { $gte: item.quantity } // Only update if enough stock is available
+        },
+        { 
+          $inc: { stock: -item.quantity } // Decrement stock atomically
+        },
+        { 
+          session,
+          new: true // Return the updated document
+        }
+      );
+      
       if (!product) {
-        return res.status(404).json({ success: false, message: `Product not found: ${productId}` });
+        await session.abortTransaction();
+        // Check if product exists to provide better error message
+        const existingProduct = await Product.findById(productId);
+        if (!existingProduct) {
+          return res.status(404).json({ 
+            success: false, 
+            message: `Product not found: ${item.name}` 
+          });
+        } else {
+          return res.status(400).json({ 
+            success: false, 
+            message: `Insufficient stock for ${existingProduct.name}. Only ${existingProduct.stock} available.` 
+          });
+        }
       }
-      if (product.stock < item.quantity) {
-        return res.status(400).json({ success: false, message: `Insufficient stock for ${product.name}. Only ${product.stock} left.` });
-      }
+      
       stockValidationResults.push({ product, item });
+      productUpdates.push({ productId, originalStock: product.stock + item.quantity, newStock: product.stock });
     }
 
-    // 📦 Prepare order items
+    // 📦 Prepare order items with validated data
     const formattedItems = cartItems.map((item, index) => {
       if (!item.productId && !item._id) {
         console.warn(`❌ Item at index ${index} is missing productId/_id:`, item);
@@ -125,36 +172,42 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
 
       return {
         productId: item.productId || item._id,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
+        name: String(item.name).trim(),
+        price: parseFloat(item.price),
+        quantity: parseInt(item.quantity),
         image: item.image || '',
       };
     });
 
-    // 🧾 Create and save order
+    // 🧾 Create and save order with session
     const newOrder = new Order({
       user: req.user._id.toString(),
       items: formattedItems,
-      amountPaid: calculatedTotal,
+      amountPaid: parseFloat(calculatedTotal.toFixed(2)),
       paymentInfo: {
         razorpay_order_id,
         razorpay_payment_id,
         razorpay_signature,
       },
-      shippingAddress,
+      shippingAddress: {
+        address: String(shippingAddress.address).trim(),
+        city: String(shippingAddress.city).trim(),
+        state: shippingAddress.state ? String(shippingAddress.state).trim() : '',
+        postalCode: String(shippingAddress.postalCode).trim(),
+        country: shippingAddress.country || 'India',
+      },
       isPaid: true,
       paidAt: new Date(),
       status: 'Processing',
     });
 
-    await newOrder.save();
+    await newOrder.save({ session });
 
-    // 📉 Decrement product stock for each item
-    for (const { product, item } of stockValidationResults) {
-      product.stock -= item.quantity;
-      await product.save();
-    }
+    // Commit the transaction
+    await session.commitTransaction();
+
+    // Log successful order placement
+    console.log(`✅ Order placed successfully: ${newOrder._id} for user: ${req.user.email}`);
 
     // Emit real-time event to user (only for order updates, not notifications)
     const io = req.app.get('io');
@@ -163,32 +216,45 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
     
     if (io && socketId) {
       io.to(socketId).emit('orderUpdated', { order: newOrder });
-      // Removed duplicate notification emit - frontend handles toasts
     }
 
-    // 📧 Send order confirmation email (optional)
-    try {
-      const user = await User.findById(req.user._id);
-      if (user?.email) {
-        await sendOrderConfirmationEmail(user.email, newOrder);
+    // 📧 Send order confirmation email (optional, don't let this fail the order)
+    setImmediate(async () => {
+      try {
+        const user = await User.findById(req.user._id);
+        if (user?.email) {
+          await sendOrderConfirmationEmail(user.email, newOrder);
+        }
+      } catch (emailError) {
+        console.warn('⚠️ Failed to send order confirmation email:', emailError.message);
       }
-    } catch (emailError) {
-      console.warn('⚠️ Failed to send order confirmation email:', emailError.message);
-    }
+    });
 
     return res.status(200).json({
       success: true,
       message: 'Order placed successfully',
-      order: newOrder,
+      order: {
+        _id: newOrder._id,
+        status: newOrder.status,
+        amountPaid: newOrder.amountPaid,
+        items: newOrder.items,
+        createdAt: newOrder.createdAt,
+      },
     });
 
   } catch (error) {
+    // Rollback transaction on any error
+    await session.abortTransaction();
     console.error('❌ Order placement error:', error);
+    
     return res.status(500).json({
       success: false,
       message: 'Failed to place order. Please try again.',
-      error: error.message,
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
+  } finally {
+    // End session
+    session.endSession();
   }
 };
 

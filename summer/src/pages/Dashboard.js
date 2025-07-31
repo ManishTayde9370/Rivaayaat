@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { FaUser, FaEnvelope, FaPhone, FaEdit, FaSignOutAlt, FaBoxOpen, FaHeart } from 'react-icons/fa';
@@ -7,6 +7,7 @@ import { SET_USER } from '../redux/user/actions';
 import { fetchWishlist } from '../redux/wishlist/actions';
 import LoadingBar from '../components/LoadingBar';
 import WishlistItem from '../components/WishlistItem';
+import { authNotifications } from '../utils/notifications';
 
 const Dashboard = ({ onLogout }) => {
   const userDetails = useSelector(state => state.user);
@@ -14,6 +15,7 @@ const Dashboard = ({ onLogout }) => {
   const wishlistLoading = useSelector(state => state.wishlist.loading);
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError] = useState(null);
   const [edit, setEdit] = useState(false);
   const [profile, setProfile] = useState({
     name: userDetails?.name || '',
@@ -22,52 +24,291 @@ const Dashboard = ({ onLogout }) => {
   });
   const [profileMsg, setProfileMsg] = useState(null);
   const [profileError, setProfileError] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(false);
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [dataLoaded, setDataLoaded] = useState(false);
   const dispatch = useDispatch();
 
+  // Memoize profile data to prevent unnecessary re-renders
+  const profileData = useMemo(() => ({
+    name: userDetails?.name || '',
+    email: userDetails?.email || '',
+    phone: userDetails?.phone || ''
+  }), [userDetails?.name, userDetails?.email, userDetails?.phone]);
+
+  // Update profile state when user details change
   useEffect(() => {
+    if (!edit) { // Only update when not editing to prevent overwriting user input
+      setProfile(profileData);
+    }
+  }, [profileData, edit]);
+
+  // Fetch orders with improved error handling
+  const fetchOrders = useCallback(async () => {
+    if (!userDetails?._id || ordersLoading) return;
+    
+    setOrdersLoading(true);
+    setOrdersError(null);
+    
+    try {
+      const response = await axios.get(`/api/orders?userId=${userDetails._id}`);
+      setOrders(response.data.orders || []);
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+      setOrdersError(error.response?.data?.message || 'Failed to load orders');
+      setOrders([]); // Set empty array to prevent undefined state
+    } finally {
+      setOrdersLoading(false);
+    }
+  }, [userDetails?._id, ordersLoading]);
+
+  // Fetch wishlist with improved error handling
+  const fetchWishlistData = useCallback(async () => {
     if (!userDetails?._id) return;
     
-    // Fetch orders
-    setOrdersLoading(true);
-    axios.get(`/api/orders?userId=${userDetails._id}`)
-      .then(res => setOrders(res.data.orders || []))
-      .catch(() => setOrders([]))
-      .finally(() => setOrdersLoading(false));
-    
-    // Fetch wishlist
-    dispatch(fetchWishlist());
-  }, [userDetails, dispatch]);
+    try {
+      await dispatch(fetchWishlist());
+    } catch (error) {
+      console.error('Failed to fetch wishlist:', error);
+    }
+  }, [userDetails?._id, dispatch]);
 
-  const handleChange = e => setProfile({ ...profile, [e.target.name]: e.target.value });
+  // Initial data load - only once when component mounts
+  useEffect(() => {
+    if (!userDetails?._id || dataLoaded) return;
+    
+    const loadData = async () => {
+      await Promise.all([
+        fetchOrders(),
+        fetchWishlistData()
+      ]);
+      setDataLoaded(true);
+    };
+    
+    loadData();
+  }, [userDetails?._id, dataLoaded, fetchOrders, fetchWishlistData]);
+
+  const handleChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setProfile(prev => ({ ...prev, [name]: value }));
+  }, []);
   
-  const handleEdit = async e => {
+  const handleEdit = useCallback(async (e) => {
     e.preventDefault();
+    if (profileLoading) return;
+    
     setProfileMsg(null);
     setProfileError(null);
+    setProfileLoading(true);
+    
     try {
-      const res = await axios.patch('/api/auth/me', profile, { withCredentials: true });
-      setProfileMsg(res.data.message || 'Profile updated');
-      setEdit(false);
-      if (res.data.user) {
-        setProfile(res.data.user);
-        dispatch({ type: SET_USER, payload: { ...userDetails, ...res.data.user } });
+      const response = await axios.patch('/api/auth/me', profile, { withCredentials: true });
+      
+      if (response.data.success) {
+        setProfileMsg(response.data.message || 'Profile updated successfully');
+        setEdit(false);
+        authNotifications.profileUpdated();
+        
+        if (response.data.user) {
+          setProfile(response.data.user);
+          dispatch({ type: SET_USER, payload: { ...userDetails, ...response.data.user } });
+        }
+      } else {
+        throw new Error(response.data.message || 'Update failed');
       }
-    } catch (err) {
-      setProfileError(err.response?.data?.message || 'Failed to update profile');
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to update profile';
+      setProfileError(errorMessage);
+      authNotifications.profileError(errorMessage);
+    } finally {
+      setProfileLoading(false);
     }
-  };
+  }, [profile, profileLoading, userDetails, dispatch]);
 
-  const handleShowOrder = (order) => {
+  const handleShowOrder = useCallback((order) => {
     setSelectedOrder(order);
     setShowOrderModal(true);
-  };
+  }, []);
   
-  const handleCloseOrder = () => {
+  const handleCloseOrder = useCallback(() => {
     setShowOrderModal(false);
     setSelectedOrder(null);
-  };
+  }, []);
+
+  const handleCancelEdit = useCallback(() => {
+    setEdit(false);
+    setProfile(profileData); // Reset to original data
+    setProfileMsg(null);
+    setProfileError(null);
+  }, [profileData]);
+
+  // Retry functions for error states
+  const retryOrders = useCallback(() => {
+    setOrdersError(null);
+    fetchOrders();
+  }, [fetchOrders]);
+
+  // Memoized components to prevent unnecessary re-renders
+  const ProfileSection = useMemo(() => (
+    <div className="col-md-4">
+      <div className="rivaayat-card h-100">
+        <div className="d-flex align-items-center mb-3">
+          <FaUser size={28} style={{ color: 'var(--accent-color)', marginRight: 10 }} />
+          <h5 className="mb-0" style={{ fontWeight: 600, color: 'var(--primary-color)' }}>Profile</h5>
+        </div>
+        {edit ? (
+          <form onSubmit={handleEdit}>
+            <div className="mb-2">
+              <label>Name</label>
+              <input 
+                className="form-control" 
+                name="name" 
+                value={profile.name} 
+                onChange={handleChange}
+                disabled={profileLoading}
+                required
+              />
+            </div>
+            <div className="mb-2">
+              <label>Email</label>
+              <input 
+                className="form-control" 
+                name="email" 
+                type="email"
+                value={profile.email} 
+                onChange={handleChange}
+                disabled={profileLoading}
+                required
+              />
+            </div>
+            <div className="mb-3">
+              <label>Phone</label>
+              <input 
+                className="form-control" 
+                name="phone" 
+                value={profile.phone} 
+                onChange={handleChange}
+                disabled={profileLoading}
+              />
+            </div>
+            <div className="d-flex gap-2">
+              <button 
+                type="submit" 
+                className="btn btn-success btn-sm"
+                disabled={profileLoading}
+              >
+                {profileLoading ? 'Saving...' : 'Save'}
+              </button>
+              <button 
+                type="button" 
+                className="btn btn-secondary btn-sm"
+                onClick={handleCancelEdit}
+                disabled={profileLoading}
+              >
+                Cancel
+              </button>
+            </div>
+            {profileError && <div className="alert alert-danger mt-2 p-2">{profileError}</div>}
+            {profileMsg && <div className="alert alert-success mt-2 p-2">{profileMsg}</div>}
+          </form>
+        ) : (
+          <>
+            <div className="mb-2 d-flex align-items-center">
+              <FaUser className="me-2" style={{ color: 'var(--accent-color)' }} />
+              <span>{userDetails?.name}</span>
+            </div>
+            <div className="mb-2 d-flex align-items-center">
+              <FaEnvelope className="me-2" style={{ color: 'var(--accent-color)' }} />
+              <span>{userDetails?.email}</span>
+            </div>
+            <div className="mb-3 d-flex align-items-center">
+              <FaPhone className="me-2" style={{ color: 'var(--accent-color)' }} />
+              <span>{userDetails?.phone || 'Not provided'}</span>
+            </div>
+            <button className="rivaayat-btn btn-sm d-flex align-items-center" onClick={() => setEdit(true)}>
+              <FaEdit className="me-2" /> Edit Profile
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  ), [edit, profile, handleChange, handleEdit, handleCancelEdit, profileLoading, profileError, profileMsg, userDetails]);
+
+  const OrdersSection = useMemo(() => (
+    <div className="col-md-4">
+      <div className="rivaayat-card h-100">
+        <div className="d-flex align-items-center justify-content-between mb-3">
+          <div className="d-flex align-items-center">
+            <FaBoxOpen size={28} style={{ color: 'var(--accent-color)', marginRight: 10 }} />
+            <h5 className="mb-0" style={{ fontWeight: 600, color: 'var(--primary-color)' }}>Recent Orders</h5>
+          </div>
+          {ordersError && (
+            <button className="btn btn-sm btn-outline-primary" onClick={retryOrders}>
+              Retry
+            </button>
+          )}
+        </div>
+        {ordersLoading ? (
+          <LoadingBar />
+        ) : ordersError ? (
+          <div className="text-center">
+            <p className="text-danger mb-2">{ordersError}</p>
+            <button className="btn btn-sm btn-primary" onClick={retryOrders}>
+              Try Again
+            </button>
+          </div>
+        ) : orders.length === 0 ? (
+          <p className="text-muted">No orders yet</p>
+        ) : (
+          <div className="orders-list" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+            {orders.slice(0, 5).map(order => (
+              <div key={order._id} className="border-bottom pb-2 mb-2 cursor-pointer" onClick={() => handleShowOrder(order)}>
+                <div className="d-flex justify-content-between">
+                  <small className="fw-bold">Order #{order._id.slice(-6)}</small>
+                  <small className="text-muted">{new Date(order.createdAt).toLocaleDateString()}</small>
+                </div>
+                <div className="d-flex justify-content-between">
+                  <small>₹{order.amountPaid}</small>
+                  <small className={`badge ${order.status === 'Delivered' ? 'bg-success' : order.status === 'Processing' ? 'bg-warning' : 'bg-info'}`}>
+                    {order.status}
+                  </small>
+                </div>
+              </div>
+            ))}
+            {orders.length > 5 && (
+              <small className="text-muted">+{orders.length - 5} more orders</small>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  ), [orders, ordersLoading, ordersError, handleShowOrder, retryOrders]);
+
+  const WishlistSection = useMemo(() => (
+    <div className="col-md-4">
+      <div className="rivaayat-card h-100">
+        <div className="d-flex align-items-center mb-3">
+          <FaHeart size={28} style={{ color: 'var(--accent-color)', marginRight: 10 }} />
+          <h5 className="mb-0" style={{ fontWeight: 600, color: 'var(--primary-color)' }}>Wishlist</h5>
+        </div>
+        {wishlistLoading ? (
+          <LoadingBar />
+        ) : wishlist.length === 0 ? (
+          <p className="text-muted">No items in wishlist</p>
+        ) : (
+          <div className="wishlist-preview" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+            {wishlist.slice(0, 3).map(item => (
+              <WishlistItem key={item._id || item.productId} item={item} />
+            ))}
+            {wishlist.length > 3 && (
+              <small className="text-muted">+{wishlist.length - 3} more items</small>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  ), [wishlist, wishlistLoading]);
 
   return (
     <div className="container py-5">
@@ -81,117 +322,11 @@ const Dashboard = ({ onLogout }) => {
       </div>
       
       <div className="row g-4 mb-4">
-        <div className="col-md-4">
-          <div className="rivaayat-card h-100">
-            <div className="d-flex align-items-center mb-3">
-              <FaUser size={28} style={{ color: 'var(--accent-color)', marginRight: 10 }} />
-              <h5 className="mb-0" style={{ fontWeight: 600, color: 'var(--primary-color)' }}>Profile</h5>
-            </div>
-            {edit ? (
-              <form onSubmit={handleEdit}>
-                <div className="mb-2">
-                  <label>Name</label>
-                  <input className="form-control" name="name" value={profile.name} onChange={handleChange} />
-                </div>
-                <div className="mb-2">
-                  <label>Email</label>
-                  <input className="form-control" name="email" value={profile.email} onChange={handleChange} />
-                </div>
-                <div className="mb-2">
-                  <label>Phone</label>
-                  <input className="form-control" name="phone" value={profile.phone} onChange={handleChange} />
-                </div>
-                <button className="rivaayat-btn btn-sm mt-2" type="submit" aria-label="Save Profile" tabIndex={0}>Save</button>
-                {profileMsg && <div className="alert alert-success mt-2">{profileMsg}</div>}
-                {profileError && <div className="alert alert-danger mt-2">{profileError}</div>}
-              </form>
-            ) : (
-              <>
-                <p className="mb-2"><FaUser className="me-2" /> <strong>Name:</strong> {profile.name || 'N/A'}</p>
-                <p className="mb-2"><FaEnvelope className="me-2" /> <strong>Email:</strong> {profile.email || 'N/A'}</p>
-                <p className="mb-2"><FaPhone className="me-2" /> <strong>Phone:</strong> {profile.phone || 'N/A'}</p>
-                <button className="rivaayat-btn btn-sm mt-2" style={{ background: 'var(--secondary-color)', color: 'var(--primary-color)' }} onClick={() => setEdit(true)} aria-label="Edit Profile" tabIndex={0}><FaEdit className="me-1" /> Edit</button>
-                {profileMsg && <div className="alert alert-success mt-2">{profileMsg}</div>}
-                {profileError && <div className="alert alert-danger mt-2">{profileError}</div>}
-              </>
-            )}
-          </div>
-        </div>
-        
-        <div className="col-md-8">
-          <div className="rivaayat-card h-100">
-            <div className="d-flex align-items-center mb-3">
-              <FaBoxOpen size={26} style={{ color: 'var(--accent-color)', marginRight: 10 }} />
-              <h5 className="mb-0" style={{ fontWeight: 600, color: 'var(--primary-color)' }}>Account Settings</h5>
-            </div>
-            <p>Update your password, address, and preferences here. <span className="text-muted">(Feature coming soon!)</span></p>
-          </div>
-        </div>
+        {ProfileSection}
+        {OrdersSection}
+        {WishlistSection}
       </div>
       
-      <div className="row g-4 mb-4">
-        <div className="col-md-7">
-          <div className="rivaayat-card h-100">
-            <div className="d-flex align-items-center mb-3">
-              <FaBoxOpen size={24} style={{ color: 'var(--accent-color)', marginRight: 10 }} />
-              <h5 className="mb-0" style={{ fontWeight: 600, color: 'var(--primary-color)' }}>Order History</h5>
-            </div>
-            <div className="table-responsive">
-              <table className="table table-hover">
-                <thead>
-                  <tr>
-                    <th>Order ID</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Amount</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {ordersLoading ? (
-                    <tr><td colSpan={5} className="text-center"><LoadingBar /></td></tr>
-                  ) : orders.length === 0 ? (
-                    <tr><td colSpan={5} className="text-center">No orders found.</td></tr>
-                  ) : orders.map(o => (
-                    <tr key={o._id || o.id}>
-                      <td>{o._id || o.id}</td>
-                      <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString() : o.date}</td>
-                      <td><span className="badge bg-success" style={{ fontSize: '1em' }}>{o.status || o.orderStatus}</span></td>
-                      <td>₹{o.amountPaid || o.amount}</td>
-                      <td>
-                        <button className="btn btn-outline-primary btn-sm" onClick={() => handleShowOrder(o)} aria-label="View Order Details">View Details</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-        
-        <div className="col-md-5">
-          <div className="rivaayat-card h-100">
-            <div className="d-flex align-items-center mb-3">
-              <FaHeart size={22} style={{ color: 'var(--accent-color)', marginRight: 10 }} />
-              <h5 className="mb-0" style={{ fontWeight: 600, color: 'var(--primary-color)' }}>Wishlist</h5>
-            </div>
-            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-              {wishlistLoading ? (
-                <div className="text-center py-3">
-                  <LoadingBar />
-                </div>
-              ) : wishlist.length === 0 ? (
-                <p className="text-muted text-center py-3">No items in wishlist.</p>
-              ) : (
-                wishlist.map((item, i) => (
-                  <WishlistItem key={item._id || i} item={item} />
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Order Details Modal */}
       <Modal show={showOrderModal} onHide={handleCloseOrder} size="lg">
         <Modal.Header closeButton>
@@ -200,21 +335,49 @@ const Dashboard = ({ onLogout }) => {
         <Modal.Body>
           {selectedOrder && (
             <div>
-              <p><strong>Order ID:</strong> {selectedOrder._id || selectedOrder.id}</p>
-              <p><strong>Date:</strong> {selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleDateString() : selectedOrder.date}</p>
-              <p><strong>Status:</strong> {selectedOrder.status || selectedOrder.orderStatus}</p>
-              <p><strong>Amount:</strong> ₹{selectedOrder.amountPaid || selectedOrder.amount}</p>
-              {selectedOrder.items && (
-                <div>
-                  <h6>Items:</h6>
-                  <ul>
-                    {selectedOrder.items.map((item, index) => (
-                      <li key={index}>
-                        {item.name} - Qty: {item.quantity} - ₹{item.price}
-                      </li>
-                    ))}
-                  </ul>
+              <div className="row mb-3">
+                <div className="col-md-6">
+                  <strong>Order ID:</strong> {selectedOrder._id}
                 </div>
+                <div className="col-md-6">
+                  <strong>Date:</strong> {new Date(selectedOrder.createdAt).toLocaleDateString()}
+                </div>
+              </div>
+              <div className="row mb-3">
+                <div className="col-md-6">
+                  <strong>Status:</strong> 
+                  <span className={`badge ms-2 ${selectedOrder.status === 'Delivered' ? 'bg-success' : selectedOrder.status === 'Processing' ? 'bg-warning' : 'bg-info'}`}>
+                    {selectedOrder.status}
+                  </span>
+                </div>
+                <div className="col-md-6">
+                  <strong>Total:</strong> ₹{selectedOrder.amountPaid}
+                </div>
+              </div>
+              <hr />
+              <h6>Items:</h6>
+              {selectedOrder.items?.map((item, index) => (
+                <div key={index} className="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+                  <div>
+                    <div className="fw-bold">{item.name}</div>
+                    <small className="text-muted">Quantity: {item.quantity}</small>
+                  </div>
+                  <div className="text-end">
+                    <div>₹{item.price}</div>
+                    <small className="text-muted">₹{item.price * item.quantity} total</small>
+                  </div>
+                </div>
+              ))}
+              {selectedOrder.shippingAddress && (
+                <>
+                  <hr />
+                  <h6>Shipping Address:</h6>
+                  <p className="mb-0">
+                    {selectedOrder.shippingAddress.address}<br />
+                    {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state} {selectedOrder.shippingAddress.postalCode}<br />
+                    {selectedOrder.shippingAddress.country || 'India'}
+                  </p>
+                </>
               )}
             </div>
           )}
