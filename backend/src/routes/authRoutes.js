@@ -3,7 +3,8 @@ const { body } = require('express-validator');
 const authController = require('../controller/authController');
 const rateLimit = require('express-rate-limit');
 const { requireAuth } = require('../middleware/authMiddleware');
-const { validationResult } = require('express-validator');
+const { validationResult, body } = require('express-validator');
+const User = require('../model/Users'); // Added missing import for User model
 
 const router = express.Router();
 
@@ -88,25 +89,122 @@ router.post('/logout', authController.logout);
 router.get('/is-user-logged-in', authController.isUserLoggedIn);
 
 // ✅ Update user profile
-router.patch('/me', requireAuth, profileUpdateValidator, async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(422).json({
-      success: false,
-      message: 'Validation failed',
-      errors: errors.array(),
-    });
-  }
+router.patch('/me', 
+  requireAuth,
+  [
+    body('name')
+      .trim()
+      .isLength({ min: 2, max: 50 })
+      .withMessage('Name must be between 2 and 50 characters')
+      .matches(/^[a-zA-Z\s]+$/)
+      .withMessage('Name can only contain letters and spaces'),
+    body('email')
+      .isEmail()
+      .normalizeEmail()
+      .withMessage('Please provide a valid email address'),
+    body('phone')
+      .optional({ nullable: true, checkFalsy: true })
+      .isMobilePhone('any')
+      .withMessage('Please provide a valid phone number'),
+  ],
+  async (req, res) => {
+    try {
+      // Check for validation errors
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          errors: errors.array(),
+        });
+      }
 
-  try {
-    await authController.updateProfile(req, res);
-  } catch (error) {
-    console.error('Profile update error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update profile',
-    });
+      const { name, email, phone } = req.body;
+      const userId = req.user._id;
+
+      // Check if email is already taken by another user
+      if (email !== req.user.email) {
+        const existingUser = await User.findOne({ 
+          email: email,
+          _id: { $ne: userId } 
+        });
+        
+        if (existingUser) {
+          return res.status(409).json({
+            success: false,
+            message: 'Email is already registered to another account',
+          });
+        }
+      }
+
+      // Check if phone is already taken by another user
+      if (phone && phone !== req.user.phone) {
+        const existingPhone = await User.findOne({ 
+          phone: phone,
+          _id: { $ne: userId } 
+        });
+        
+        if (existingPhone) {
+          return res.status(409).json({
+            success: false,
+            message: 'Phone number is already registered to another account',
+          });
+        }
+      }
+
+      // Update user profile
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { 
+          name: name.trim(),
+          email: email.toLowerCase(),
+          phone: phone || null,
+        },
+        { 
+          new: true, 
+          runValidators: true,
+          select: '-password' // Don't return password
+        }
+      );
+
+      if (!updatedUser) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found',
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Profile updated successfully',
+        user: {
+          _id: updatedUser._id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          phone: updatedUser.phone,
+          isAdmin: updatedUser.isAdmin,
+        },
+      });
+
+    } catch (error) {
+      console.error('Profile update error:', error);
+      
+      // Handle specific MongoDB errors
+      if (error.code === 11000) {
+        const field = Object.keys(error.keyPattern)[0];
+        return res.status(409).json({
+          success: false,
+          message: `${field} is already taken`,
+        });
+      }
+      
+      res.status(500).json({
+        success: false,
+        message: 'Server error while updating profile',
+        error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
+      });
+    }
   }
-});
+);
 
 module.exports = router;

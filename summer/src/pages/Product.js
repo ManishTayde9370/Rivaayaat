@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import Zoom from 'react-medium-image-zoom';
 import { useDispatch, useSelector } from 'react-redux';
-import { addToCart } from '../redux/cart/actions';
+import { addToCartWithValidation } from '../redux/cart/actions';
 import { toggleWishlist, fetchWishlist } from '../redux/wishlist/actions';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FaHeart, FaRegHeart, FaStar } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaShoppingCart, FaEye, FaFilter, FaSort } from 'react-icons/fa';
 
 import 'react-medium-image-zoom/dist/styles.css';
 import 'react-toastify/dist/ReactToastify.css';
@@ -15,278 +15,504 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import '../css/ProductPage.css';
 import LoadingBar from '../components/LoadingBar';
 import ProductFilters from '../components/ProductFilters';
-import { cartNotifications } from '../utils/notifications';
-import '../css/theme.css';
+import { cartNotifications, showNotification } from '../utils/notifications';
+
+// Debounce function for search and filter operations
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
 
 const Product = () => {
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [filtersLoading, setFiltersLoading] = useState(false);
   const [filters, setFilters] = useState({});
   const [pagination, setPagination] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [addingToCart, setAddingToCart] = useState(new Set());
+  const [retryCount, setRetryCount] = useState(0);
   
   const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
+  const userDetails = useSelector(state => state.user);
+  const wishlist = useSelector(state => state.wishlist.items) || [];
+  
   const searchResults = location.state?.searchResults;
   const searchTerm = location.state?.searchTerm;
   const notFound = location.state?.notFound;
 
-  useEffect(() => {
-    fetchProducts();
-    dispatch(fetchWishlist());
-  }, [dispatch, currentPage, filters]);
+  // Debounced filters to prevent excessive API calls
+  const debouncedFilters = useDebounce(filters, 300);
 
-  const fetchProducts = async () => {
-    setLoading(true);
+  // Memoized wishlist IDs for efficient lookup
+  const wishlistIds = useMemo(() => 
+    new Set(wishlist.map(item => item.product?._id || item.productId || item._id)),
+    [wishlist]
+  );
+
+  // Fetch products with improved error handling and caching
+  const fetchProducts = useCallback(async (page = currentPage, filterOptions = debouncedFilters, isRetry = false) => {
+    if (!isRetry) {
+      setLoading(true);
+    } else {
+      setFiltersLoading(true);
+    }
+    setError(null);
+    
     try {
       // Build query parameters
       const params = new URLSearchParams({
-        page: currentPage,
+        page,
         limit: 12,
-        ...filters
+        ...filterOptions
       });
 
-      const res = await axios.get(`http://localhost:5000/api/products?${params}`, {
+      const response = await axios.get(`http://localhost:5000/api/products?${params}`, {
         withCredentials: true,
+        timeout: 10000, // 10 second timeout
       });
-      
-      if (res.data.success) {
-        setProducts(res.data.products || []);
-        setPagination(res.data.pagination || {});
-        setError(null);
+
+      if (response.data?.success) {
+        setProducts(response.data.products || []);
+        setPagination(response.data.pagination || {});
+        setRetryCount(0); // Reset retry count on success
       } else {
-        setError('Failed to load products');
+        throw new Error(response.data?.message || 'Failed to fetch products');
       }
-    } catch (err) {
-      setError('Failed to load products. Please try again later.');
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      
+      if (error.code === 'ECONNABORTED') {
+        setError('Request timed out. Please check your connection and try again.');
+      } else if (error.response?.status === 500) {
+        setError('Server error. Our team has been notified. Please try again later.');
+      } else {
+        setError(error.response?.data?.message || error.message || 'Failed to load products');
+      }
+      
+      // Don't clear products on filter errors, only on initial load errors
+      if (!isRetry) {
+        setProducts([]);
+        setPagination({});
+      }
+    } finally {
+      setLoading(false);
+      setFiltersLoading(false);
     }
-    setLoading(false);
-  };
+  }, [currentPage, debouncedFilters]);
 
-  const handleFiltersChange = (newFilters) => {
+  // Initial load and wishlist fetch
+  useEffect(() => {
+    if (searchResults) {
+      setProducts(searchResults);
+      setLoading(false);
+    } else {
+      fetchProducts(1, debouncedFilters);
+    }
+    
+    // Only fetch wishlist if user is logged in
+    if (userDetails?.email) {
+      dispatch(fetchWishlist());
+    }
+  }, []);
+
+  // Handle filter and page changes
+  useEffect(() => {
+    if (!searchResults && debouncedFilters !== filters) {
+      setCurrentPage(1); // Reset to first page when filters change
+      fetchProducts(1, debouncedFilters, true);
+    }
+  }, [debouncedFilters, fetchProducts, searchResults]);
+
+  // Handle page changes
+  useEffect(() => {
+    if (!searchResults && currentPage > 1) {
+      fetchProducts(currentPage, debouncedFilters, true);
+    }
+  }, [currentPage, fetchProducts, searchResults]);
+
+  // Optimized add to cart function
+  const handleAddToCart = useCallback(async (product) => {
+    if (!userDetails?.email) {
+      showNotification.warning('Please log in to add items to cart');
+      navigate('/login');
+      return;
+    }
+
+    if (addingToCart.has(product._id)) {
+      return; // Prevent duplicate requests
+    }
+
+    setAddingToCart(prev => new Set(prev).add(product._id));
+    
+    try {
+      await dispatch(addToCartWithValidation(product));
+    } catch (error) {
+      console.error('Add to cart error:', error);
+    } finally {
+      setAddingToCart(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(product._id);
+        return newSet;
+      });
+    }
+  }, [dispatch, userDetails, navigate, addingToCart]);
+
+  // Optimized wishlist toggle
+  const handleWishlistToggle = useCallback(async (productId) => {
+    if (!userDetails?.email) {
+      showNotification.warning('Please log in to manage wishlist');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      await dispatch(toggleWishlist(productId));
+    } catch (error) {
+      console.error('Wishlist toggle error:', error);
+      showNotification.error('Failed to update wishlist');
+    }
+  }, [dispatch, userDetails, navigate]);
+
+  // Filter handling
+  const handleFilterChange = useCallback((newFilters) => {
     setFilters(newFilters);
-    setCurrentPage(1); // Reset to first page when filters change
-  };
+  }, []);
 
-  const handlePageChange = (page) => {
+  // Page change handling
+  const handlePageChange = useCallback((page) => {
     setCurrentPage(page);
-  };
+    // Smooth scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
-  const displayProducts = searchResults || products;
+  // Retry function for error states
+  const handleRetry = useCallback(() => {
+    setRetryCount(prev => prev + 1);
+    fetchProducts(currentPage, debouncedFilters);
+  }, [fetchProducts, currentPage, debouncedFilters]);
+
+  // Memoized product cards to prevent unnecessary re-renders
+  const ProductCard = useMemo(() => {
+    return ({ product }) => {
+      const isInWishlist = wishlistIds.has(product._id);
+      const isAddingToCartThis = addingToCart.has(product._id);
+      
+      return (
+        <div className="col-md-6 col-lg-4 mb-4" key={product._id}>
+          <div className="product-card h-100 shadow-sm">
+            <div className="product-image-container position-relative">
+              <Zoom>
+                <img
+                  src={product.images?.[0] || 'https://via.placeholder.com/300x200?text=No+Image'}
+                  alt={product.name}
+                  className="product-image"
+                  loading="lazy"
+                  onError={(e) => {
+                    e.target.src = 'https://via.placeholder.com/300x200?text=Image+Not+Found';
+                  }}
+                />
+              </Zoom>
+              
+              {/* Wishlist Button */}
+              <button
+                className="wishlist-btn position-absolute top-0 end-0 m-2 btn btn-sm"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleWishlistToggle(product._id);
+                }}
+                aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+                disabled={!userDetails?.email}
+              >
+                {isInWishlist ? (
+                  <FaHeart className="text-danger" />
+                ) : (
+                  <FaRegHeart className="text-muted" />
+                )}
+              </button>
+              
+              {/* Stock Badge */}
+              {product.stock <= 0 && (
+                <span className="position-absolute top-0 start-0 m-2 badge bg-danger">
+                  Out of Stock
+                </span>
+              )}
+              
+              {product.stock > 0 && product.stock <= 5 && (
+                <span className="position-absolute top-0 start-0 m-2 badge bg-warning">
+                  Only {product.stock} left
+                </span>
+              )}
+            </div>
+            
+            <div className="card-body d-flex flex-column">
+              <h6 className="product-title text-truncate" title={product.name}>
+                {product.name}
+              </h6>
+              
+              <p className="product-description text-muted small">
+                {product.description?.substring(0, 80)}
+                {product.description?.length > 80 && '...'}
+              </p>
+              
+              <div className="product-details">
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <span className="price fw-bold text-primary">₹{product.price}</span>
+                  {product.category && (
+                    <span className="badge bg-light text-dark">{product.category}</span>
+                  )}
+                </div>
+                
+                {product.artisanName && (
+                  <small className="text-muted">By {product.artisanName}</small>
+                )}
+              </div>
+              
+              <div className="mt-auto pt-2">
+                <div className="row g-2">
+                  <div className="col-6">
+                    <button
+                      className="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center"
+                      onClick={() => handleAddToCart(product)}
+                      disabled={product.stock <= 0 || isAddingToCartThis || !userDetails?.email}
+                    >
+                      {isAddingToCartThis ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm me-1" />
+                          Adding...
+                        </>
+                      ) : (
+                        <>
+                          <FaShoppingCart className="me-1" />
+                          Add to Cart
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <div className="col-6">
+                    <Link
+                      to={`/product/${product._id}`}
+                      className="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center"
+                    >
+                      <FaEye className="me-1" />
+                      View
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+  }, [wishlistIds, addingToCart, userDetails, handleAddToCart, handleWishlistToggle]);
+
+  // Pagination component
+  const PaginationComponent = useMemo(() => {
+    if (!pagination.totalPages || pagination.totalPages <= 1) return null;
+    
+    const pages = [];
+    const totalPages = pagination.totalPages;
+    const current = pagination.currentPage || currentPage;
+    
+    // Show first page
+    if (current > 3) {
+      pages.push(1);
+      if (current > 4) pages.push('...');
+    }
+    
+    // Show pages around current
+    for (let i = Math.max(1, current - 2); i <= Math.min(totalPages, current + 2); i++) {
+      pages.push(i);
+    }
+    
+    // Show last page
+    if (current < totalPages - 2) {
+      if (current < totalPages - 3) pages.push('...');
+      pages.push(totalPages);
+    }
+    
+    return (
+      <nav aria-label="Product pagination">
+        <ul className="pagination justify-content-center">
+          <li className={`page-item ${current === 1 ? 'disabled' : ''}`}>
+            <button
+              className="page-link"
+              onClick={() => handlePageChange(current - 1)}
+              disabled={current === 1}
+            >
+              Previous
+            </button>
+          </li>
+          
+          {pages.map((page, index) => (
+            <li key={index} className={`page-item ${page === current ? 'active' : page === '...' ? 'disabled' : ''}`}>
+              {page === '...' ? (
+                <span className="page-link">...</span>
+              ) : (
+                <button
+                  className="page-link"
+                  onClick={() => handlePageChange(page)}
+                >
+                  {page}
+                </button>
+              )}
+            </li>
+          ))}
+          
+          <li className={`page-item ${current === totalPages ? 'disabled' : ''}`}>
+            <button
+              className="page-link"
+              onClick={() => handlePageChange(current + 1)}
+              disabled={current === totalPages}
+            >
+              Next
+            </button>
+          </li>
+        </ul>
+      </nav>
+    );
+  }, [pagination, currentPage, handlePageChange]);
+
+  // Loading state
+  if (loading && products.length === 0) {
+    return (
+      <div className="container py-5">
+        <div className="text-center">
+          <LoadingBar />
+          <p className="mt-3 text-muted">Loading products...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error && products.length === 0) {
+    return (
+      <div className="container py-5">
+        <div className="text-center">
+          <div className="alert alert-danger">
+            <h5>Oops! Something went wrong</h5>
+            <p>{error}</p>
+            <button className="btn btn-primary" onClick={handleRetry}>
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container py-5 product-page-container">
-      <h2 className="cinzel text-center mb-5" style={{ color: 'var(--color-maroon)' }}>
-        {searchTerm ? `Search Results for "${searchTerm}"` : '👑 Explore Our Royal Collection'}
-      </h2>
+    <div className="container py-5">
+      {/* Search Results Header */}
+      {searchTerm && (
+        <div className="mb-4">
+          <h2>Search Results for "{searchTerm}"</h2>
+          <p className="text-muted">{products.length} products found</p>
+        </div>
+      )}
       
-      {/* Product Filters */}
-      <ProductFilters 
-        onFiltersChange={handleFiltersChange}
-        currentFilters={filters}
-      />
-
-      {/* Loading and Error States */}
-      {loading && <div className="d-flex justify-content-center my-5"><LoadingBar /></div>}
-      {error && <div className="alert alert-danger text-center" role="alert">{error}</div>}
       {notFound && (
-        <div className="alert alert-warning text-center" role="alert">
-          No products found for "{searchTerm}".
+        <div className="alert alert-info">
+          No products found for your search. Showing all products instead.
+        </div>
+      )}
+
+      {/* Filters */}
+      {!searchResults && (
+        <div className="row mb-4">
+          <div className="col-12">
+            <ProductFilters
+              onFilterChange={handleFilterChange}
+              loading={filtersLoading}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Filter Loading Indicator */}
+      {filtersLoading && (
+        <div className="text-center mb-3">
+          <div className="spinner-border spinner-border-sm text-primary" />
+          <span className="ms-2 text-muted">Applying filters...</span>
+        </div>
+      )}
+
+      {/* Error Banner (when there are existing products) */}
+      {error && products.length > 0 && (
+        <div className="alert alert-warning alert-dismissible fade show" role="alert">
+          {error}
+          <button
+            type="button"
+            className="btn-close"
+            onClick={() => setError(null)}
+            aria-label="Close"
+          />
         </div>
       )}
 
       {/* Products Grid */}
-      <div className="row justify-content-center">
-        {displayProducts.map((product, i) => (
-          <ProductCard key={product._id || i} product={product} />
-        ))}
-      </div>
-
-      {/* Pagination */}
-      {pagination.totalPages > 1 && (
-        <div className="d-flex justify-content-center mt-5">
-          <nav aria-label="Product pagination">
-            <ul className="pagination">
-              <li className={`page-item ${pagination.currentPage === 1 ? 'disabled' : ''}`}>
-                <button 
-                  className="page-link" 
-                  onClick={() => handlePageChange(pagination.currentPage - 1)}
-                  disabled={pagination.currentPage === 1}
-                >
-                  Previous
-                </button>
-              </li>
-              
-              {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(page => (
-                <li key={page} className={`page-item ${page === pagination.currentPage ? 'active' : ''}`}>
-                  <button 
-                    className="page-link" 
-                    onClick={() => handlePageChange(page)}
-                  >
-                    {page}
-                  </button>
-                </li>
-              ))}
-              
-              <li className={`page-item ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''}`}>
-                <button 
-                  className="page-link" 
-                  onClick={() => handlePageChange(pagination.currentPage + 1)}
-                  disabled={pagination.currentPage === pagination.totalPages}
-                >
-                  Next
-                </button>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      )}
-
-      {/* No Products Found */}
-      {!loading && !error && displayProducts.length === 0 && (
+      {products.length > 0 ? (
+        <>
+          <div className="row mb-4">
+            <div className="col-12">
+              <div className="d-flex justify-content-between align-items-center">
+                <p className="text-muted mb-0">
+                  Showing {products.length} of {pagination.total || products.length} products
+                </p>
+                <div className="d-flex align-items-center">
+                  <FaSort className="me-1 text-muted" />
+                  <small className="text-muted">Sorted by relevance</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="row">
+            {products.map(product => (
+              <ProductCard key={product._id} product={product} />
+            ))}
+          </div>
+          
+          {/* Pagination */}
+          <div className="row mt-4">
+            <div className="col-12">
+              {PaginationComponent}
+            </div>
+          </div>
+        </>
+      ) : (
         <div className="text-center py-5">
-          <h4 className="text-muted">No products found</h4>
-          <p className="text-muted">Try adjusting your filters or search terms.</p>
+          <div className="mb-4">
+            <FaFilter size={48} className="text-muted" />
+          </div>
+          <h4>No products found</h4>
+          <p className="text-muted">Try adjusting your filters or search terms</p>
+          {Object.keys(filters).length > 0 && (
+            <button
+              className="btn btn-outline-primary"
+              onClick={() => setFilters({})}
+            >
+              Clear Filters
+            </button>
+          )}
         </div>
       )}
-    </div>
-  );
-};
-
-const ProductCard = ({ product }) => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const [activeIndex, setActiveIndex] = useState(0);
-  const fallbackImage = '/fallback.jpg';
-  const isOutOfStock = product.stock === 0;
-  const wishlist = useSelector((state) => state.wishlist.items);
-  const isInWishlist = wishlist.some((item) => item._id === product._id);
-
-  // // Bell sound for add-to-cart
-  // const playBell = () => {
-  //   const audio = new Audio('https://cdn.pixabay.com/audio/2022/07/26/audio_124bfae5b2.mp3');
-  //   audio.play();
-  // };
-
-  const handleAddToCart = () => {
-    dispatch(addToCart({ ...product, quantity: 1 }));
-    cartNotifications.added(product.name);
-    // playBell();
-  };
-
-  const handleBuyNow = () => {
-    dispatch(addToCart({ ...product, quantity: 1 }));
-    navigate('/checkout/shipping');
-  };
-
-  const handleToggleWishlist = async () => {
-    try {
-      await dispatch(toggleWishlist(product._id));
-    } catch (err) {
-      console.error('Wishlist toggle error:', err);
-    }
-  };
-
-  return (
-    <div className="col-lg-3 col-md-4 col-sm-6 mb-4">
-      <div className="miniature-border h-100 product-card" style={{ background: 'var(--color-ivory)' }}>
-        <div className="product-image-container position-relative">
-          {product.images && product.images.length > 0 ? (
-            <Zoom>
-              <img
-                src={product.images[activeIndex] || fallbackImage}
-                className="card-img-top product-image"
-                alt={product.name}
-                onError={(e) => {
-                  e.target.src = fallbackImage;
-                }}
-                style={{ borderRadius: 12, border: '2px solid var(--color-gold)', objectFit: 'cover', height: 220 }}
-              />
-            </Zoom>
-          ) : (
-            <img
-              src={fallbackImage}
-              className="card-img-top product-image"
-              alt="Product placeholder"
-              style={{ borderRadius: 12, border: '2px solid var(--color-gold)', objectFit: 'cover', height: 220 }}
-            />
-          )}
-          {/* Image Navigation */}
-          {product.images && product.images.length > 1 && (
-            <div className="image-nav">
-              {product.images.map((_, index) => (
-                <button
-                  key={index}
-                  className={`image-nav-dot ${index === activeIndex ? 'active' : ''}`}
-                  onClick={() => setActiveIndex(index)}
-                />
-              ))}
-            </div>
-          )}
-          {/* Wishlist Button */}
-          <button
-            className="wishlist-btn position-absolute top-0 end-0 m-2"
-            onClick={handleToggleWishlist}
-            aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
-          >
-            {isInWishlist ? <FaHeart className="text-danger" /> : <FaRegHeart />}
-          </button>
-          {/* Out of Stock Badge */}
-          {isOutOfStock && (
-            <div className="position-absolute top-0 start-0 m-2">
-              <span className="badge bg-danger">Out of Stock</span>
-            </div>
-          )}
-          {/* Rating Badge */}
-          {product.averageRating > 0 && (
-            <div className="position-absolute bottom-0 start-0 m-2">
-              <span className="badge bg-warning text-dark">
-                <FaStar style={{ marginBottom: 2 }} /> {product.averageRating} ({product.numReviews})
-              </span>
-            </div>
-          )}
-        </div>
-        <div className="card-body d-flex flex-column">
-          <h5 className="cinzel product-title mb-1" style={{ color: 'var(--color-maroon)' }}>
-            <Link to={`/product/${product._id}`} className="text-decoration-none">
-              {product.name}
-            </Link>
-          </h5>
-          {product.category && (
-            <p className="card-text text-muted small mb-2 cinzel">
-              {product.category}
-            </p>
-          )}
-          <p className="card-text product-description flex-grow-1" style={{ color: 'var(--color-black)' }}>
-            {product.description?.length > 100
-              ? `${product.description.substring(0, 100)}...`
-              : product.description}
-          </p>
-          <div className="product-price mb-3 cinzel" style={{ color: 'var(--color-gold)', fontSize: '1.2rem' }}>
-            ₹{product.price}
-            {product.stock > 0 && (
-              <small className="text-muted ms-2">({product.stock} in stock)</small>
-            )}
-          </div>
-          <div className="product-actions">
-            <button
-              className="btn btn-dark btn-sm me-2 diya-flicker"
-              onClick={handleAddToCart}
-              disabled={isOutOfStock}
-            >
-              Add to Cart
-            </button>
-            <button
-              className="btn btn-outline-dark btn-sm"
-              onClick={handleBuyNow}
-              disabled={isOutOfStock}
-            >
-              Buy Now
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
