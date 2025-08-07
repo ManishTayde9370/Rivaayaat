@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import brandLogo from '../assets/brandlogo.png';
+import '../css/theme.css';
 
 function CheckoutSuccess() {
   const location = useLocation();
@@ -33,27 +34,29 @@ function CheckoutSuccess() {
 
   return (
     <div className="container py-5 text-center">
-      <h2 className="text-success">🎉 Order Placed Successfully!</h2>
-      <p className="mt-3">Thank you for shopping with Rivaayaat.</p>
-      <div className="mt-4 card p-4 shadow-sm" id="invoice-section" style={{ maxWidth: 600, margin: '0 auto', textAlign: 'left' }}>
+      <h2 className="cinzel text-success mb-3" style={{ color: 'var(--color-emerald)' }}>
+        <span role="img" aria-label="confetti">🎉</span> Order Placed Successfully!
+      </h2>
+      <p className="mt-3 cinzel" style={{ color: 'var(--color-maroon)' }}>Thank you for shopping with Rivaayaat.</p>
+      <div className="miniature-border mt-4 p-4 shadow-sm scroll-dropdown" id="invoice-section" style={{ maxWidth: 600, margin: '0 auto', textAlign: 'left', background: 'var(--color-ivory)' }}>
         <div className="d-flex align-items-center mb-3 gap-3">
           <img src={brandLogo} alt="Brand Logo" style={{ width: 60, height: 60, objectFit: 'contain' }} />
           <div>
-            <h3 className="mb-0" style={{ color: '#5e3d19', fontFamily: 'Georgia', fontWeight: 'bold' }}>Rivaayaat</h3>
-            <span style={{ color: '#888' }}>www.rivaayaat.com</span>
+            <h3 className="cinzel mb-0" style={{ color: 'var(--color-maroon)', fontWeight: 'bold' }}>Rivaayaat</h3>
+            <span style={{ color: 'var(--color-peacock)' }}>www.rivaayaat.com</span>
           </div>
         </div>
         <hr />
-        <h4>Invoice</h4>
+        <h4 className="cinzel" style={{ color: 'var(--color-gold)' }}>Invoice</h4>
         <p><strong>Order ID:</strong> {order._id}</p>
         <p><strong>Order Date:</strong> {order.createdAt ? new Date(order.createdAt).toLocaleString() : 'N/A'}</p>
-        <p><strong>Total Paid:</strong> ₹{order.amountPaid.toFixed(2)}</p>
-        <h5 className="mt-4">Shipping Address</h5>
+        <p><strong>Total Paid:</strong> <span className="cinzel" style={{ color: 'var(--color-gold)' }}>₹{order.amountPaid.toFixed(2)}</span></p>
+        <h5 className="mt-4 cinzel" style={{ color: 'var(--color-peacock)' }}>Shipping Address</h5>
         <p style={{ marginBottom: 0 }}>{order.shippingAddress?.address}, {order.shippingAddress?.city}</p>
         <p style={{ marginBottom: 0 }}>{order.shippingAddress?.state} - {order.shippingAddress?.postalCode}, {order.shippingAddress?.country}</p>
         {order.shippingAddress?.email && <p style={{ marginBottom: 0 }}><strong>Email:</strong> {order.shippingAddress.email}</p>}
         {order.shippingAddress?.mobile && <p style={{ marginBottom: 0 }}><strong>Mobile:</strong> {order.shippingAddress.mobile}</p>}
-        <h5 className="mt-4">Items</h5>
+        <h5 className="mt-4 cinzel" style={{ color: 'var(--color-maroon)' }}>Items</h5>
         <table className="table table-bordered" style={{ fontSize: 14 }}>
           <thead>
             <tr>
@@ -75,17 +78,18 @@ function CheckoutSuccess() {
           </tbody>
         </table>
         <div className="text-end mt-3">
-          <strong>Grand Total: ₹{order.amountPaid.toFixed(2)}</strong>
+          <strong className="cinzel" style={{ color: 'var(--color-gold)' }}>Grand Total: ₹{order.amountPaid.toFixed(2)}</strong>
         </div>
       </div>
-      <button className="btn btn-outline-primary mt-4" onClick={handleDownloadInvoice}>
-        Download Invoice
+      <button className="btn btn-outline-dark mt-4 scroll-dropdown" onClick={handleDownloadInvoice} style={{ fontFamily: 'Cinzel Decorative, serif', fontSize: '1.1rem', color: 'var(--color-gold)', border: '2px solid var(--color-gold)' }}>
+        <span role="img" aria-label="download">📥</span> Download Invoice
       </button>
       <button
-        className="btn btn-primary mt-4 ms-3"
+        className="btn btn-dark mt-4 ms-3 scroll-dropdown"
         onClick={() => navigate('/')}
+        style={{ fontFamily: 'Cinzel Decorative, serif', fontSize: '1.1rem', color: 'var(--color-gold)', border: '2px solid var(--color-gold)' }}
       >
-        Back to Home
+        <span role="img" aria-label="home">🏠</span> Back to Home
       </button>
     </div>
   );

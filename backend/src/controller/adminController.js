@@ -1,5 +1,6 @@
 const User = require('../model/Users');
 const Order = require('../model/Order');
+const Setting = require('../model/Setting');
 const { validationResult } = require('express-validator');
 
 // ✅ Input validation middleware
@@ -488,7 +489,10 @@ const getProductTrends = handleAsyncError(async (req, res) => {
     ]);
 
     // ✅ Populate product details
-    const productIds = trends.map(t => t._id);
+   const productIds = someArray
+  .filter(p => p && p._id)
+  .map(p => p._id.toString());
+
     const products = await require('../model/Product').find({ _id: { $in: productIds } });
     const productMap = Object.fromEntries(products.map(p => [p._id.toString(), p]));
 
@@ -517,6 +521,33 @@ const getProductTrends = handleAsyncError(async (req, res) => {
   }
 });
 
+// Get all settings
+function getAllSettings(req, res) {
+  Setting.find({})
+    .then(settings => res.json({ success: true, settings }))
+    .catch(error => {
+      console.error('❌ Get all settings error:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch settings' });
+    });
+}
+
+// Update a setting by key
+function updateSetting(req, res) {
+  const { key } = req.params;
+  const { value, description } = req.body;
+  if (!key) return res.status(400).json({ success: false, message: 'Key is required' });
+  Setting.findOneAndUpdate(
+    { key },
+    { value, description },
+    { new: true, upsert: true }
+  )
+    .then(updated => res.json({ success: true, setting: updated }))
+    .catch(error => {
+      console.error('❌ Update setting error:', error);
+      res.status(500).json({ success: false, message: 'Failed to update setting' });
+    });
+}
+
 module.exports = {
   dashboard,
   getAllUsers,
@@ -526,5 +557,8 @@ module.exports = {
   blockUser,
   getUserOrders,
   getProductTrends,
-  validateAdminInput
+  validateAdminInput,
+  getAllSettings,
+  updateSetting
 };
+

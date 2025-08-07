@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import bgImage from '../assets/bg-royal1.jpg'; // ✅ Correct import
+import bgImage from '../assets/hero-image.jpg'; // ✅ Correct import
 
 const HomePublic = () => {
   return (

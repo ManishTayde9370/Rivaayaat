@@ -14,31 +14,67 @@ const razorpay = new Razorpay({
 
 // ✅ Send Razorpay Key to frontend
 exports.getRazorpayKey = (req, res) => {
-  res.status(200).json({ key: process.env.RAZORPAY_KEY_ID });
+  try {
+    if (!process.env.RAZORPAY_KEY_ID) {
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Payment gateway not configured' 
+      });
+    }
+    res.status(200).json({ key: process.env.RAZORPAY_KEY_ID });
+  } catch (error) {
+    console.error('❌ Error getting Razorpay key:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to get payment configuration' 
+    });
+  }
 };
 
 // ✅ Create Razorpay Order
 exports.createOrder = async (req, res) => {
   const { amount } = req.body;
 
-  if (!amount || amount <= 0) {
-    return res.status(400).json({ success: false, message: 'Invalid amount' });
+  // Validate amount
+  if (!amount || typeof amount !== 'number' || amount <= 0) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Invalid amount. Must be a positive number.' 
+    });
+  }
+
+  // Check maximum order amount (safety limit)
+  const maxAmount = 100000; // ₹1,00,000
+  if (amount > maxAmount) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Order amount exceeds maximum limit' 
+    });
   }
 
   try {
     const options = {
-      amount: amount * 100, // Convert to paisa
+      amount: Math.round(amount * 100), // Convert to paisa and ensure integer
       currency: 'INR',
-      receipt: `receipt_order_${Date.now()}`,
+      receipt: `receipt_order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     };
 
     const order = await razorpay.orders.create(options);
     return res.status(201).json(order);
   } catch (error) {
     console.error('❌ Error creating Razorpay order:', error);
+    
+    // Handle specific Razorpay errors
+    if (error.error && error.error.description) {
+      return res.status(400).json({
+        success: false,
+        message: `Payment gateway error: ${error.error.description}`,
+      });
+    }
+    
     return res.status(500).json({
       success: false,
-      message: 'Failed to create Razorpay order',
+      message: 'Failed to create payment order. Please try again.',
     });
   }
 };
@@ -60,6 +96,14 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
       shippingAddress,
     } = req.body;
 
+    // 🔍 Validate all required fields
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Payment verification data is incomplete' 
+      });
+    }
+
     // 🔍 Validate cart items
     if (!Array.isArray(cartItems) || cartItems.length === 0) {
       return res.status(400).json({ success: false, message: 'Cart is empty or missing' });
@@ -77,6 +121,14 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
       });
     }
 
+    // Validate amount
+    if (!amount || typeof amount !== 'number' || amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid order amount',
+      });
+    }
+
     // 🔒 Validate Razorpay signature
     const generatedSignature = crypto
       .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
@@ -90,13 +142,13 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
       });
     }
 
-    // 💰 Validate amount
+    // 💰 Validate amount calculation
     const calculatedTotal = cartItems.reduce(
-      (sum, item) => sum + item.price * item.quantity,
+      (sum, item) => sum + (item.price * item.quantity),
       0
     );
 
-    if (calculatedTotal !== amount) {
+    if (Math.abs(calculatedTotal - amount) > 0.01) { // Allow for small floating point differences
       return res.status(400).json({
         success: false,
         message: 'Amount mismatch. Please try again.',
@@ -107,20 +159,36 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
     const stockValidationResults = [];
     for (const item of cartItems) {
       const productId = item.productId || item._id;
+      
+      if (!productId) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Invalid product data' 
+        });
+      }
+
       const product = await Product.findById(productId);
       if (!product) {
-        return res.status(404).json({ success: false, message: `Product not found: ${productId}` });
+        return res.status(404).json({ 
+          success: false, 
+          message: `Product not found: ${item.name || productId}` 
+        });
       }
+      
       if (product.stock < item.quantity) {
-        return res.status(400).json({ success: false, message: `Insufficient stock for ${product.name}. Only ${product.stock} left.` });
+        return res.status(400).json({ 
+          success: false, 
+          message: `Insufficient stock for ${product.name}. Only ${product.stock} left.` 
+        });
       }
+      
       stockValidationResults.push({ product, item });
     }
 
-    // 📦 Prepare order items
+    // 📦 Prepare order items with validation
     const formattedItems = cartItems.map((item, index) => {
       if (!item.productId && !item._id) {
-        console.warn(`❌ Item at index ${index} is missing productId/_id:`, item);
+        throw new Error(`Item at index ${index} is missing productId/_id`);
       }
 
       return {
@@ -163,7 +231,6 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
     
     if (io && socketId) {
       io.to(socketId).emit('orderUpdated', { order: newOrder });
-      // Removed duplicate notification emit - frontend handles toasts
     }
 
     // 📧 Send order confirmation email (optional)
@@ -174,6 +241,7 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
       }
     } catch (emailError) {
       console.warn('⚠️ Failed to send order confirmation email:', emailError.message);
+      // Don't fail the order if email fails
     }
 
     return res.status(200).json({
@@ -195,7 +263,14 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
 // ✅ Get all orders for the logged-in user
 exports.getUserOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ success: false, message: 'Access denied' });
+    }
+
+    const orders = await Order.find({ user: req.user._id })
+      .populate('items.productId', 'name images')
+      .sort({ createdAt: -1 });
+      
     return res.status(200).json({ success: true, orders });
   } catch (error) {
     console.error('❌ Error fetching user orders:', error);
@@ -211,6 +286,15 @@ exports.updateOrderStatus = async (req, res) => {
     
     if (!status) {
       return res.status(400).json({ success: false, message: 'Status is required.' });
+    }
+
+    // Validate status
+    const validStatuses = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid status. Must be one of: ' + validStatuses.join(', ') 
+      });
     }
     
     const order = await Order.findByIdAndUpdate(id, { status }, { new: true });

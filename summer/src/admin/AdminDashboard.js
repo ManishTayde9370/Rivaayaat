@@ -129,7 +129,7 @@ const AdminDashboard = () => {
       badge: 'Config',
       actions: [
         { label: 'General', icon: <FaCog />, action: 'general' },
-        { label: 'Security', icon: <FaBell />, action: 'security' }
+        // { label: 'Security', icon: <FaBell />, action: 'security' }
       ]
     }
   ];

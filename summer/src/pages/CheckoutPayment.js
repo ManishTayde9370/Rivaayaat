@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { clearCart } from '../redux/cart/actions';
 import { serverEndpoint } from '../components/config';
 import { orderNotifications } from '../utils/notifications';
+import '../css/theme.css';
 
 function CheckoutPayment() {
   const cartItems = useSelector((state) => state?.cart?.items || []);
@@ -13,9 +14,11 @@ function CheckoutPayment() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const paymentSuccessRef = useRef(false);
+  const razorpayInstanceRef = useRef(null);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isRazorpayOpen, setIsRazorpayOpen] = useState(false);
+  const [paymentError, setPaymentError] = useState(null);
 
   const totalAmount = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -28,8 +31,23 @@ function CheckoutPayment() {
     }
   }, [cartItems, navigate]);
 
+  // Cleanup function for Razorpay instance
+  useEffect(() => {
+    return () => {
+      if (razorpayInstanceRef.current) {
+        razorpayInstanceRef.current.close();
+      }
+    };
+  }, []);
+
   const loadRazorpayScript = () =>
     new Promise((resolve) => {
+      // Check if script is already loaded
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
+
       const script = document.createElement('script');
       script.src = 'https://checkout.razorpay.com/v1/checkout.js';
       script.onload = () => resolve(true);
@@ -37,27 +55,84 @@ function CheckoutPayment() {
       document.body.appendChild(script);
     });
 
+  const validatePaymentData = () => {
+    if (!shippingAddress?.address || !shippingAddress?.city || !shippingAddress?.postalCode) {
+      setPaymentError('Shipping address is incomplete. Please go back and fill it.');
+      return false;
+    }
+
+    if (totalAmount <= 0) {
+      setPaymentError('Invalid order amount.');
+      return false;
+    }
+
+    if (!Array.isArray(cartItems) || cartItems.length === 0) {
+      setPaymentError('Cart is empty.');
+      return false;
+    }
+
+    // Validate each cart item
+    for (const item of cartItems) {
+      if (!item.productId && !item._id) {
+        setPaymentError('Invalid product data.');
+        return false;
+      }
+      if (!item.name || typeof item.price !== 'number' || typeof item.quantity !== 'number') {
+        setPaymentError('Invalid product information.');
+        return false;
+      }
+      if (item.price <= 0 || item.quantity <= 0) {
+        setPaymentError('Invalid product price or quantity.');
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   const handlePayment = async () => {
     if (isLoading || isRazorpayOpen) return;
 
+    setPaymentError(null);
     setIsLoading(true);
+
     try {
-      const scriptLoaded = await loadRazorpayScript();
-      if (!scriptLoaded) {
-        alert('Failed to load payment gateway. Please try again.');
+      // Validate payment data
+      if (!validatePaymentData()) {
         setIsLoading(false);
         return;
       }
 
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        setPaymentError('Failed to load payment gateway. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Get Razorpay key
       const { data: keyData } = await axios.get(
         `${serverEndpoint}/api/checkout/razorpay-key`
       );
 
+      if (!keyData.key) {
+        setPaymentError('Payment gateway configuration error.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Create order
       const { data: order } = await axios.post(
         `${serverEndpoint}/api/checkout/create-order`,
         { amount: totalAmount },
         { withCredentials: true }
       );
+
+      if (!order.id) {
+        setPaymentError('Failed to create payment order.');
+        setIsLoading(false);
+        return;
+      }
 
       const options = {
         key: keyData.key,
@@ -68,14 +143,13 @@ function CheckoutPayment() {
         order_id: order.id,
         handler: async function (response) {
           try {
-            if (!shippingAddress?.address || !shippingAddress?.city) {
-              alert('Shipping address missing. Please go back and fill it.');
+            if (!validatePaymentData()) {
               navigate('/checkout/shipping');
               return;
             }
 
             const formattedCartItems = cartItems.map((item) => ({
-              productId: item.productId || item._id, // Ensure productId is always present
+              productId: item.productId || item._id,
               name: item.name,
               price: item.price,
               quantity: item.quantity,
@@ -95,8 +169,6 @@ function CheckoutPayment() {
               { withCredentials: true }
             );
 
-            // Don't clear cart - let users keep their items for potential re-ordering
-            // dispatch(clearCart());
             paymentSuccessRef.current = true;
             orderNotifications.paymentSuccess();
             navigate('/checkout-success', { state: { order: result.order } });
@@ -105,7 +177,16 @@ function CheckoutPayment() {
               'Payment verification failed:',
               error.response?.data || error.message
             );
-            orderNotifications.verificationFailed();
+            
+            // Handle specific error cases
+            if (error.response?.status === 400) {
+              orderNotifications.verificationFailed(error.response.data.message);
+            } else if (error.response?.status === 401) {
+              orderNotifications.verificationFailed('Session expired. Please login again.');
+              navigate('/login');
+            } else {
+              orderNotifications.verificationFailed();
+            }
           }
         },
         prefill: {
@@ -115,19 +196,43 @@ function CheckoutPayment() {
         theme: {
           color: '#6366F1',
         },
+        modal: {
+          ondismiss: function() {
+            setIsRazorpayOpen(false);
+            setPaymentError(null);
+          }
+        }
       };
 
       const rzp = new window.Razorpay(options);
+      razorpayInstanceRef.current = rzp;
 
       rzp.on('payment.failed', function (response) {
         console.error('Payment failed:', response.error);
+        setPaymentError(`Payment failed: ${response.error.description || 'Unknown error'}`);
         orderNotifications.paymentFailed();
+        setIsRazorpayOpen(false);
+      });
+
+      rzp.on('payment.cancelled', function () {
+        setPaymentError('Payment was cancelled by user.');
+        setIsRazorpayOpen(false);
       });
 
       rzp.open();
       setIsRazorpayOpen(true);
     } catch (err) {
       console.error('Error during payment:', err);
+      
+      if (err.response?.status === 401) {
+        setPaymentError('Session expired. Please login again.');
+        navigate('/login');
+      } else if (err.response?.status === 400) {
+        setPaymentError(err.response.data.message || 'Invalid payment data.');
+      } else {
+        setPaymentError('Payment initialization failed. Please try again.');
+      }
+      
       orderNotifications.paymentFailed();
     } finally {
       setIsLoading(false);
@@ -136,14 +241,34 @@ function CheckoutPayment() {
 
   return (
     <div className="container py-5 text-center">
-      <h2>💳 Pay ₹{totalAmount.toFixed(2)}</h2>
-      <button
-        className="btn btn-success mt-4"
-        onClick={handlePayment}
-        disabled={isLoading || isRazorpayOpen || totalAmount <= 0}
-      >
-        {isLoading ? 'Processing...' : 'Pay with Razorpay'}
-      </button>
+      <div className="scroll-dropdown mx-auto p-4" style={{ maxWidth: 420 }}>
+        <h2 className="cinzel mb-4" style={{ color: 'var(--color-maroon)' }}>
+          <span role="img" aria-label="scroll">📜</span> Payment
+        </h2>
+        <h3 className="cinzel mb-4" style={{ color: 'var(--color-gold)' }}>
+          <span role="img" aria-label="money">💰</span> Pay ₹{totalAmount.toFixed(2)}
+        </h3>
+        {paymentError && (
+          <div className="alert alert-danger mt-3" role="alert">
+            {paymentError}
+          </div>
+        )}
+        <button
+          className="btn btn-dark w-100 scroll-dropdown"
+          onClick={handlePayment}
+          disabled={isLoading || isRazorpayOpen || totalAmount <= 0}
+          style={{ fontFamily: 'Cinzel Decorative, serif', fontSize: '1.1rem', color: 'var(--color-gold)', border: '2px solid var(--color-gold)' }}
+        >
+          <span role="img" aria-label="diya">🪔</span> {isLoading ? 'Processing...' : 'Pay with Razorpay'}
+        </button>
+        {isLoading && (
+          <div className="mt-3">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

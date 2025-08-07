@@ -59,6 +59,25 @@ const userSchema = new mongoose.Schema({
         default: Date.now
       }
     }
+  ],
+  // Bookmarks: support both Blog and Product in a single array
+  bookmarks: [
+    {
+      kind: {
+        type: String,
+        enum: ['Blog', 'Product'],
+        required: true
+      },
+      item: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        refPath: 'bookmarks.kind'
+      },
+      addedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }
   ]
 }, {
   timestamps: true // Adds createdAt and updatedAt automatically

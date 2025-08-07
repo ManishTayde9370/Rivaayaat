@@ -31,8 +31,9 @@ const AdminLogin = () => {
 
   const validate = () => {
     const err = {};
-    if (!identity) err.identity = 'Username or email is required';
+    if (!identity.trim()) err.identity = 'Username or email is required';
     if (!password) err.password = 'Password is required';
+    if (password.length < 6) err.password = 'Password must be at least 6 characters';
     return err;
   };
 
@@ -44,33 +45,75 @@ const AdminLogin = () => {
 
     setLoading(true);
     try {
-      await axios.post(
+      // First, attempt login
+      const loginResponse = await axios.post(
         'http://localhost:5000/api/auth/login',
-        { identity, password },
+        { identity: identity.trim(), password },
         { withCredentials: true }
       );
 
+      if (!loginResponse.data.success) {
+        throw new Error(loginResponse.data.message || 'Login failed');
+      }
+
+      // Then verify user details and admin status
       const userRes = await axios.get(
         'http://localhost:5000/api/auth/is-user-logged-in',
         { withCredentials: true }
       );
 
+      if (!userRes.data.success) {
+        throw new Error('Failed to verify user session');
+      }
+
       const user = userRes.data.userDetails;
 
-      if (user?.isAdmin) {
-        dispatch({ type: SET_USER, payload: user });
-        authNotifications.loginSuccess();
-        setTimeout(() => {
-          navigate('/admin', { replace: true });
-        }, 1000);
-      } else {
-        authNotifications.loginFailed('You are not authorized as admin');
+      if (!user) {
+        throw new Error('User session not found');
       }
+
+      // Check if user is blocked
+      if (user.isBlocked) {
+        throw new Error('Account has been blocked. Please contact support.');
+      }
+
+      // Verify admin privileges
+      if (!user.isAdmin) {
+        // Clear any existing session
+        await axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true });
+        throw new Error('Access denied. Admin privileges required.');
+      }
+
+      // Set user in Redux store
+      dispatch({ type: SET_USER, payload: user });
+      authNotifications.loginSuccess();
+      
+      // Navigate to admin dashboard
+      setTimeout(() => {
+        navigate('/admin', { replace: true });
+      }, 1000);
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Login failed';
-      authNotifications.loginFailed(errorMessage);
+      console.error('Admin login error:', err);
+      
+      // Handle specific error cases
+      if (err.response?.status === 401) {
+        authNotifications.loginFailed('Invalid credentials');
+      } else if (err.response?.status === 403) {
+        authNotifications.loginFailed(err.response.data.message || 'Access denied');
+      } else if (err.response?.status === 429) {
+        authNotifications.loginFailed('Too many login attempts. Please try again later.');
+      } else {
+        const errorMessage = err.response?.data?.message || err.message || 'Login failed';
+        authNotifications.loginFailed(errorMessage);
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !loading) {
+      handleSubmit(e);
     }
   };
 
@@ -121,7 +164,9 @@ const AdminLogin = () => {
                   className={`form-input ${errors.identity ? 'error' : ''}`}
                   value={identity}
                   onChange={(e) => setIdentity(e.target.value)}
+                  onKeyPress={handleKeyPress}
                   disabled={loading}
+                  autoComplete="username"
                 />
                 {errors.identity && (
                   <div className="error-message">{errors.identity}</div>
@@ -143,7 +188,9 @@ const AdminLogin = () => {
                   className={`form-input ${errors.password ? 'error' : ''}`}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  onKeyPress={handleKeyPress}
                   disabled={loading}
+                  autoComplete="current-password"
                 />
                 <button
                   type="button"
@@ -160,43 +207,28 @@ const AdminLogin = () => {
             </div>
 
             {/* Submit Button */}
-            <button 
-              type="submit" 
-              className={`login-button ${loading ? 'loading' : ''}`}
+            <button
+              type="submit"
+              className="login-button"
               disabled={loading}
             >
               {loading ? (
-                <div className="loading-spinner">
-                  <div className="spinner"></div>
-                  <span>Signing in...</span>
+                <div className="spinner-border spinner-border-sm me-2" role="status">
+                  <span className="visually-hidden">Loading...</span>
                 </div>
               ) : (
-                <>
-                  <span>Sign In</span>
-                  <FaArrowRight className="button-icon" />
-                </>
+                <FaArrowRight className="button-icon" />
               )}
+              {loading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
 
-          {/* Additional Info */}
-          <div className="login-footer">
-            <div className="security-info">
-              <FaShieldAlt className="security-icon" />
-              <span>Secure admin access</span>
-            </div>
-            <p className="help-text">
-              Need help? Contact your system administrator
-            </p>
+          {/* Security Notice */}
+          <div className="security-notice">
+            <FaShieldAlt className="security-icon" />
+            <p>Secure admin access with enhanced authentication</p>
           </div>
         </div>
-      </div>
-
-      {/* Decorative Elements */}
-      <div className="decorative-elements">
-        <div className="floating-shape shape-1"></div>
-        <div className="floating-shape shape-2"></div>
-        <div className="floating-shape shape-3"></div>
       </div>
     </div>
   );

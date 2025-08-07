@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../redux/cart/actions';
 import { toggleWishlist, fetchWishlist } from '../redux/wishlist/actions';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FaHeart, FaRegHeart } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaStar } from 'react-icons/fa';
 
 import 'react-medium-image-zoom/dist/styles.css';
 import 'react-toastify/dist/ReactToastify.css';
@@ -16,6 +16,7 @@ import '../css/ProductPage.css';
 import LoadingBar from '../components/LoadingBar';
 import ProductFilters from '../components/ProductFilters';
 import { cartNotifications } from '../utils/notifications';
+import '../css/theme.css';
 
 const Product = () => {
   const [products, setProducts] = useState([]);
@@ -76,7 +77,7 @@ const Product = () => {
 
   return (
     <div className="container py-5 product-page-container">
-      <h2 className="section-heading text-center mb-5">
+      <h2 className="cinzel text-center mb-5" style={{ color: 'var(--color-maroon)' }}>
         {searchTerm ? `Search Results for "${searchTerm}"` : '👑 Explore Our Royal Collection'}
       </h2>
       
@@ -162,9 +163,16 @@ const ProductCard = ({ product }) => {
   const wishlist = useSelector((state) => state.wishlist.items);
   const isInWishlist = wishlist.some((item) => item._id === product._id);
 
+  // // Bell sound for add-to-cart
+  // const playBell = () => {
+  //   const audio = new Audio('https://cdn.pixabay.com/audio/2022/07/26/audio_124bfae5b2.mp3');
+  //   audio.play();
+  // };
+
   const handleAddToCart = () => {
     dispatch(addToCart({ ...product, quantity: 1 }));
     cartNotifications.added(product.name);
+    // playBell();
   };
 
   const handleBuyNow = () => {
@@ -182,7 +190,7 @@ const ProductCard = ({ product }) => {
 
   return (
     <div className="col-lg-3 col-md-4 col-sm-6 mb-4">
-      <div className="card h-100 product-card">
+      <div className="miniature-border h-100 product-card" style={{ background: 'var(--color-ivory)' }}>
         <div className="product-image-container position-relative">
           {product.images && product.images.length > 0 ? (
             <Zoom>
@@ -193,6 +201,7 @@ const ProductCard = ({ product }) => {
                 onError={(e) => {
                   e.target.src = fallbackImage;
                 }}
+                style={{ borderRadius: 12, border: '2px solid var(--color-gold)', objectFit: 'cover', height: 220 }}
               />
             </Zoom>
           ) : (
@@ -200,9 +209,9 @@ const ProductCard = ({ product }) => {
               src={fallbackImage}
               className="card-img-top product-image"
               alt="Product placeholder"
+              style={{ borderRadius: 12, border: '2px solid var(--color-gold)', objectFit: 'cover', height: 220 }}
             />
           )}
-
           {/* Image Navigation */}
           {product.images && product.images.length > 1 && (
             <div className="image-nav">
@@ -215,7 +224,6 @@ const ProductCard = ({ product }) => {
               ))}
             </div>
           )}
-
           {/* Wishlist Button */}
           <button
             className="wishlist-btn position-absolute top-0 end-0 m-2"
@@ -224,60 +232,53 @@ const ProductCard = ({ product }) => {
           >
             {isInWishlist ? <FaHeart className="text-danger" /> : <FaRegHeart />}
           </button>
-
           {/* Out of Stock Badge */}
           {isOutOfStock && (
             <div className="position-absolute top-0 start-0 m-2">
               <span className="badge bg-danger">Out of Stock</span>
             </div>
           )}
-
           {/* Rating Badge */}
           {product.averageRating > 0 && (
             <div className="position-absolute bottom-0 start-0 m-2">
               <span className="badge bg-warning text-dark">
-                ⭐ {product.averageRating} ({product.numReviews})
+                <FaStar style={{ marginBottom: 2 }} /> {product.averageRating} ({product.numReviews})
               </span>
             </div>
           )}
         </div>
-
         <div className="card-body d-flex flex-column">
-          <h5 className="card-title product-title">
+          <h5 className="cinzel product-title mb-1" style={{ color: 'var(--color-maroon)' }}>
             <Link to={`/product/${product._id}`} className="text-decoration-none">
               {product.name}
             </Link>
           </h5>
-          
           {product.category && (
-            <p className="card-text text-muted small mb-2">
-              Category: {product.category}
+            <p className="card-text text-muted small mb-2 cinzel">
+              {product.category}
             </p>
           )}
-          
-          <p className="card-text product-description flex-grow-1">
+          <p className="card-text product-description flex-grow-1" style={{ color: 'var(--color-black)' }}>
             {product.description?.length > 100
               ? `${product.description.substring(0, 100)}...`
               : product.description}
           </p>
-          
-          <div className="product-price mb-3">
-            <span className="h5 text-primary">₹{product.price}</span>
+          <div className="product-price mb-3 cinzel" style={{ color: 'var(--color-gold)', fontSize: '1.2rem' }}>
+            ₹{product.price}
             {product.stock > 0 && (
               <small className="text-muted ms-2">({product.stock} in stock)</small>
             )}
           </div>
-
           <div className="product-actions">
             <button
-              className="btn btn-primary btn-sm me-2"
+              className="btn btn-dark btn-sm me-2 diya-flicker"
               onClick={handleAddToCart}
               disabled={isOutOfStock}
             >
               Add to Cart
             </button>
             <button
-              className="btn btn-outline-primary btn-sm"
+              className="btn btn-outline-dark btn-sm"
               onClick={handleBuyNow}
               disabled={isOutOfStock}
             >

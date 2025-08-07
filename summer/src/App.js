@@ -30,6 +30,7 @@ import AddProduct from './admin/AddProduct';
 import AdminContactMessages from './admin/AdminContactMessages';
 import ManageOrders from './admin/ManageOrders';
 import ManageUsers from './admin/ManageUsers';
+import AdminSettings from './admin/AdminSettings';
 
 import { serverEndpoint } from './components/config';
 import { SET_USER, CLEAR_USER } from './redux/user/actions';
@@ -40,8 +41,6 @@ import './css/theme.css';
 import BrandStory from './pages/BrandStory';
 import Blogs from './pages/Blogs';
 import Careers from './pages/Careers';
-import StoreLocator from './pages/StoreLocator';
-import FAQs from './pages/FAQs';
 import ShippingDetails from './pages/ShippingDetails';
 import ReturnRefundPolicy from './pages/ReturnRefundPolicy';
 import TermsOfUse from './pages/TermsOfUse';
@@ -355,8 +354,8 @@ function App() {
           path="/admin/settings"
           element={
             isAdmin ? (
-              <AdminLayout userDetails={userDetails} onLogout={handleLogout}>
-                <AdminDashboard />
+              <AdminLayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
+                <AdminSettings />
               </AdminLayout>
             ) : (
               <Navigate to="/adminlogin" replace />
@@ -395,8 +394,6 @@ function App() {
         <Route path="/brand-story" element={<Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}><BrandStory /></Applayout>} />
         <Route path="/blogs" element={<Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}><Blogs /></Applayout>} />
         <Route path="/careers" element={<Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}><Careers /></Applayout>} />
-        <Route path="/store-locator" element={<Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}><StoreLocator /></Applayout>} />
-        <Route path="/faqs" element={<Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}><FAQs /></Applayout>} />
         <Route path="/shipping-details" element={<Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}><ShippingDetails /></Applayout>} />
         <Route path="/return-refund-policy" element={<Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}><ReturnRefundPolicy /></Applayout>} />
         <Route path="/terms-of-use" element={<Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}><TermsOfUse /></Applayout>} />

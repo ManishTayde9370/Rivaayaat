@@ -253,6 +253,10 @@ router.get('/users/analytics',
   }
 );
 
+// Settings routes
+router.get('/settings', requireAdmin, adminController.getAllSettings);
+router.put('/settings/:key', requireAdmin, adminController.updateSetting);
+
 // ✅ Get system health
 router.get('/health', 
   requireAdmin, 

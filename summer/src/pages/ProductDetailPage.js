@@ -7,11 +7,12 @@ import { addToCart } from '../redux/cart/actions';
 import { toggleWishlist } from '../redux/wishlist/actions';
 import 'react-medium-image-zoom/dist/styles.css';
 import 'react-toastify/dist/ReactToastify.css';
-import { FaInstagram, FaFacebook, FaGlobe, FaStar } from 'react-icons/fa';
+import { FaInstagram, FaFacebook, FaGlobe, FaStar, FaVolumeUp } from 'react-icons/fa';
 import LoadingBar from '../components/LoadingBar';
 import ProductReviewForm from '../components/ProductReviewForm';
 import ProductReviews from '../components/ProductReviews';
 import { cartNotifications } from '../utils/notifications';
+import '../css/theme.css';
 
 const API_BASE_URL = 'http://localhost:5000';
 
@@ -23,6 +24,8 @@ const ProductDetailPage = () => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [error, setError] = useState(null);
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [showBackstory, setShowBackstory] = useState(false);
+  const [soundPlaying, setSoundPlaying] = useState(false);
 
   const wishlist = useSelector((state) => state.wishlist.items);
   const isInWishlist = wishlist.some((item) => item._id === id);
@@ -44,9 +47,22 @@ const ProductDetailPage = () => {
     fetchProduct();
   }, [id]);
 
+  // // Bell sound for add-to-cart
+  // const playBell = () => {
+  //   const audio = new Audio('https://cdn.pixabay.com/audio/2022/07/26/audio_124bfae5b2.mp3');
+  //   audio.play();
+  // };
+
+  // Dummy soundscape (no actual sound file for now)
+  const handleSoundscape = () => {
+    setSoundPlaying((prev) => !prev);
+    // Optionally play/pause a sound file here
+  };
+
   const handleAddToCart = () => {
     dispatch(addToCart({ ...product, quantity: 1 }));
     cartNotifications.added(product.name);
+    // playBell();
   };
 
   const handleBuyNow = () => {
@@ -91,54 +107,81 @@ const ProductDetailPage = () => {
       <div className="row align-items-center">
         {/* Image Section */}
         <div className="col-md-6 mb-4">
-          <Zoom>
-            <img
-              src={product.images?.[activeImageIndex] || '/fallback.jpg'}
-              alt={product.name}
-              className="img-fluid rounded"
-              style={{
-                border: '1px solid #fcecc5',
-                borderRadius: '12px',
-                objectFit: 'cover',
-                height: '400px',
-              }}
-              onError={(e) => (e.target.src = '/fallback.jpg')}
-            />
-          </Zoom>
-
-          <div className="d-flex mt-3">
-            {product.images?.map((img, i) => (
+          <div className="miniature-border p-2" style={{ background: 'var(--color-ivory)' }}>
+            <Zoom>
               <img
-                key={i}
-                src={img}
-                alt={`thumb-${i}`}
-                onClick={() => setActiveImageIndex(i)}
-                onError={(e) => (e.target.src = '/fallback.jpg')}
-                className={`me-2 rounded border ${i === activeImageIndex ? 'border-warning' : 'border-light'}`}
+                src={product.images?.[activeImageIndex] || '/fallback.jpg'}
+                alt={product.name}
+                className="img-fluid rounded"
                 style={{
-                  width: '70px',
-                  height: '70px',
+                  border: '2.5px solid var(--color-gold)',
+                  borderRadius: '16px',
                   objectFit: 'cover',
-                  cursor: 'pointer',
+                  height: '400px',
+                  boxShadow: '0 4px 24px rgba(123,34,48,0.08)'
                 }}
+                onError={(e) => (e.target.src = '/fallback.jpg')}
               />
-            ))}
+            </Zoom>
+            <div className="d-flex mt-3 justify-content-center">
+              {product.images?.map((img, i) => (
+                <img
+                  key={i}
+                  src={img}
+                  alt={`thumb-${i}`}
+                  onClick={() => setActiveImageIndex(i)}
+                  onError={(e) => (e.target.src = '/fallback.jpg')}
+                  className={`me-2 rounded border ${i === activeImageIndex ? 'border-warning' : 'border-light'}`}
+                  style={{
+                    width: '70px',
+                    height: '70px',
+                    objectFit: 'cover',
+                    cursor: 'pointer',
+                  }}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Product Info Section */}
         <div className="col-md-6">
-          <h1 className="mb-3">{product.name}</h1>
-          
-          {product.category && (
-            <p className="text-muted mb-2">
-              <strong>Category:</strong> {product.category}
-            </p>
-          )}
+          <h1 className="cinzel mb-2" style={{ color: 'var(--color-maroon)' }}>{product.name}</h1>
+          <div className="d-flex align-items-center mb-2">
+            <button
+              className={`btn btn-sm regal-sound-btn me-2${soundPlaying ? ' diya-flicker' : ''}`}
+              onClick={handleSoundscape}
+              title="Play regal soundscape"
+            >
+              <FaVolumeUp />
+            </button>
+            <span style={{ color: 'var(--color-peacock)', fontWeight: 500 }}>Regal Soundscape</span>
+            {soundPlaying && <span className="ms-2" style={{ color: 'var(--color-gold)' }}>(Playing...)</span>}
+          </div>
 
-          <p className="mb-3">{product.description}</p>
+          <div className="d-flex gap-2 mb-3">
+            <span className="badge bg-warning text-dark cinzel" style={{ fontSize: '1rem' }}>{product.category}</span>
+            {product.origin && <span className="badge bg-info text-dark cinzel">{product.origin}</span>}
+          </div>
 
-          <h3 className="text-primary mb-3">₹{product.price}</h3>
+          <div className="mb-3">
+            <button
+              className={`btn btn-outline-dark rounded-pill px-3 me-2${showBackstory ? ' active' : ''}`}
+              onClick={() => setShowBackstory((prev) => !prev)}
+            >
+              Royal Backstory
+            </button>
+            {showBackstory && (
+              <div className="scroll-dropdown mt-2 p-3" style={{ maxWidth: 420 }}>
+                <div className="cinzel mb-2" style={{ color: 'var(--color-gold)' }}>The Royal Tale</div>
+                <div style={{ color: 'var(--color-black)' }}>{product.backstory || 'This piece is inspired by centuries-old traditions and royal patronage.'}</div>
+              </div>
+            )}
+          </div>
+
+          <p className="mb-3" style={{ color: 'var(--color-black)' }}>{product.description}</p>
+
+          <h3 className="cinzel mb-3" style={{ color: 'var(--color-gold)' }}>₹{product.price}</h3>
 
           {/* Enhanced Rating Display */}
           {product.averageRating > 0 && (
@@ -165,7 +208,7 @@ const ProductDetailPage = () => {
 
           <div className="d-flex gap-3 mt-3">
             <button
-              className="btn btn-dark rounded-pill px-4"
+              className="btn btn-dark rounded-pill px-4 diya-flicker"
               onClick={handleAddToCart}
               disabled={product.stock === 0}
             >
@@ -190,52 +233,57 @@ const ProductDetailPage = () => {
 
       {/* Artisan Info Section */}
       {product.artisan && (
-        <div className="rivaayat-card" style={{ maxWidth: 500, margin: '2em auto', textAlign: 'center', padding: '2em 1em' }}>
+        <div className="miniature-border my-5 p-4" style={{ maxWidth: 600, margin: '2em auto', textAlign: 'center', background: 'var(--color-ivory)' }}>
           {product.artisan.photo && (
             <img
               src={product.artisan.photo}
               alt={product.artisan.name}
               style={{
-                width: '160px',
-                height: '160px',
+                width: '120px',
+                height: '120px',
                 objectFit: 'cover',
                 borderRadius: '50%',
                 marginBottom: '1em',
-                border: '4px solid var(--border-color)',
+                border: '4px solid var(--color-gold)',
                 boxShadow: '0 4px 16px rgba(141,85,36,0.12)'
               }}
             />
           )}
-          <h2 className="rivaayat-heading" style={{ marginBottom: '0.5em' }}>
-            Meet the Artisan: {product.artisan.name}
-          </h2>
-          <p style={{ color: 'var(--primary-color)', fontSize: '1.1em', marginBottom: '1em' }}>
-            {product.artisan.bio}
-          </p>
+          <h2 className="cinzel mb-1" style={{ color: 'var(--color-maroon)' }}>Artisan: {product.artisan.name}</h2>
+          <div style={{ color: 'var(--color-peacock)', fontWeight: 500 }}>{product.artisan.region}</div>
+          <div style={{ fontStyle: 'italic', color: 'var(--color-emerald)' }}>{product.artisan.bio}</div>
           {product.artisan.quote && (
-            <blockquote style={{ fontStyle: 'italic', color: 'var(--accent-color)', margin: '1em 0' }}>
-              "{product.artisan.quote}"
+            <blockquote style={{ fontStyle: 'italic', color: 'var(--color-gold)', margin: '1em 0' }}>
+              “{product.artisan.quote}”
             </blockquote>
           )}
           <div style={{ marginTop: '0.5em', fontSize: '1.5em' }}>
             {product.artisan.social?.instagram && (
-              <a href={product.artisan.social.instagram} target="_blank" rel="noopener noreferrer" style={{ margin: '0 10px', color: 'var(--accent-color)' }}>
+              <a href={product.artisan.social.instagram} target="_blank" rel="noopener noreferrer" style={{ margin: '0 10px', color: 'var(--color-peacock)' }}>
                 <FaInstagram />
               </a>
             )}
             {product.artisan.social?.facebook && (
-              <a href={product.artisan.social.facebook} target="_blank" rel="noopener noreferrer" style={{ margin: '0 10px', color: 'var(--accent-color)' }}>
+              <a href={product.artisan.social.facebook} target="_blank" rel="noopener noreferrer" style={{ margin: '0 10px', color: 'var(--color-peacock)' }}>
                 <FaFacebook />
               </a>
             )}
             {product.artisan.social?.website && (
-              <a href={product.artisan.social.website} target="_blank" rel="noopener noreferrer" style={{ margin: '0 10px', color: 'var(--accent-color)' }}>
+              <a href={product.artisan.social.website} target="_blank" rel="noopener noreferrer" style={{ margin: '0 10px', color: 'var(--color-peacock)' }}>
                 <FaGlobe />
               </a>
             )}
           </div>
         </div>
       )}
+
+      {/* Cultural Footnotes Section */}
+      <div className="container my-5">
+        <div className="scroll-dropdown p-4" style={{ maxWidth: 700, margin: '0 auto' }}>
+          <div className="cinzel mb-2" style={{ color: 'var(--color-gold)' }}>From the Royal Diaries</div>
+          <div style={{ color: 'var(--color-black)' }}>{product.footnotes || 'This piece is part of a living tradition, cherished in royal courts and family rituals.'}</div>
+        </div>
+      </div>
 
       {/* Reviews Section */}
       <div className="mt-5">
@@ -247,7 +295,6 @@ const ProductDetailPage = () => {
               numReviews={product.numReviews || 0}
             />
           </div>
-          
           <div className="col-lg-4">
             {user ? (
               <div className="review-form-sidebar">

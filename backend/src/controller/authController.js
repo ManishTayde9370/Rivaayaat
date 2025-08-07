@@ -24,14 +24,20 @@ const authController = {
     const { username, email, phone, password, name } = req.body;
 
     try {
+      // Check for existing user with better error messages
       const existingUser = await User.findOne({
         $or: [{ username }, { email }, { phone }],
       });
 
       if (existingUser) {
+        let conflictField = '';
+        if (existingUser.username === username) conflictField = 'username';
+        else if (existingUser.email === email) conflictField = 'email';
+        else if (existingUser.phone === phone) conflictField = 'phone';
+
         return res.status(409).json({
           success: false,
-          message: 'User already exists',
+          message: `${conflictField.charAt(0).toUpperCase() + conflictField.slice(1)} already exists`,
         });
       }
 
@@ -54,6 +60,16 @@ const authController = {
       });
     } catch (error) {
       console.error('Register error:', error);
+      
+      // Handle MongoDB duplicate key errors
+      if (error.code === 11000) {
+        const field = Object.keys(error.keyPattern)[0];
+        return res.status(409).json({
+          success: false,
+          message: `${field.charAt(0).toUpperCase() + field.slice(1)} already exists`,
+        });
+      }
+      
       return res.status(500).json({
         success: false,
         message: 'Server error',
@@ -80,6 +96,14 @@ const authController = {
 
       if (!user) {
         return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      }
+
+      // Check if user is blocked
+      if (user.isBlocked) {
+        return res.status(403).json({ 
+          success: false, 
+          message: 'Account has been blocked. Please contact support.' 
+        });
       }
 
       if (user.isGoogleUser) {
@@ -145,7 +169,16 @@ const authController = {
       let user = await User.findOne({ email });
 
       if (!user) {
-        const generatedUsername = `${email.split('@')[0]}${Math.floor(Math.random() * 10000)}`;
+        // Generate unique username
+        let generatedUsername = `${email.split('@')[0]}${Math.floor(Math.random() * 10000)}`;
+        
+        // Ensure username uniqueness
+        let counter = 1;
+        while (await User.findOne({ username: generatedUsername })) {
+          generatedUsername = `${email.split('@')[0]}${Math.floor(Math.random() * 10000)}${counter}`;
+          counter++;
+        }
+
         user = new User({
           username: generatedUsername,
           email,
@@ -154,6 +187,14 @@ const authController = {
           isGoogleUser: true,
         });
         await user.save();
+      } else {
+        // Check if existing user is blocked
+        if (user.isBlocked) {
+          return res.status(403).json({ 
+            success: false, 
+            message: 'Account has been blocked. Please contact support.' 
+          });
+        }
       }
 
       const tokenPayload = {
@@ -211,7 +252,7 @@ const authController = {
       });
     }
 
-    jwt.verify(token, secret, (err, decoded) => {
+    jwt.verify(token, secret, async (err, decoded) => {
       if (err) {
         return res.status(401).json({
           success: false,
@@ -219,10 +260,39 @@ const authController = {
         });
       }
 
-      return res.status(200).json({
-        success: true,
-        userDetails: decoded,
-      });
+      try {
+        // Verify user still exists and is not blocked
+        const user = await User.findById(decoded._id);
+        if (!user) {
+          return res.status(401).json({
+            success: false,
+            message: 'User no longer exists',
+          });
+        }
+
+        if (user.isBlocked) {
+          return res.status(403).json({
+            success: false,
+            message: 'Account has been blocked',
+          });
+        }
+
+        return res.status(200).json({
+          success: true,
+          userDetails: {
+            _id: user._id,
+            username: user.username,
+            email: user.email,
+            isAdmin: user.isAdmin,
+          },
+        });
+      } catch (error) {
+        console.error('User verification error:', error);
+        return res.status(500).json({
+          success: false,
+          message: 'Server error',
+        });
+      }
     });
   },
 };

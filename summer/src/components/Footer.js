@@ -11,17 +11,7 @@ const Footer = () => {
         <Row className="mb-4">
           <Col md={8}>
             <Row>
-              <Col md={3}>
-                <h6 className="footer-heading">CATEGORIES</h6>
-                <ul className="footer-links">
-                  <li>Kurta Pajama</li>
-                  <li>Kurta Jacket Sets</li>
-                  <li>Only Kurtas</li>
-                  <li>Nehru Jackets</li>
-                  <li>Indo Western</li>
-                  <li>Sherwani</li>
-                </ul>
-              </Col>
+              
               <Col md={3}>
                 <h6 className="footer-heading">SUPPORT</h6>
                 <ul className="footer-links">
