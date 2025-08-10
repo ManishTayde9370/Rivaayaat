@@ -3,7 +3,7 @@ const { body } = require('express-validator');
 const authController = require('../controller/authController');
 const rateLimit = require('express-rate-limit');
 const { requireAuth } = require('../middleware/authMiddleware');
-const { validationResult, body } = require('express-validator');
+const { validationResult } = require('express-validator');
 const User = require('../model/Users'); // Added missing import for User model
 
 const router = express.Router();

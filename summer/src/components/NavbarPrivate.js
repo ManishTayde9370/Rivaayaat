@@ -6,6 +6,7 @@ import logo from '../assets/brandlogo.png';
 import '../css/NavbarPrivate.css';
 import CartIcon from './CartIcon';
 import axios from 'axios';
+import { serverEndpoint } from './config';
 
 
 const NavbarPrivate = ({ username, onLogout }) => {
@@ -15,11 +16,40 @@ const NavbarPrivate = ({ username, onLogout }) => {
   const handleSearch = async () => {
     if (searchTerm.trim()) {
       try {
-        const res = await axios.get(`http://localhost:5000/api/products/search?keyword=${encodeURIComponent(searchTerm)}`);
-        // Pass results to product page via navigation state
-        navigate('/product', { state: { searchResults: res.data.products, searchTerm, notFound: res.data.products.length === 0 } });
+        const res = await axios.get(`${serverEndpoint}/api/products/search?keyword=${encodeURIComponent(searchTerm.trim())}`, {
+          withCredentials: true
+        });
+        
+        if (res.data.success) {
+          // Pass results to product page via navigation state
+          navigate('/product', { 
+            state: { 
+              searchResults: res.data.products, 
+              searchTerm, 
+              notFound: res.data.products.length === 0 
+            } 
+          });
+        } else {
+          console.error('Search failed:', res.data.message);
+          // Navigate with empty results
+          navigate('/product', { 
+            state: { 
+              searchResults: [], 
+              searchTerm, 
+              notFound: true 
+            } 
+          });
+        }
       } catch (err) {
         console.error('Search error:', err);
+        // Navigate with empty results on error
+        navigate('/product', { 
+          state: { 
+            searchResults: [], 
+            searchTerm, 
+            notFound: true 
+          } 
+        });
       }
     }
   };

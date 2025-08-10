@@ -102,7 +102,18 @@ mongoose.connect(MONGO_URI)
   })
   .catch((err) => {
     console.error('❌ MongoDB connection error:', err.message);
-    process.exit(1);
+    console.log('💡 Make sure MongoDB is running or install MongoDB locally');
+    console.log('💡 You can also use MongoDB Atlas (cloud) by setting MONGO_URI in .env file');
+    
+    // For development, start server anyway with a warning
+    if (process.env.NODE_ENV === 'development') {
+      console.log('⚠️  Starting server in development mode without database...');
+      server.listen(PORT, () => {
+        console.log(`🚀 Server running at http://localhost:${PORT} (without database)`);
+      });
+    } else {
+      process.exit(1);
+    }
   });
 
 // 🛡️ Graceful shutdown

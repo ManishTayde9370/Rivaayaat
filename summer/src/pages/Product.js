@@ -6,6 +6,7 @@ import { addToCartWithValidation } from '../redux/cart/actions';
 import { toggleWishlist, fetchWishlist } from '../redux/wishlist/actions';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FaHeart, FaRegHeart, FaShoppingCart, FaEye, FaFilter, FaSort } from 'react-icons/fa';
+import { serverEndpoint } from '../components/config';
 
 import 'react-medium-image-zoom/dist/styles.css';
 import 'react-toastify/dist/ReactToastify.css';
@@ -39,7 +40,14 @@ const Product = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filtersLoading, setFiltersLoading] = useState(false);
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState({
+    category: 'all',
+    minPrice: '',
+    maxPrice: '',
+    search: '',
+    sortBy: 'createdAt',
+    sortOrder: 'desc'
+  });
   const [pagination, setPagination] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [addingToCart, setAddingToCart] = useState(new Set());
@@ -81,7 +89,9 @@ const Product = () => {
         ...filterOptions
       });
 
-      const response = await axios.get(`http://localhost:5000/api/products?${params}`, {
+
+
+      const response = await axios.get(`${serverEndpoint}/api/products?${params}`, {
         withCredentials: true,
         timeout: 10000, // 10 second timeout
       });
@@ -132,7 +142,7 @@ const Product = () => {
 
   // Handle filter and page changes
   useEffect(() => {
-    if (!searchResults && debouncedFilters !== filters) {
+    if (!searchResults) {
       setCurrentPage(1); // Reset to first page when filters change
       fetchProducts(1, debouncedFilters, true);
     }
@@ -438,7 +448,8 @@ const Product = () => {
         <div className="row mb-4">
           <div className="col-12">
             <ProductFilters
-              onFilterChange={handleFilterChange}
+              onFiltersChange={handleFilterChange}
+              currentFilters={filters}
               loading={filtersLoading}
             />
           </div>

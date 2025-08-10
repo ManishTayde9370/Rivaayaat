@@ -89,31 +89,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 📦 GET single product by ID
-router.get('/:id', async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    
-    if (!product) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Product not found' 
-      });
-    }
-    
-    return res.json({ 
-      success: true, 
-      product 
-    });
-  } catch (err) {
-    console.error('❌ Error fetching product:', err);
-    return res.status(500).json({ 
-      success: false, 
-      message: 'Failed to fetch product' 
-    });
-  }
-});
-
 // 🔍 GET search suggestions (for autocomplete)
 router.get('/search/suggestions', async (req, res) => {
   try {
@@ -136,6 +111,44 @@ router.get('/search/suggestions', async (req, res) => {
   } catch (err) {
     console.error('❌ Error fetching search suggestions:', err);
     return res.status(500).json({ suggestions: [] });
+  }
+});
+
+// 🔍 GET search products by keyword
+router.get('/search', async (req, res) => {
+  try {
+    const { keyword } = req.query;
+    
+    if (!keyword || keyword.trim().length < 2) {
+      return res.json({ 
+        success: true,
+        products: [],
+        message: 'Please enter at least 2 characters to search'
+      });
+    }
+
+    const products = await Product.find({
+      $or: [
+        { name: { $regex: keyword, $options: 'i' } },
+        { description: { $regex: keyword, $options: 'i' } },
+        { category: { $regex: keyword, $options: 'i' } }
+      ]
+    })
+    .sort({ createdAt: -1 })
+    .limit(20);
+
+    return res.json({
+      success: true,
+      products,
+      total: products.length
+    });
+  } catch (err) {
+    console.error('❌ Error searching products:', err);
+    return res.status(500).json({ 
+      success: false,
+      message: 'Failed to search products',
+      products: []
+    });
   }
 });
 
@@ -370,6 +383,31 @@ router.delete('/:productId/reviews/:reviewId', requireAuth, async (req, res) => 
     return res.status(500).json({
       success: false,
       message: 'Failed to delete review'
+    });
+  }
+});
+
+// 📦 GET single product by ID (must be last to avoid conflicts with other routes)
+router.get('/:id', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    
+    if (!product) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Product not found' 
+      });
+    }
+    
+    return res.json({ 
+      success: true, 
+      product 
+    });
+  } catch (err) {
+    console.error('❌ Error fetching product:', err);
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch product' 
     });
   }
 });

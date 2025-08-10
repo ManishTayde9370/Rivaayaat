@@ -42,18 +42,36 @@ const AdminDashboard = () => {
   const fetchDashboardStats = async () => {
     try {
       setLoading(true);
-      // Fetch basic stats (you can implement these endpoints)
+      
+      // Fetch real statistics from backend
+      const [usersRes, productsRes, ordersRes, messagesRes] = await Promise.all([
+        axios.get(`${serverEndpoint}/api/admin/users/analytics`, { withCredentials: true }),
+        axios.get(`${serverEndpoint}/api/products`, { withCredentials: true }),
+        axios.get(`${serverEndpoint}/api/admin/orders/analytics`, { withCredentials: true }),
+        axios.get(`${serverEndpoint}/api/contact/messages`, { withCredentials: true })
+      ]);
+
       const statsData = {
-        totalUsers: 25, // Mock data - replace with actual API call
-        totalProducts: 7,
-        totalOrders: 12,
-        totalMessages: 3,
-        recentOrders: [],
-        recentUsers: []
+        totalUsers: usersRes.data?.analytics?.totalUsers || 0,
+        totalProducts: productsRes.data?.products?.length || 0,
+        totalOrders: ordersRes.data?.analytics?.totalOrders || 0,
+        totalMessages: messagesRes.data?.messages?.length || 0,
+        recentOrders: ordersRes.data?.recentOrders || [],
+        recentUsers: usersRes.data?.recentUsers || []
       };
+      
       setStats(statsData);
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
+      // Fallback to zero values instead of mock data
+      setStats({
+        totalUsers: 0,
+        totalProducts: 0,
+        totalOrders: 0,
+        totalMessages: 0,
+        recentOrders: [],
+        recentUsers: []
+      });
     } finally {
       setLoading(false);
     }

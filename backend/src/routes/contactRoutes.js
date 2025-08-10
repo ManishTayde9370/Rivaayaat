@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const contactController = require('../controller/contactController');
-const { requireAdmin } = require('../middleware/authMiddleware');
+const { requireAdmin, requireAuth } = require('../middleware/authMiddleware');
 const { body, validationResult } = require('express-validator');
+const ContactMessage = require('../model/ContactMessage');
 
 // Public: Submit contact message
 const contactValidator = [

@@ -23,6 +23,20 @@ const CheckoutShipping = () => {
       return;
     }
 
+    // ✅ Add email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setFormError('Please enter a valid email address');
+      return;
+    }
+
+    // ✅ Add mobile number validation (basic Indian format)
+    const mobileRegex = /^[6-9]\d{9}$/;
+    if (!mobileRegex.test(mobile.replace(/\s/g, ''))) {
+      setFormError('Please enter a valid 10-digit mobile number');
+      return;
+    }
+
     // ✅ Include all fields expected by backend
     dispatch(setShippingAddress({
       address,

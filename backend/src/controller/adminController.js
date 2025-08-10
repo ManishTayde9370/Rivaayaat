@@ -489,7 +489,7 @@ const getProductTrends = handleAsyncError(async (req, res) => {
     ]);
 
     // ✅ Populate product details
-   const productIds = someArray
+   const productIds = trends
   .filter(p => p && p._id)
   .map(p => p._id.toString());
 

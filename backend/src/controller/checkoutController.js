@@ -16,10 +16,10 @@ const razorpay = new Razorpay({
 // ✅ Send Razorpay Key to frontend
 exports.getRazorpayKey = (req, res) => {
   try {
-    if (!process.env.RAZORPAY_KEY_ID) {
+    if (!process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID === 'rzp_test_dummy') {
       return res.status(500).json({ 
         success: false, 
-        message: 'Payment gateway not configured' 
+        message: 'Payment gateway not configured. Please set RAZORPAY_KEY_ID in environment variables.' 
       });
     }
     res.status(200).json({ key: process.env.RAZORPAY_KEY_ID });
@@ -82,14 +82,29 @@ exports.createOrder = async (req, res) => {
 
 // ✅ Verify Payment and Place Order
 exports.verifyPaymentAndPlaceOrder = async (req, res) => {
-  // Start a database transaction to prevent race conditions
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  // Use transaction only in production, fallback to regular operations in development
+  let session = null;
+  let useTransaction = false;
+  
+  try {
+    // Check if we're in a replica set environment
+    const adminDb = mongoose.connection.db.admin();
+    const serverStatus = await adminDb.serverStatus();
+    useTransaction = serverStatus.repl && serverStatus.repl.ismaster;
+  } catch (error) {
+    // If we can't check server status, assume no replica set
+    useTransaction = false;
+  }
+  
+  if (useTransaction) {
+    session = await mongoose.startSession();
+    session.startTransaction();
+  }
   
   try {
     // 👤 Make sure user is authenticated
     if (!req.user || !req.user._id) {
-      await session.abortTransaction();
+      if (session) await session.abortTransaction();
       return res.status(401).json({ success: false, message: 'Access denied. Please log in.' });
     }
 
@@ -112,7 +127,7 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
 
     // 🔍 Validate cart items
     if (!Array.isArray(cartItems) || cartItems.length === 0) {
-      await session.abortTransaction();
+      if (session) await session.abortTransaction();
       return res.status(400).json({ success: false, message: 'Cart is empty or missing' });
     }
 
@@ -122,7 +137,7 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
       !shippingAddress?.city ||
       !shippingAddress?.postalCode
     ) {
-      await session.abortTransaction();
+      if (session) await session.abortTransaction();
       return res.status(400).json({
         success: false,
         message: 'Shipping address is incomplete',
@@ -144,7 +159,7 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
       .digest('hex');
 
     if (generatedSignature !== razorpay_signature) {
-      await session.abortTransaction();
+      if (session) await session.abortTransaction();
       return res.status(400).json({
         success: false,
         message: 'Payment signature verification failed',
@@ -157,12 +172,10 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
       0
     );
 
-<<<<<<< HEAD
-    if (Math.abs(calculatedTotal - amount) > 0.01) { // Allow for small floating point differences
-=======
+
     if (Math.abs(calculatedTotal - amount) > 0.01) { // Allow for minor floating point differences
-      await session.abortTransaction();
->>>>>>> 06cc6544b6b32331981c04d637270849f0d6cc9f
+      if (session) await session.abortTransaction();
+
       return res.status(400).json({
         success: false,
         message: 'Amount mismatch. Please try again.',
@@ -177,7 +190,7 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
       const productId = item.productId || item._id;
       
       if (!productId) {
-<<<<<<< HEAD
+
         return res.status(400).json({ 
           success: false, 
           message: 'Invalid product data' 
@@ -197,7 +210,7 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
           success: false, 
           message: `Insufficient stock for ${product.name}. Only ${product.stock} left.` 
         });
-=======
+
         await session.abortTransaction();
         return res.status(400).json({ 
           success: false, 
@@ -205,8 +218,11 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
         });
       }
       
-      // Use findOneAndUpdate with session to ensure atomic stock checking and updating
-      const product = await Product.findOneAndUpdate(
+      // Use findOneAndUpdate with or without session to ensure atomic stock checking and updating
+      const updateOptions = { new: true }; // Return the updated document
+      if (session) updateOptions.session = session;
+      
+      const updatedProduct = await Product.findOneAndUpdate(
         { 
           _id: productId, 
           stock: { $gte: item.quantity } // Only update if enough stock is available
@@ -214,14 +230,11 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
         { 
           $inc: { stock: -item.quantity } // Decrement stock atomically
         },
-        { 
-          session,
-          new: true // Return the updated document
-        }
+        updateOptions
       );
       
-      if (!product) {
-        await session.abortTransaction();
+      if (!updatedProduct) {
+        if (session) await session.abortTransaction();
         // Check if product exists to provide better error message
         const existingProduct = await Product.findById(productId);
         if (!existingProduct) {
@@ -235,18 +248,18 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
             message: `Insufficient stock for ${existingProduct.name}. Only ${existingProduct.stock} available.` 
           });
         }
->>>>>>> 06cc6544b6b32331981c04d637270849f0d6cc9f
+
       }
       
-      stockValidationResults.push({ product, item });
-      productUpdates.push({ productId, originalStock: product.stock + item.quantity, newStock: product.stock });
+      stockValidationResults.push({ product: updatedProduct, item });
+      productUpdates.push({ productId, originalStock: updatedProduct.stock + item.quantity, newStock: updatedProduct.stock });
     }
 
-<<<<<<< HEAD
+
     // 📦 Prepare order items with validation
-=======
+
     // 📦 Prepare order items with validated data
->>>>>>> 06cc6544b6b32331981c04d637270849f0d6cc9f
+
     const formattedItems = cartItems.map((item, index) => {
       if (!item.productId && !item._id) {
         throw new Error(`Item at index ${index} is missing productId/_id`);
@@ -283,10 +296,16 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
       status: 'Processing',
     });
 
-    await newOrder.save({ session });
+    if (session) {
+      await newOrder.save({ session });
+    } else {
+      await newOrder.save();
+    }
 
-    // Commit the transaction
-    await session.commitTransaction();
+    // Commit the transaction if using sessions
+    if (session) {
+      await session.commitTransaction();
+    }
 
     // Log successful order placement
     console.log(`✅ Order placed successfully: ${newOrder._id} for user: ${req.user.email}`);
@@ -309,15 +328,10 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
         }
       } catch (emailError) {
         console.warn('⚠️ Failed to send order confirmation email:', emailError.message);
+        // Don't fail the order if email fails
       }
-<<<<<<< HEAD
-    } catch (emailError) {
-      console.warn('⚠️ Failed to send order confirmation email:', emailError.message);
-      // Don't fail the order if email fails
-    }
-=======
     });
->>>>>>> 06cc6544b6b32331981c04d637270849f0d6cc9f
+
 
     return res.status(200).json({
       success: true,
@@ -333,7 +347,9 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
 
   } catch (error) {
     // Rollback transaction on any error
-    await session.abortTransaction();
+    if (session) {
+      await session.abortTransaction();
+    }
     console.error('❌ Order placement error:', error);
     
     return res.status(500).json({
@@ -342,8 +358,10 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
   } finally {
-    // End session
-    session.endSession();
+    // End session if it exists
+    if (session) {
+      session.endSession();
+    }
   }
 };
 
