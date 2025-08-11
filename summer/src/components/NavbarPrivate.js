@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Navbar, Nav, Container, Form, FormControl, NavDropdown } from 'react-bootstrap';
-import { FaSearch, FaUser, FaSignOutAlt, FaHeart, FaShoppingCart, FaHome, FaShoppingBag, FaUserCircle } from 'react-icons/fa';
+import { FaSearch, FaUser, FaSignOutAlt, FaShoppingCart, FaHome, FaShoppingBag, FaUserCircle } from 'react-icons/fa';
 import logo from '../assets/brandlogo.png';
 import '../css/theme.css';
 import CartIcon from './CartIcon';
@@ -101,9 +101,6 @@ const NavbarPrivate = ({ username, onLogout }) => {
         
         {/* User Menu */}
         <Nav className="ms-auto">
-          <Nav.Link as={Link} to="/wishlist" className="rivaayat-nav-link">
-            <FaHeart className="me-1" />
-          </Nav.Link>
           <CartIcon />
           <NavDropdown 
             title={

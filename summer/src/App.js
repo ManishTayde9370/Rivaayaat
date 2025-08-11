@@ -22,6 +22,7 @@ import ProductDetailPage from './pages/ProductDetailPage';
 import CheckoutShipping from './pages/CheckoutShipping';
 import CheckoutPayment from './pages/CheckoutPayment';
 import CheckoutSuccess from './pages/CheckoutSuccess';
+import CheckoutFlow from './pages/CheckoutFlow';
 
 import AdminLogin from './admin/AdminLogin';
 import AdminDashboard from './admin/AdminDashboard';
@@ -217,6 +218,19 @@ function App() {
         />
 
         {/* ✅ Razorpay Checkout Flow */}
+        <Route
+          path="/checkout-flow"
+          element={
+            isLoggedIn ? (
+              <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
+                <CheckoutFlow />
+              </Applayout>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+
         <Route
           path="/checkout/shipping"
           element={

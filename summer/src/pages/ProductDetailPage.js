@@ -67,7 +67,7 @@ const ProductDetailPage = () => {
 
   const handleBuyNow = () => {
     dispatch(addToCart({ ...product, quantity: 1 }));
-    navigate('/checkout/shipping');
+            navigate('/checkout-flow');
   };
 
   const handleToggleWishlist = async () => {

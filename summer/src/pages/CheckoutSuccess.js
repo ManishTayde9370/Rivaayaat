@@ -3,7 +3,9 @@ import { useEffect } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import brandLogo from '../assets/brandlogo.png';
+import { FaCheckCircle, FaDownload, FaHome, FaExclamationTriangle } from 'react-icons/fa';
 import '../css/theme.css';
+import '../css/CheckoutFlow.css';
 
 function CheckoutSuccess() {
   const location = useLocation();
@@ -33,12 +35,33 @@ function CheckoutSuccess() {
   };
 
   return (
-    <div className="container py-5 text-center">
-      <h2 className="cinzel text-success mb-3" style={{ color: 'var(--color-emerald)' }}>
-        <span role="img" aria-label="confetti">🎉</span> Order Placed Successfully!
-      </h2>
-      <p className="mt-3 cinzel" style={{ color: 'var(--color-maroon)' }}>Thank you for shopping with Rivaayaat.</p>
-      <div className="miniature-border mt-4 p-4 shadow-sm scroll-dropdown" id="invoice-section" style={{ maxWidth: 600, margin: '0 auto', textAlign: 'left', background: 'var(--color-ivory)' }}>
+    <div className="checkout-container">
+      <div className="container">
+        <div className="checkout-header">
+          <h1 className="cinzel" style={{ color: 'var(--color-earth)' }}>
+            Order Confirmation
+          </h1>
+          <p style={{ color: 'var(--color-earth)' }}>
+            Your order has been successfully placed
+          </p>
+        </div>
+
+        <div className="checkout-form-container text-center">
+          <div className="checkout-success mb-4">
+            <FaCheckCircle />
+            Order Placed Successfully!
+          </div>
+          
+          <h2 className="cinzel mb-4" style={{ color: 'var(--color-earth)' }}>
+            Thank you for your purchase! 🎉
+          </h2>
+          
+          <p className="mb-4" style={{ color: 'var(--color-earth)' }}>
+            Thank you for shopping with Rivaayaat. Your order has been confirmed and will be shipped to your address soon.
+            You will receive an email confirmation with tracking details.
+          </p>
+
+          <div className="checkout-summary" id="invoice-section">
         <div className="d-flex align-items-center mb-3 gap-3">
           <img src={brandLogo} alt="Brand Logo" style={{ width: 60, height: 60, objectFit: 'contain' }} />
           <div>
@@ -77,20 +100,26 @@ function CheckoutSuccess() {
             ))}
           </tbody>
         </table>
-        <div className="text-end mt-3">
-          <strong className="cinzel" style={{ color: 'var(--color-gold)' }}>Grand Total: ₹{order.amountPaid.toFixed(2)}</strong>
+            <div className="text-end mt-3">
+              <strong className="cinzel" style={{ color: 'var(--color-terracotta)' }}>Grand Total: ₹{order.amountPaid.toFixed(2)}</strong>
+            </div>
+          </div>
+          
+          <div className="d-flex gap-3 justify-content-center mt-4">
+            <button className="checkout-btn checkout-btn-secondary" onClick={handleDownloadInvoice}>
+              <FaDownload />
+              Download Invoice
+            </button>
+            <button
+              className="checkout-btn"
+              onClick={() => navigate('/')}
+            >
+              <FaHome />
+              Back to Home
+            </button>
+          </div>
         </div>
       </div>
-      <button className="btn btn-outline-dark mt-4 scroll-dropdown" onClick={handleDownloadInvoice} style={{ fontFamily: 'Cinzel Decorative, serif', fontSize: '1.1rem', color: 'var(--color-gold)', border: '2px solid var(--color-gold)' }}>
-        <span role="img" aria-label="download">📥</span> Download Invoice
-      </button>
-      <button
-        className="btn btn-dark mt-4 ms-3 scroll-dropdown"
-        onClick={() => navigate('/')}
-        style={{ fontFamily: 'Cinzel Decorative, serif', fontSize: '1.1rem', color: 'var(--color-gold)', border: '2px solid var(--color-gold)' }}
-      >
-        <span role="img" aria-label="home">🏠</span> Back to Home
-      </button>
     </div>
   );
 }
