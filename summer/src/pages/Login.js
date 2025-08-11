@@ -12,7 +12,7 @@ import { FaUserAlt, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-toastify/dist/ReactToastify.css';
-import '../css/login.css';
+import '../css/theme.css';
 
 import bgImage from '../assets/bg-login2.jpeg';
 import SplashScreen from '../components/SplashScreen';
@@ -132,19 +132,21 @@ const Login = () => {
         initial={{ y: 40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.7 }}
-        className="login-card"
+        className="rivaayat-card login-card"
       >
-        <h2 className="login-heading">Login</h2>
-        <p className="login-subheading">Sign in to your account</p>
+        <h2 className="rivaayat-heading text-amber">Login</h2>
+        <p className="rivaayat-subheading text-sand">Sign in to your account</p>
 
         <form onSubmit={handleSubmit}>
           <div className="mb-3 input-group">
-            <span className="input-group-text"><FaUserAlt /></span>
+            <span className="input-group-text rivaayat-input-icon">
+              <FaUserAlt />
+            </span>
             <input
               type="text"
               name="identity"
               placeholder="Username / Email / Phone"
-              className={`form-control ${errors.identity ? 'is-invalid' : ''}`}
+              className={`rivaayat-input form-control ${errors.identity ? 'is-invalid' : ''}`}
               value={identity}
               onChange={(e) => setIdentity(e.target.value)}
             />
@@ -152,17 +154,19 @@ const Login = () => {
           {errors.identity && <div className="text-danger small mb-2">{errors.identity}</div>}
 
           <div className="mb-3 input-group">
-            <span className="input-group-text"><FaLock /></span>
+            <span className="input-group-text rivaayat-input-icon">
+              <FaLock />
+            </span>
             <input
               type={showPwd ? 'text' : 'password'}
               name="password"
               placeholder="Password"
-              className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+              className={`rivaayat-input form-control ${errors.password ? 'is-invalid' : ''}`}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
             <span
-              className="input-group-text"
+              className="input-group-text rivaayat-input-icon"
               onClick={() => setShowPwd(!showPwd)}
               style={{ cursor: 'pointer' }}
             >
@@ -171,17 +175,18 @@ const Login = () => {
           </div>
           {errors.password && <div className="text-danger small mb-2">{errors.password}</div>}
 
-          <button type="submit" className="btn login-btn w-100">Login</button>
+          <button type="submit" className="rivaayat-btn w-100">Login</button>
 
-          <div className="text-center my-3" style={{ color: '#fcecc5', fontWeight: 'bold', position: 'relative' }}>
-            <hr style={{ borderColor: '#fcecc5' }} />
+          <div className="text-center my-3" style={{ color: 'var(--color-amber)', fontWeight: 'bold', position: 'relative' }}>
+            <hr style={{ borderColor: 'var(--color-amber)' }} />
             <span style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.65)',
+              backgroundColor: 'var(--color-cream)',
               padding: '0 10px',
               position: 'absolute',
               top: '-13px',
               left: '50%',
               transform: 'translateX(-50%)',
+              color: 'var(--color-earth)',
             }}>or</span>
           </div>
 
@@ -190,8 +195,8 @@ const Login = () => {
           </div>
 
           <div className="mt-3 text-center">
-            <span>Don't have an account? </span>
-            <Link to="/register" className="register-link">Register</Link>
+            <span className="text-sand">Don't have an account? </span>
+            <Link to="/register" className="rivaayat-link">Register</Link>
           </div>
 
           {message && <div className="alert alert-danger mt-3">{message}</div>}

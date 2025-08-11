@@ -1,6 +1,6 @@
 // src/admin/AdminDashboard.js
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { 
   FaUsers, 
@@ -9,20 +9,12 @@ import {
   FaEnvelope, 
   FaChartBar, 
   FaCog, 
-  FaBell,
-  FaArrowRight,
   FaPlus,
-  FaEye,
-  FaEdit,
-  FaTrash,
-  FaCrown,
-  FaTachometerAlt,
-  FaClipboardList
+  FaEye
 } from 'react-icons/fa';
 import axios from 'axios';
 import { serverEndpoint } from '../components/config';
-import LoadingBar from '../components/LoadingBar';
-import '../css/admin-dashboard.css';
+import '../css/theme.css';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -43,7 +35,6 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       
-      // Fetch real statistics from backend
       const [usersRes, productsRes, ordersRes, messagesRes] = await Promise.all([
         axios.get(`${serverEndpoint}/api/admin/users/analytics`, { withCredentials: true }),
         axios.get(`${serverEndpoint}/api/products`, { withCredentials: true }),
@@ -63,7 +54,6 @@ const AdminDashboard = () => {
       setStats(statsData);
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
-      // Fallback to zero values instead of mock data
       setStats({
         totalUsers: 0,
         totalProducts: 0,
@@ -80,328 +70,235 @@ const AdminDashboard = () => {
   const dashboardCards = [
     {
       title: 'Manage Products',
-      description: 'Add, update, and delete products with images, prices, and descriptions',
+      description: 'Add, update, and delete products',
       icon: <FaBox />,
       link: '/admin/products',
-      color: 'primary',
-      badge: stats.totalProducts,
-      actions: [
-        { label: 'View All', icon: <FaEye />, action: 'view' },
-        { label: 'Add New', icon: <FaPlus />, action: 'add' }
-      ]
+      color: 'maroon',
+      badge: stats.totalProducts
     },
     {
       title: 'Manage Users',
-      description: 'View, search, and manage users. Track registration, roles, and activity',
+      description: 'View and manage user accounts',
       icon: <FaUsers />,
       link: '/admin/users',
-      color: 'success',
-      badge: stats.totalUsers,
-      actions: [
-        { label: 'View All', icon: <FaEye />, action: 'view' },
-        { label: 'Analytics', icon: <FaChartBar />, action: 'analytics' }
-      ]
+      color: 'peacock',
+      badge: stats.totalUsers
     },
     {
       title: 'Manage Orders',
-      description: 'Track, analyze, and update order statuses. View customer analytics',
+      description: 'Track and manage customer orders',
       icon: <FaShoppingCart />,
       link: '/admin/orders',
-      color: 'warning',
-      badge: stats.totalOrders,
-      actions: [
-        { label: 'View All', icon: <FaEye />, action: 'view' },
-        { label: 'Reports', icon: <FaChartBar />, action: 'reports' }
-      ]
+      color: 'turmeric',
+      badge: stats.totalOrders
     },
     {
       title: 'Contact Messages',
-      description: 'View and manage messages submitted via the Contact Us form',
+      description: 'View customer inquiries and feedback',
       icon: <FaEnvelope />,
       link: '/admin/contact-messages',
-      color: 'info',
-      badge: stats.totalMessages,
-      actions: [
-        { label: 'View All', icon: <FaEye />, action: 'view' },
-        { label: 'Mark Read', icon: <FaEdit />, action: 'mark-read' }
-      ]
+      color: 'indigo',
+      badge: stats.totalMessages
+    }
+  ];
+
+  const quickActions = [
+    {
+      title: 'Add Product',
+      description: 'Create a new product',
+      icon: <FaPlus />,
+      link: '/admin/add-product',
+      color: 'maroon'
     },
     {
-      title: 'Review Analytics',
-      description: 'Monitor product reviews, ratings, and customer feedback',
+      title: 'View Analytics',
+      description: 'Check platform statistics',
       icon: <FaChartBar />,
-      link: '/admin/reviews',
-      color: 'secondary',
-      badge: 'New',
-      actions: [
-        { label: 'View Analytics', icon: <FaChartBar />, action: 'analytics' },
-        { label: 'Reports', icon: <FaEye />, action: 'reports' }
-      ]
+      link: '/admin/analytics',
+      color: 'peacock'
     },
     {
       title: 'Settings',
-      description: 'Configure platform settings, security, and system preferences',
+      description: 'Manage platform settings',
       icon: <FaCog />,
       link: '/admin/settings',
-      color: 'dark',
-      badge: 'Config',
-      actions: [
-        { label: 'General', icon: <FaCog />, action: 'general' },
-        // { label: 'Security', icon: <FaBell />, action: 'security' }
-      ]
+      color: 'turmeric'
     }
   ];
 
   if (loading) {
     return (
-      <div className="admin-container">
-        <LoadingBar message="Loading dashboard..." />
+      <div className="container py-5">
+        <div className="text-center">
+          <div className="rivaayat-motif">
+            <div className="rivaayat-loader mb-3" />
+            <h4 className="cinzel text-earth mb-2">Loading Dashboard</h4>
+            <p className="inter text-forest">Please wait...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="admin-container">
-      {/* Enhanced Header Section */}
-      <div className="admin-header">
-        <div className="header-content">
-          <div className="header-left">
-            <h1 className="admin-title">
-              <FaCrown className="title-icon" />
-              Admin Dashboard
-            </h1>
-            <p className="admin-subtitle">
-              Manage your Rivaayat e-commerce platform with powerful tools and analytics
-            </p>
-          </div>
-          <div className="header-right">
-            <div className="quick-stats">
-              <div className="stat-item">
-                <span className="stat-number">{stats.totalUsers}</span>
-                <span className="stat-label">Users</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">{stats.totalProducts}</span>
-                <span className="stat-label">Products</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">{stats.totalOrders}</span>
-                <span className="stat-label">Orders</span>
-              </div>
-            </div>
-          </div>
+    <div className="container py-5">
+      {/* Header */}
+              <div className="text-center mb-5">
+          <h1 className="rivaayat-heading text-earth">
+            Admin Dashboard
+          </h1>
+          <p className="rivaayat-subheading text-forest">
+            Manage your Rivaayat platform
+          </p>
         </div>
-      </div>
 
-      {/* Analytics Cards */}
-      <div className="analytics-section">
-        <div className="analytics-grid">
-          <Card className="analytics-card">
-            <Card.Body>
-              <div className="analytics-icon">
-                <FaUsers />
+      {/* Stats Overview */}
+      <Row className="mb-5">
+        <Col lg={3} md={6} className="mb-4">
+          <div className="rivaayat-card text-center">
+            <div className="rivaayat-badge rivaayat-badge-maroon mb-3" style={{ fontSize: '2rem' }}>
+              <FaUsers />
+            </div>
+            <h3 className="cinzel text-earth mb-2">{stats.totalUsers}</h3>
+            <p className="inter text-forest mb-0">Total Users</p>
+          </div>
+        </Col>
+        <Col lg={3} md={6} className="mb-4">
+          <div className="rivaayat-card text-center">
+            <div className="rivaayat-badge rivaayat-badge-peacock mb-3" style={{ fontSize: '2rem' }}>
+              <FaBox />
+            </div>
+            <h3 className="cinzel text-forest mb-2">{stats.totalProducts}</h3>
+            <p className="inter text-earth mb-0">Total Products</p>
+          </div>
+        </Col>
+        <Col lg={3} md={6} className="mb-4">
+          <div className="rivaayat-card text-center">
+            <div className="rivaayat-badge rivaayat-badge-turmeric mb-3" style={{ fontSize: '2rem' }}>
+              <FaShoppingCart />
+            </div>
+            <h3 className="cinzel text-amber mb-2">{stats.totalOrders}</h3>
+            <p className="inter text-forest mb-0">Total Orders</p>
+          </div>
+        </Col>
+        <Col lg={3} md={6} className="mb-4">
+          <div className="rivaayat-card text-center">
+            <div className="rivaayat-badge rivaayat-badge-indigo mb-3" style={{ fontSize: '2rem' }}>
+              <FaEnvelope />
+            </div>
+            <h3 className="cinzel text-warm-gray mb-2">{stats.totalMessages}</h3>
+            <p className="inter text-forest mb-0">Messages</p>
+          </div>
+        </Col>
+      </Row>
+
+      {/* Management Cards */}
+      <Row className="mb-5">
+        <Col lg={12}>
+          <h3 className="cinzel text-earth mb-4 text-center">
+            Management
+          </h3>
+        </Col>
+        {dashboardCards.map((card, index) => (
+          <Col lg={6} className="mb-4" key={index}>
+            <div className="rivaayat-card h-100">
+              <div className="d-flex justify-content-between align-items-start mb-3">
+                <div className="rivaayat-badge" style={{ fontSize: '1.5rem' }}>
+                  {card.icon}
+                </div>
+                <span className="rivaayat-badge rivaayat-badge-maroon">
+                  {card.badge}
+                </span>
               </div>
-              <div className="analytics-content">
-                <h3>{stats.totalUsers}</h3>
-                <p>Total Users</p>
-              </div>
-            </Card.Body>
-          </Card>
-          
-          <Card className="analytics-card">
-            <Card.Body>
-              <div className="analytics-icon">
-                <FaBox />
-              </div>
-              <div className="analytics-content">
-                <h3>{stats.totalProducts}</h3>
-                <p>Total Products</p>
-              </div>
-            </Card.Body>
-          </Card>
-          
-          <Card className="analytics-card">
-            <Card.Body>
-              <div className="analytics-icon">
-                <FaShoppingCart />
-              </div>
-              <div className="analytics-content">
-                <h3>{stats.totalOrders}</h3>
-                <p>Total Orders</p>
-              </div>
-            </Card.Body>
-          </Card>
-          
-          <Card className="analytics-card">
-            <Card.Body>
-              <div className="analytics-icon">
-                <FaEnvelope />
-              </div>
-              <div className="analytics-content">
-                <h3>{stats.totalMessages}</h3>
-                <p>Messages</p>
-              </div>
-            </Card.Body>
-          </Card>
-        </div>
-      </div>
+              <h4 className="cinzel text-earth mb-3">{card.title}</h4>
+              <p className="inter text-forest mb-4">{card.description}</p>
+              <Link to={card.link} className="rivaayat-btn btn-sm">
+                <FaEye className="me-2" />
+                Manage
+              </Link>
+            </div>
+          </Col>
+        ))}
+      </Row>
 
       {/* Quick Actions */}
-      <div className="search-filters-section">
-        <div className="actions-header">
-          <h3>Quick Actions</h3>
-          <p>Common tasks to get you started</p>
-        </div>
-        <div className="actions-grid">
-          <Link to="/admin/products/add" className="action-card add-product">
-            <FaPlus className="action-icon" />
-            <span>Add Product</span>
-          </Link>
-          <Link to="/admin/users" className="action-card view-users">
-            <FaUsers className="action-icon" />
-            <span>View Users</span>
-          </Link>
-          <Link to="/admin/orders" className="action-card view-orders">
-            <FaShoppingCart className="action-icon" />
-            <span>Recent Orders</span>
-          </Link>
-          <Link to="/admin/contact-messages" className="action-card view-messages">
-            <FaEnvelope className="action-icon" />
-            <span>Messages</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* Main Dashboard Cards */}
-      <div className="dashboard-grid">
-        {dashboardCards.map((card, index) => (
-          <div key={index} className="dashboard-card">
-            <Card className={`h-100 border-0 shadow-sm card-${card.color}`}>
-              <Card.Body className="p-4">
-                <div className="card-header">
-                  <div className="card-icon-wrapper">
-                    {card.icon}
-                  </div>
-                  <Badge bg={card.color} className="card-badge">
-                    {card.badge}
-                  </Badge>
+      <Row className="mb-5">
+        <Col lg={12}>
+          <h3 className="cinzel text-earth mb-4 text-center">
+            Quick Actions
+          </h3>
+        </Col>
+        {quickActions.map((action, index) => (
+          <Col lg={4} md={6} className="mb-4" key={index}>
+            <Link to={action.link} className="text-decoration-none">
+              <div className="rivaayat-card text-center h-100 rivaayat-transition">
+                <div className="rivaayat-badge mb-3" style={{ fontSize: '2rem' }}>
+                  {action.icon}
                 </div>
-                
-                <Card.Title className="card-title mt-3">
-                  {card.title}
-                </Card.Title>
-                
-                <Card.Text className="card-description">
-                  {card.description}
-                </Card.Text>
-                
-                <div className="card-actions">
-                  <Link to={card.link} className="btn btn-primary btn-sm">
-                    <FaArrowRight className="me-2" />
-                    Manage
-                  </Link>
-                  
-                  <div className="action-buttons">
-                    {card.actions.map((action, actionIndex) => (
-                      <Button
-                        key={actionIndex}
-                        variant="outline-secondary"
-                        size="sm"
-                        className="action-btn"
-                        title={action.label}
-                      >
-                        {action.icon}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              </Card.Body>
-            </Card>
-          </div>
+                <h5 className="cinzel text-maroon mb-2">{action.title}</h5>
+                <p className="inter text-peacock mb-0">{action.description}</p>
+              </div>
+            </Link>
+          </Col>
         ))}
-      </div>
+      </Row>
 
-      {/* Recent Activity Section */}
-      <div className="recent-activity mt-5">
-        <div className="activity-header">
-          <h3>Recent Activity</h3>
-          <p>Latest updates and notifications</p>
-        </div>
+      {/* Recent Activity */}
+      <Row>
+        <Col lg={6} className="mb-4">
+          <div className="rivaayat-card">
+            <h4 className="cinzel text-earth mb-3">
+              Recent Orders
+            </h4>
+            {stats.recentOrders.length > 0 ? (
+              <div>
+                {stats.recentOrders.slice(0, 5).map((order, index) => (
+                  <div key={index} className="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom">
+                    <div>
+                                        <p className="inter text-forest mb-0">Order #{order._id?.slice(-6)}</p>
+                  <small className="text-muted">{order.status}</small>
+                    </div>
+                    <span className="rivaayat-badge">₹{order.total}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+                              <p className="inter text-forest">No recent orders</p>
+            )}
+            <Link to="/admin/orders" className="rivaayat-btn btn-sm mt-3">
+              View All Orders
+            </Link>
+          </div>
+        </Col>
         
-        <Row>
-          <Col lg={6}>
-            <Card className="activity-card">
-              <Card.Header>
-                <h5 className="mb-0">
-                  <FaShoppingCart className="me-2" />
-                  Recent Orders
-                </h5>
-              </Card.Header>
-              <Card.Body>
-                <div className="activity-list">
-                  <div className="activity-item">
-                    <div className="activity-icon order-icon">
-                      <FaShoppingCart />
+        <Col lg={6} className="mb-4">
+          <div className="rivaayat-card">
+            <h4 className="cinzel text-earth mb-3">
+              Recent Users
+            </h4>
+            {stats.recentUsers.length > 0 ? (
+              <div>
+                {stats.recentUsers.slice(0, 5).map((user, index) => (
+                  <div key={index} className="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom">
+                    <div>
+                                        <p className="inter text-forest mb-0">{user.name || user.email}</p>
+                  <small className="text-muted">{user.email}</small>
                     </div>
-                    <div className="activity-content">
-                      <div className="activity-title">New order received</div>
-                      <div className="activity-desc">Order #1234 - ₹2,500</div>
-                      <div className="activity-time">2 minutes ago</div>
-                    </div>
+                    <span className="rivaayat-badge rivaayat-badge-maroon">
+                      {new Date(user.createdAt).toLocaleDateString()}
+                    </span>
                   </div>
-                  
-                  <div className="activity-item">
-                    <div className="activity-icon order-icon">
-                      <FaShoppingCart />
-                    </div>
-                    <div className="activity-content">
-                      <div className="activity-title">Order shipped</div>
-                      <div className="activity-desc">Order #1233 - ₹1,800</div>
-                      <div className="activity-time">15 minutes ago</div>
-                    </div>
-                  </div>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-          
-          <Col lg={6}>
-            <Card className="activity-card">
-              <Card.Header>
-                <h5 className="mb-0">
-                  <FaUsers className="me-2" />
-                  New Users
-                </h5>
-              </Card.Header>
-              <Card.Body>
-                <div className="activity-list">
-                  <div className="activity-item">
-                    <div className="activity-icon user-icon">
-                      <FaUsers />
-                    </div>
-                    <div className="activity-content">
-                      <div className="activity-title">New user registered</div>
-                      <div className="activity-desc">john.doe@example.com</div>
-                      <div className="activity-time">5 minutes ago</div>
-                    </div>
-                  </div>
-                  
-                  <div className="activity-item">
-                    <div className="activity-icon user-icon">
-                      <FaUsers />
-                    </div>
-                    <div className="activity-content">
-                      <div className="activity-title">User profile updated</div>
-                      <div className="activity-desc">jane.smith@example.com</div>
-                      <div className="activity-time">1 hour ago</div>
-                    </div>
-                  </div>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </div>
+                ))}
+              </div>
+            ) : (
+                              <p className="inter text-forest">No recent users</p>
+            )}
+            <Link to="/admin/users" className="rivaayat-btn btn-sm mt-3">
+              View All Users
+            </Link>
+          </div>
+        </Col>
+      </Row>
     </div>
   );
 };

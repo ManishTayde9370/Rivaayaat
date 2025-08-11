@@ -18,9 +18,12 @@ router.get('/', requireAuth, async (req, res) => {
 // ✅ PUT /api/cart - Save/update current user's cart
 router.put('/', requireAuth, async (req, res) => {
   const { items } = req.body;
+  
+  console.log('Received cart data:', { items, body: req.body });
 
   // 🛡️ Validate: Must be an array
   if (!Array.isArray(items)) {
+    console.log('Invalid cart format - not an array:', items);
     return res.status(400).json({ message: 'Invalid cart format. Expected an array.' });
   }
 
@@ -32,26 +35,31 @@ router.put('/', requireAuth, async (req, res) => {
   // 🔍 Validate: All fields must be present and valid
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
+    console.log(`Validating item ${i}:`, item);
     
     if (!item.productId) {
+      console.log(`Item ${i} missing productId:`, item);
       return res.status(400).json({ 
         message: `Item at index ${i} is missing productId` 
       });
     }
     
     if (!item.name || typeof item.name !== 'string' || item.name.trim().length === 0) {
+      console.log(`Item ${i} has invalid name:`, item);
       return res.status(400).json({ 
         message: `Item at index ${i} has invalid name` 
       });
     }
     
     if (typeof item.price !== 'number' || item.price <= 0) {
+      console.log(`Item ${i} has invalid price:`, item);
       return res.status(400).json({ 
         message: `Item at index ${i} has invalid price` 
       });
     }
     
     if (typeof item.quantity !== 'number' || item.quantity <= 0 || item.quantity > 100) {
+      console.log(`Item ${i} has invalid quantity:`, item);
       return res.status(400).json({ 
         message: `Item at index ${i} has invalid quantity (must be 1-100)` 
       });

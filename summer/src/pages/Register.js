@@ -5,7 +5,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaUser, FaEnvelope, FaPhone, FaLock, FaUserTag } from 'react-icons/fa';
 
-import '../css/login.css';
+import '../css/theme.css';
 import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { authNotifications } from '../utils/notifications';
@@ -50,20 +50,22 @@ const Register = () => {
         initial={{ y: 40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.7 }}
-        className="login-card"
+        className="rivaayat-card login-card"
       >
         
-        <h2 className="login-heading">Register</h2>
-        <p className="login-subheading">Create your account</p>
+        <h2 className="rivaayat-heading text-amber">Register</h2>
+        <p className="rivaayat-subheading text-sand">Create your account</p>
 
         <form onSubmit={handleSubmit}>
           <div className="mb-3 input-group">
-            <span className="input-group-text"><FaUser /></span>
+            <span className="input-group-text rivaayat-input-icon">
+              <FaUser />
+            </span>
             <input
               type="text"
               name="name"
               placeholder="Name"
-              className="form-control"
+              className="rivaayat-input form-control"
               required
               value={formData.name}
               onChange={handleChange}
@@ -71,12 +73,14 @@ const Register = () => {
           </div>
 
           <div className="mb-3 input-group">
-            <span className="input-group-text"><FaUserTag /></span>
+            <span className="input-group-text rivaayat-input-icon">
+              <FaUserTag />
+            </span>
             <input
               type="text"
               name="username"
               placeholder="Username"
-              className="form-control"
+              className="rivaayat-input form-control"
               required
               value={formData.username}
               onChange={handleChange}
@@ -84,12 +88,14 @@ const Register = () => {
           </div>
 
           <div className="mb-3 input-group">
-            <span className="input-group-text"><FaEnvelope /></span>
+            <span className="input-group-text rivaayat-input-icon">
+              <FaEnvelope />
+            </span>
             <input
               type="email"
               name="email"
               placeholder="Email"
-              className="form-control"
+              className="rivaayat-input form-control"
               required
               value={formData.email}
               onChange={handleChange}
@@ -97,12 +103,14 @@ const Register = () => {
           </div>
 
           <div className="mb-3 input-group">
-            <span className="input-group-text"><FaPhone /></span>
+            <span className="input-group-text rivaayat-input-icon">
+              <FaPhone />
+            </span>
             <input
               type="text"
               name="phone"
               placeholder="Phone"
-              className="form-control"
+              className="rivaayat-input form-control"
               required
               value={formData.phone}
               onChange={handleChange}
@@ -110,23 +118,25 @@ const Register = () => {
           </div>
 
           <div className="mb-4 input-group">
-            <span className="input-group-text"><FaLock /></span>
+            <span className="input-group-text rivaayat-input-icon">
+              <FaLock />
+            </span>
             <input
               type="password"
               name="password"
               placeholder="Password"
-              className="form-control"
+              className="rivaayat-input form-control"
               required
               value={formData.password}
               onChange={handleChange}
             />
           </div>
 
-          <button type="submit" className="btn login-btn w-100">Register</button>
+          <button type="submit" className="rivaayat-btn w-100">Register</button>
 
           <div className="mt-3 text-center">
-            <span>Already have an account? </span>
-            <Link to="/login" className="register-link">Login</Link>
+            <span className="text-sand">Already have an account? </span>
+            <Link to="/login" className="rivaayat-link">Login</Link>
           </div>
         </form>
       </motion.div>

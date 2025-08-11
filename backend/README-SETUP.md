@@ -81,3 +81,4 @@ The server uses these defaults for development:
 - JWT Secret: dev-jwt-secret-key-change-in-production
 - Environment: development
 
+

@@ -224,23 +224,24 @@ const Product = () => {
       
       return (
         <div className="col-md-6 col-lg-4 mb-4" key={product._id}>
-          <div className="product-card h-100 shadow-sm">
-            <div className="product-image-container position-relative">
+          <div className="rivaayat-product-card h-100">
+            <div className="position-relative">
               <Zoom>
                 <img
-                  src={product.images?.[0] || 'https://via.placeholder.com/300x200?text=No+Image'}
+                  src={product.images?.[0] || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4='}
                   alt={product.name}
-                  className="product-image"
+                  className="rivaayat-product-image"
                   loading="lazy"
                   onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/300x200?text=Image+Not+Found';
+                    e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4=';
                   }}
                 />
               </Zoom>
               
               {/* Wishlist Button */}
               <button
-                className="wishlist-btn position-absolute top-0 end-0 m-2 btn btn-sm"
+                className="position-absolute top-0 end-0 m-2 rivaayat-btn rivaayat-btn-outline"
+                style={{ padding: '0.5rem', borderRadius: '50%', width: '40px', height: '40px' }}
                 onClick={(e) => {
                   e.preventDefault();
                   handleWishlistToggle(product._id);
@@ -251,44 +252,44 @@ const Product = () => {
                 {isInWishlist ? (
                   <FaHeart className="text-danger" />
                 ) : (
-                  <FaRegHeart className="text-muted" />
+                  <FaRegHeart />
                 )}
               </button>
               
               {/* Stock Badge */}
               {product.stock <= 0 && (
-                <span className="position-absolute top-0 start-0 m-2 badge bg-danger">
+                <span className="position-absolute top-0 start-0 m-2 rivaayat-badge rivaayat-badge-maroon">
                   Out of Stock
                 </span>
               )}
               
               {product.stock > 0 && product.stock <= 5 && (
-                <span className="position-absolute top-0 start-0 m-2 badge bg-warning">
+                <span className="position-absolute top-0 start-0 m-2 rivaayat-badge">
                   Only {product.stock} left
                 </span>
               )}
             </div>
             
-            <div className="card-body d-flex flex-column">
-              <h6 className="product-title text-truncate" title={product.name}>
+            <div className="rivaayat-product-content d-flex flex-column">
+              <h6 className="rivaayat-product-title text-truncate" title={product.name}>
                 {product.name}
               </h6>
               
-              <p className="product-description text-muted small">
+              <p className="inter text-muted small mb-3">
                 {product.description?.substring(0, 80)}
                 {product.description?.length > 80 && '...'}
               </p>
               
-              <div className="product-details">
+              <div className="product-details mb-3">
                 <div className="d-flex justify-content-between align-items-center mb-2">
-                  <span className="price fw-bold text-primary">₹{product.price}</span>
+                  <span className="rivaayat-product-price">₹{product.price}</span>
                   {product.category && (
-                    <span className="badge bg-light text-dark">{product.category}</span>
+                    <span className="rivaayat-badge rivaayat-badge-indigo">{product.category}</span>
                   )}
                 </div>
                 
                 {product.artisanName && (
-                  <small className="text-muted">By {product.artisanName}</small>
+                  <small className="inter text-muted">By {product.artisanName}</small>
                 )}
               </div>
               
@@ -296,13 +297,13 @@ const Product = () => {
                 <div className="row g-2">
                   <div className="col-6">
                     <button
-                      className="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center"
+                      className="rivaayat-btn btn-sm w-100 d-flex align-items-center justify-content-center"
                       onClick={() => handleAddToCart(product)}
                       disabled={product.stock <= 0 || isAddingToCartThis || !userDetails?.email}
                     >
                       {isAddingToCartThis ? (
                         <>
-                          <span className="spinner-border spinner-border-sm me-1" />
+                          <span className="rivaayat-loader me-1" />
                           Adding...
                         </>
                       ) : (
@@ -316,7 +317,7 @@ const Product = () => {
                   <div className="col-6">
                     <Link
                       to={`/product/${product._id}`}
-                      className="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center"
+                      className="rivaayat-btn rivaayat-btn-outline btn-sm w-100 d-flex align-items-center justify-content-center"
                     >
                       <FaEye className="me-1" />
                       View
@@ -357,13 +358,14 @@ const Product = () => {
     }
     
     return (
-      <nav aria-label="Product pagination">
+              <nav aria-label="Products pagination">
         <ul className="pagination justify-content-center">
           <li className={`page-item ${current === 1 ? 'disabled' : ''}`}>
             <button
-              className="page-link"
+              className="page-link rivaayat-btn rivaayat-btn-outline"
               onClick={() => handlePageChange(current - 1)}
               disabled={current === 1}
+              style={{ margin: '0 0.25rem' }}
             >
               Previous
             </button>
@@ -372,11 +374,12 @@ const Product = () => {
           {pages.map((page, index) => (
             <li key={index} className={`page-item ${page === current ? 'active' : page === '...' ? 'disabled' : ''}`}>
               {page === '...' ? (
-                <span className="page-link">...</span>
+                <span className="page-link inter text-peacock">...</span>
               ) : (
                 <button
-                  className="page-link"
+                  className={`page-link ${page === current ? 'rivaayat-btn' : 'rivaayat-btn rivaayat-btn-outline'}`}
                   onClick={() => handlePageChange(page)}
+                  style={{ margin: '0 0.25rem' }}
                 >
                   {page}
                 </button>
@@ -386,9 +389,10 @@ const Product = () => {
           
           <li className={`page-item ${current === totalPages ? 'disabled' : ''}`}>
             <button
-              className="page-link"
+              className="page-link rivaayat-btn rivaayat-btn-outline"
               onClick={() => handlePageChange(current + 1)}
               disabled={current === totalPages}
+              style={{ margin: '0 0.25rem' }}
             >
               Next
             </button>
@@ -403,8 +407,11 @@ const Product = () => {
     return (
       <div className="container py-5">
         <div className="text-center">
-          <LoadingBar />
-          <p className="mt-3 text-muted">Loading products...</p>
+          <div className="rivaayat-motif">
+            <div className="rivaayat-loader mb-3" />
+            <h4 className="cinzel text-maroon mb-2">Loading Cultural Treasures</h4>
+            <p className="inter text-peacock">Discovering handcrafted stories...</p>
+          </div>
         </div>
       </div>
     );
@@ -415,11 +422,11 @@ const Product = () => {
     return (
       <div className="container py-5">
         <div className="text-center">
-          <div className="alert alert-danger">
-            <h5>Oops! Something went wrong</h5>
-            <p>{error}</p>
-            <button className="btn btn-primary" onClick={handleRetry}>
-              Try Again
+          <div className="rivaayat-card bg-turmeric text-black">
+            <h4 className="cinzel text-maroon mb-3">🕉️ Cultural Connection Lost</h4>
+            <p className="inter mb-3">{error}</p>
+            <button className="rivaayat-btn" onClick={handleRetry}>
+              Reconnect
             </button>
           </div>
         </div>
@@ -429,17 +436,28 @@ const Product = () => {
 
   return (
     <div className="container py-5">
+      {/* Header */}
+      <div className="text-center mb-5">
+                  <h1 className="rivaayat-heading text-earth">
+            Our Products
+          </h1>
+          <p className="rivaayat-subheading text-forest">
+            Discover handcrafted treasures with authentic cultural heritage
+          </p>
+      </div>
+
       {/* Search Results Header */}
       {searchTerm && (
-        <div className="mb-4">
-          <h2>Search Results for "{searchTerm}"</h2>
-          <p className="text-muted">{products.length} products found</p>
+        <div className="rivaayat-card mb-4">
+          <h3 className="cinzel text-earth mb-2">Search Results for "{searchTerm}"</h3>
+          <p className="inter text-forest">{products.length} products found</p>
         </div>
       )}
       
       {notFound && (
-        <div className="alert alert-info">
-          No products found for your search. Showing all products instead.
+        <div className="rivaayat-card bg-amber text-earth">
+          <h5 className="cinzel mb-2">No products found</h5>
+          <p className="inter mb-0">No products found for your search. Showing all products instead.</p>
         </div>
       )}
 
@@ -459,21 +477,23 @@ const Product = () => {
       {/* Filter Loading Indicator */}
       {filtersLoading && (
         <div className="text-center mb-3">
-          <div className="spinner-border spinner-border-sm text-primary" />
-          <span className="ms-2 text-muted">Applying filters...</span>
+          <div className="rivaayat-loader" />
+          <span className="ms-2 inter text-forest">Applying filters...</span>
         </div>
       )}
 
       {/* Error Banner (when there are existing products) */}
       {error && products.length > 0 && (
-        <div className="alert alert-warning alert-dismissible fade show" role="alert">
-          {error}
+        <div className="rivaayat-card bg-turmeric text-black">
+          <h5 className="cinzel mb-2">⚠️ Notice</h5>
+          <p className="inter mb-0">{error}</p>
           <button
             type="button"
-            className="btn-close"
+            className="rivaayat-btn btn-sm mt-2"
             onClick={() => setError(null)}
-            aria-label="Close"
-          />
+          >
+            Dismiss
+          </button>
         </div>
       )}
 
@@ -483,12 +503,12 @@ const Product = () => {
           <div className="row mb-4">
             <div className="col-12">
               <div className="d-flex justify-content-between align-items-center">
-                <p className="text-muted mb-0">
+                <p className="inter text-forest mb-0">
                   Showing {products.length} of {pagination.total || products.length} products
                 </p>
                 <div className="d-flex align-items-center">
-                  <FaSort className="me-1 text-muted" />
-                  <small className="text-muted">Sorted by relevance</small>
+                  <FaSort className="me-1 text-forest" />
+                  <small className="inter text-forest">Sorted by relevance</small>
                 </div>
               </div>
             </div>
@@ -509,19 +529,21 @@ const Product = () => {
         </>
       ) : (
         <div className="text-center py-5">
-          <div className="mb-4">
-            <FaFilter size={48} className="text-muted" />
+          <div className="rivaayat-motif">
+            <div className="mb-4">
+                              <FaFilter size={48} className="text-forest" />
+            </div>
+            <h4 className="cinzel text-earth">No Products Found</h4>
+            <p className="inter text-forest mb-4">Try adjusting your filters or search terms</p>
+            {Object.keys(filters).length > 0 && (
+              <button
+                className="rivaayat-btn rivaayat-btn-outline"
+                onClick={() => setFilters({})}
+              >
+                Clear Filters
+              </button>
+            )}
           </div>
-          <h4>No products found</h4>
-          <p className="text-muted">Try adjusting your filters or search terms</p>
-          {Object.keys(filters).length > 0 && (
-            <button
-              className="btn btn-outline-primary"
-              onClick={() => setFilters({})}
-            >
-              Clear Filters
-            </button>
-          )}
         </div>
       )}
     </div>

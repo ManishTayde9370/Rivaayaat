@@ -110,7 +110,7 @@ const ProductDetailPage = () => {
           <div className="miniature-border p-2" style={{ background: 'var(--color-ivory)' }}>
             <Zoom>
               <img
-                src={product.images?.[activeImageIndex] || '/fallback.jpg'}
+                src={product.images?.[activeImageIndex] || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4='}
                 alt={product.name}
                 className="img-fluid rounded"
                 style={{
@@ -120,7 +120,7 @@ const ProductDetailPage = () => {
                   height: '400px',
                   boxShadow: '0 4px 24px rgba(123,34,48,0.08)'
                 }}
-                onError={(e) => (e.target.src = '/fallback.jpg')}
+                onError={(e) => (e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4=')}
               />
             </Zoom>
             <div className="d-flex mt-3 justify-content-center">
@@ -130,7 +130,7 @@ const ProductDetailPage = () => {
                   src={img}
                   alt={`thumb-${i}`}
                   onClick={() => setActiveImageIndex(i)}
-                  onError={(e) => (e.target.src = '/fallback.jpg')}
+                  onError={(e) => (e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4=')}
                   className={`me-2 rounded border ${i === activeImageIndex ? 'border-warning' : 'border-light'}`}
                   style={{
                     width: '70px',
