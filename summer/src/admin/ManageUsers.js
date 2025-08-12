@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Spinner, Alert, Form, InputGroup, Modal, Pagination, Badge, Card } from 'react-bootstrap';
 import axios from 'axios';
+import { serverEndpoint } from '../components/config';
 import { saveAs } from 'file-saver';
 import { Bar, Pie, Line } from 'react-chartjs-2';
 import { 
@@ -21,7 +22,7 @@ import 'chart.js/auto';
 import LoadingBar from '../components/LoadingBar';
 import { adminNotifications } from '../utils/notifications';
 
-const API = 'http://localhost:5000/api/admin/users';
+const API = `${serverEndpoint}/api/admin/users`;
 
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
@@ -101,7 +102,7 @@ const ManageUsers = () => {
     setTrendsLoading(true);
     try {
       const params = {};
-      const res = await axios.get('http://localhost:5000/api/admin/product-trends', { params, withCredentials: true });
+      const res = await axios.get(`${serverEndpoint}/api/admin/product-trends`, { params, withCredentials: true });
       setProductTrends(res.data.trends || []);
     } catch (err) {
       console.error('Failed to fetch product trends:', err);

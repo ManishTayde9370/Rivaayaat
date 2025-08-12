@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { serverEndpoint } from '../components/config';
 import { Table, Button, Modal, Form, Image } from 'react-bootstrap';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { adminNotifications } from '../utils/notifications';
 
-const API = 'http://localhost:5000/api/admin/products';
+const API = `${serverEndpoint}/api/admin/products`;
 
 const ManageProducts = () => {
   const [products, setProducts] = useState([]);
@@ -153,7 +154,7 @@ const ManageProducts = () => {
                 {p.images?.map((img, i) => (
                   <Image
                     key={i}
-                    src={img.startsWith('http') ? img : `http://localhost:5000/${img}`}
+                    src={img.startsWith('http') ? img : `${serverEndpoint}/${img}`}
                     alt="img"
                     width={60}
                     height={60}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
+import { serverEndpoint } from '../components/config';
 import LoadingBar from '../components/LoadingBar';
 
 const TrackOrder = () => {
@@ -16,7 +17,7 @@ const TrackOrder = () => {
   useEffect(() => {
     if (userDetails?._id) {
       setRecentLoading(true);
-      axios.get(`/api/orders?userId=${userDetails._id}`)
+      axios.get(`${serverEndpoint}/api/checkout/orders`, { withCredentials: true })
         .then(res => setRecentOrders(res.data.orders || []))
         .catch(() => setRecentOrders([]))
         .finally(() => setRecentLoading(false));
@@ -29,8 +30,10 @@ const TrackOrder = () => {
     setResult(null);
     setTrackError(null);
     try {
-      const res = await axios.post('/api/orders/track', { orderId, email });
-      setResult(res.data.order);
+      // No dedicated tracking endpoint exists; fetch and filter recent orders instead
+      const res = await axios.get(`${serverEndpoint}/api/checkout/orders`, { withCredentials: true });
+      const match = (res.data.orders || []).find(o => o._id === orderId && (o.user?.email === email || email === userDetails?.email));
+      if (match) setResult(match); else throw new Error('Not found');
     } catch (err) {
       setTrackError('Order not found or tracking failed. Please check your details and try again.');
       setResult(null);

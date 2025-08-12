@@ -40,10 +40,10 @@ const dashboard = handleAsyncError(async (req, res) => {
     
     return res.status(200).json({
       success: true,
-      message: `Welcome Admin, ${req.user.name}`,
+      message: `Welcome Admin, ${req.user.name || req.user.username || req.user.email}`,
       userInfo: {
         _id: req.user._id,
-        name: req.user.name,
+        name: req.user.name || req.user.username || req.user.email,
         email: req.user.email,
         isAdmin: req.user.isAdmin,
         lastLogin: req.user.lastLogin
@@ -151,7 +151,7 @@ const getAllUsers = handleAsyncError(async (req, res) => {
       { $match: orderMatch },
       { $unwind: '$items' },
       { $group: {
-          _id: { user: '$user', product: '$items.product' },
+          _id: { user: '$user', product: '$items.productId' },
           count: { $sum: '$items.quantity' }
         }
       },
@@ -427,7 +427,7 @@ const getUserOrders = handleAsyncError(async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limitNum)
-      .populate('items.product', 'name price image');
+      .populate('items.productId', 'name price images');
 
     const totalOrders = await Order.countDocuments({ user: id });
 
@@ -478,7 +478,7 @@ const getProductTrends = handleAsyncError(async (req, res) => {
       { $unwind: '$items' },
       {
         $group: {
-          _id: '$items.product',
+          _id: '$items.productId',
           totalQuantity: { $sum: '$items.quantity' },
           totalRevenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } },
           orderCount: { $sum: 1 }
@@ -496,14 +496,19 @@ const getProductTrends = handleAsyncError(async (req, res) => {
     const products = await require('../model/Product').find({ _id: { $in: productIds } });
     const productMap = Object.fromEntries(products.map(p => [p._id.toString(), p]));
 
-    const trendsWithDetails = trends.map(trend => ({
-      productId: trend._id,
-      productName: productMap[trend._id.toString()]?.name || 'Unknown Product',
-      totalQuantity: trend.totalQuantity,
-      totalRevenue: trend.totalRevenue,
-      orderCount: trend.orderCount,
-      averagePrice: trend.totalRevenue / trend.totalQuantity
-    }));
+    const trendsWithDetails = trends
+      .filter(trend => trend && trend._id) // guard against null product IDs
+      .map(trend => {
+        const key = String(trend._id);
+        return {
+          productId: trend._id,
+          productName: productMap[key]?.name || 'Unknown Product',
+          totalQuantity: trend.totalQuantity,
+          totalRevenue: trend.totalRevenue,
+          orderCount: trend.orderCount,
+          averagePrice: trend.totalQuantity ? (trend.totalRevenue / trend.totalQuantity) : 0
+        };
+      });
 
     return res.status(200).json({
       success: true,

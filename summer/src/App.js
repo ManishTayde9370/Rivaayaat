@@ -12,6 +12,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Contact from './pages/Contact';
+import FAQs from './pages/FAQs';
+import UserProfile from './pages/UserProfile';
+import UserOrders from './pages/UserOrders';
 import About from './pages/About';
 import HomePublic from './pages/HomePublic';
 import HomePrivate from './pages/HomePrivate';
@@ -22,7 +25,6 @@ import ProductDetailPage from './pages/ProductDetailPage';
 import CheckoutShipping from './pages/CheckoutShipping';
 import CheckoutPayment from './pages/CheckoutPayment';
 import CheckoutSuccess from './pages/CheckoutSuccess';
-import CheckoutFlow from './pages/CheckoutFlow';
 
 import AdminLogin from './admin/AdminLogin';
 import AdminDashboard from './admin/AdminDashboard';
@@ -87,7 +89,7 @@ function App() {
   // Socket.IO real-time updates
   useEffect(() => {
     if (!userDetails?._id) return;
-    const socket = io('http://localhost:5000', { withCredentials: true });
+    const socket = io(serverEndpoint, { withCredentials: true });
     socket.emit('register', userDetails._id);
     
     // Only handle essential real-time updates, not notifications
@@ -188,7 +190,14 @@ function App() {
           }
         />
 
-        <Route path="/product/:id" element={<ProductDetailPage />} />
+        <Route
+          path="/product/:id"
+          element={
+            <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
+              <ProductDetailPage />
+            </Applayout>
+          }
+        />
 
         <Route
           path="/about"
@@ -209,6 +218,33 @@ function App() {
         />
 
         <Route
+          path="/faqs"
+          element={
+            <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
+              <FAQs />
+            </Applayout>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
+              <UserProfile />
+            </Applayout>
+          }
+        />
+
+        <Route
+          path="/orders"
+          element={
+            <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
+              <UserOrders />
+            </Applayout>
+          }
+        />
+
+        <Route
           path="/cart"
           element={
             <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
@@ -218,19 +254,6 @@ function App() {
         />
 
         {/* ✅ Razorpay Checkout Flow */}
-        <Route
-          path="/checkout-flow"
-          element={
-            isLoggedIn ? (
-              <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
-                <CheckoutFlow />
-              </Applayout>
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-
         <Route
           path="/checkout/shipping"
           element={

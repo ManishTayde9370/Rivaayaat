@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
+import { serverEndpoint } from '../components/config';
 import { FaUser, FaEnvelope, FaPhone, FaEdit, FaSignOutAlt, FaBoxOpen, FaHeart } from 'react-icons/fa';
 import { Modal, Button } from 'react-bootstrap';
 import { SET_USER } from '../redux/user/actions';
@@ -52,7 +53,7 @@ const Dashboard = ({ onLogout }) => {
     setOrdersError(null);
     
     try {
-      const response = await axios.get(`/api/orders?userId=${userDetails._id}`);
+      const response = await axios.get(`${serverEndpoint}/api/checkout/orders`, { withCredentials: true });
       setOrders(response.data.orders || []);
     } catch (error) {
       console.error('Failed to fetch orders:', error);

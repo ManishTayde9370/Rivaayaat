@@ -1,6 +1,6 @@
 // src/Layout/AdminLayout.js
 import React, { useState } from 'react';
-import { Container, Navbar, Nav, Dropdown, Badge } from 'react-bootstrap';
+import { Dropdown, Badge } from 'react-bootstrap';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   FaBars, 
@@ -30,48 +30,10 @@ const AdminLayout = ({ children, userDetails, onLogout }) => {
   };
 
   const navigationItems = [
-    {
-      title: 'Dashboard',
-      path: '/admin',
-      icon: <FaHome />,
-      badge: null
-    },
-    {
-      title: 'Products',
-      path: '/admin/products',
-      icon: <FaBox />,
-      badge: null
-    },
-    {
-      title: 'Users',
-      path: '/admin/users',
-      icon: <FaUsers />,
-      badge: null
-    },
-    {
-      title: 'Orders',
-      path: '/admin/orders',
-      icon: <FaShoppingCart />,
-      badge: '3'
-    },
-    {
-      title: 'Messages',
-      path: '/admin/contact-messages',
-      icon: <FaEnvelope />,
-      badge: '2'
-    },
-    {
-      title: 'Analytics',
-      path: '/admin/analytics',
-      icon: <FaChartBar />,
-      badge: null
-    },
-    {
-      title: 'Settings',
-      path: '/admin/settings',
-      icon: <FaCog />,
-      badge: null
-    }
+    { title: 'Dashboard', path: '/admin', icon: <FaHome /> },
+    { title: 'Products', path: '/admin/products', icon: <FaBox /> },
+    { title: 'Orders', path: '/admin/orders', icon: <FaShoppingCart /> },
+    { title: 'Users', path: '/admin/users', icon: <FaUsers /> },
   ];
 
   const isActiveRoute = (path) => {
@@ -159,13 +121,6 @@ const AdminLayout = ({ children, userDetails, onLogout }) => {
 
           <div className="nav-right">
             <div className="nav-actions">
-              <button className="notification-btn">
-                <FaBell />
-                <Badge bg="danger" className="notification-badge">
-                  3
-                </Badge>
-              </button>
-              
               <Dropdown className="user-dropdown">
                 <Dropdown.Toggle as="div" className="user-toggle">
                   <div className="user-avatar-small">
@@ -178,14 +133,6 @@ const AdminLayout = ({ children, userDetails, onLogout }) => {
                 </Dropdown.Toggle>
                 
                 <Dropdown.Menu className="user-dropdown-menu">
-                  <Dropdown.Item onClick={() => navigate('/admin/profile')}>
-                    <FaUser className="me-2" />
-                    Profile
-                  </Dropdown.Item>
-                  <Dropdown.Item onClick={() => navigate('/admin/settings')}>
-                    <FaCog className="me-2" />
-                    Settings
-                  </Dropdown.Item>
                   <Dropdown.Divider />
                   <Dropdown.Item onClick={handleLogout}>
                     <FaSignOutAlt className="me-2" />

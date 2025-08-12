@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { serverEndpoint } from '../components/config';
 import Zoom from 'react-medium-image-zoom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../redux/cart/actions';
@@ -14,7 +15,7 @@ import ProductReviews from '../components/ProductReviews';
 import { cartNotifications } from '../utils/notifications';
 import '../css/theme.css';
 
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = serverEndpoint;
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -67,7 +68,7 @@ const ProductDetailPage = () => {
 
   const handleBuyNow = () => {
     dispatch(addToCart({ ...product, quantity: 1 }));
-            navigate('/checkout-flow');
+    navigate('/checkout/shipping');
   };
 
   const handleToggleWishlist = async () => {
@@ -95,15 +96,20 @@ const ProductDetailPage = () => {
   };
 
   if (error) {
-    return <div className="alert alert-danger text-center mt-5">{error}</div>;
+    return <>
+      <div className="alert alert-danger text-center mt-5">{error}</div>
+    </>;
   }
 
   if (!product) {
-    return <div className="d-flex justify-content-center my-5"><LoadingBar /></div>;
+    return <>
+      <div className="d-flex justify-content-center my-5"><LoadingBar /></div>
+    </>;
   }
 
   return (
-    <div className="container py-5">
+    <>
+      <div className="container py-5">
       <div className="row align-items-center">
         {/* Image Section */}
         <div className="col-md-6 mb-4">
@@ -277,48 +283,12 @@ const ProductDetailPage = () => {
         </div>
       )}
 
-      {/* Cultural Footnotes Section */}
-      <div className="container my-5">
-        <div className="scroll-dropdown p-4" style={{ maxWidth: 700, margin: '0 auto' }}>
-          <div className="cinzel mb-2" style={{ color: 'var(--color-gold)' }}>From the Royal Diaries</div>
-          <div style={{ color: 'var(--color-black)' }}>{product.footnotes || 'This piece is part of a living tradition, cherished in royal courts and family rituals.'}</div>
-        </div>
-      </div>
+      
 
       {/* Reviews Section */}
-      <div className="mt-5">
-        <div className="row">
-          <div className="col-lg-8">
-            <ProductReviews 
-              reviews={product.reviews || []}
-              averageRating={product.averageRating || 0}
-              numReviews={product.numReviews || 0}
-            />
-          </div>
-          <div className="col-lg-4">
-            {user ? (
-              <div className="review-form-sidebar">
-                <ProductReviewForm 
-                  productId={id}
-                  onReviewSubmitted={handleReviewSubmitted}
-                />
-              </div>
-            ) : (
-              <div className="text-center p-4">
-                <h6>Write a Review</h6>
-                <p className="text-muted">Please login to write a review</p>
-                <button 
-                  className="btn btn-outline-primary"
-                  onClick={() => navigate('/login')}
-                >
-                  Login to Review
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+      
       </div>
-    </div>
+    </>
   );
 };
 

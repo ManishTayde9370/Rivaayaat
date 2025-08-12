@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { serverEndpoint } from '../components/config';
 import { ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
@@ -66,7 +67,7 @@ const AddProduct = () => {
     setUploading(true);
 
     await axios.post(
-      'http://localhost:5000/api/admin/products',
+      `${serverEndpoint}/api/admin/products`,
       formData,
       {
         withCredentials: true,

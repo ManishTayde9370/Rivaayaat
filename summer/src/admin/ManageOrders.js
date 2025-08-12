@@ -3,6 +3,7 @@ import { Table, Container, Spinner, Alert, Row, Col } from 'react-bootstrap';
 import { Bar, Pie } from 'react-chartjs-2';
 import 'chart.js/auto';
 import axios from 'axios';
+import { serverEndpoint } from '../components/config';
 import { saveAs } from 'file-saver';
 import { FaBox, FaRupeeSign, FaClock, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import '../css/admin-dashboard.css';
@@ -52,7 +53,7 @@ const ManageOrders = () => {
       };
       if (monthFilter) params.month = monthFilter;
       if (emailFilter) params.email = emailFilter;
-      const res = await axios.get('http://localhost:5000/api/admin/orders', { params, withCredentials: true });
+      const res = await axios.get(`${serverEndpoint}/api/admin/orders`, { params, withCredentials: true });
       if (res.data.success) {
         setOrders(res.data.orders || []);
         setTotal(res.data.total || 0);
@@ -69,7 +70,7 @@ const ManageOrders = () => {
 
   const fetchRecentOrders = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/orders/recent', { withCredentials: true });
+      const res = await axios.get(`${serverEndpoint}/api/admin/orders/recent`, { withCredentials: true });
       console.log('Recent orders response:', res.data); // Debug log
       if (res.data.success) {
         const orders = res.data.orders || [];
@@ -97,7 +98,7 @@ const ManageOrders = () => {
   // Update order status
   const handleStatusChange = async (id, newStatus) => {
     try {
-      const res = await axios.patch(`http://localhost:5000/api/admin/orders/${id}/status`, { status: newStatus }, { withCredentials: true });
+      const res = await axios.patch(`${serverEndpoint}/api/admin/orders/${id}/status`, { status: newStatus }, { withCredentials: true });
       if (res.data.success) {
         setOrders(prev => prev.map(o => o._id === id ? { ...o, status: newStatus } : o));
       } else {
@@ -160,7 +161,7 @@ const ManageOrders = () => {
   // Helper to fetch all orders for stats
   const fetchAllOrdersForStats = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/orders', { params: { page: 1, limit: 10000 }, withCredentials: true });
+      const res = await axios.get(`${serverEndpoint}/api/admin/orders`, { params: { page: 1, limit: 10000 }, withCredentials: true });
       if (res.data.success) {
         return res.data.orders || [];
       } else {

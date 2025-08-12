@@ -51,7 +51,7 @@ const NavbarPrivate = ({ username, onLogout }) => {
   return (
     <Navbar expand="lg" className="rivaayat-nav py-3">
       <Container>
-        <Navbar.Brand as={Link} to="/" className="d-flex align-items-center">
+        <Navbar.Brand as={Link} to="/homeprivate" className="d-flex align-items-center">
           <img 
             src={logo} 
             alt="Rivaayat Logo" 
@@ -62,8 +62,8 @@ const NavbarPrivate = ({ username, onLogout }) => {
 
         <Navbar.Toggle aria-controls="user-navbar-nav" className="border-0" />
         
-        <Navbar.Collapse id="user-navbar-nav" className="justify-content-center">
-          <Nav className="mx-auto">
+        <Navbar.Collapse id="user-navbar-nav" className="justify-content-between">
+          <Nav className="me-auto">
             <Nav.Link as={Link} to="/" className="rivaayat-nav-link">
               <FaHome className="me-1" /> Home
             </Nav.Link>
@@ -76,10 +76,8 @@ const NavbarPrivate = ({ username, onLogout }) => {
               <FaUserCircle className="me-1" /> Dashboard
             </Nav.Link>
           </Nav>
-        </Navbar.Collapse>
-        
-        {/* Search Bar */}
-        <div className="d-flex align-items-center me-3">
+          {/* Search Bar */}
+          <div className="d-flex align-items-center ms-auto me-3">
           <Form className="d-flex" onSubmit={(e) => { e.preventDefault(); handleSearch(); }}>
             <FormControl
               type="search"
@@ -97,11 +95,11 @@ const NavbarPrivate = ({ username, onLogout }) => {
               <FaSearch />
             </button>
           </Form>
-        </div>
+          </div>
+        </Navbar.Collapse>
         
-        {/* User Menu */}
-        <Nav className="ms-auto">
-          <CartIcon />
+        {/* User Menu and Cart - Cart at absolute end */}
+        <Nav className="ms-auto align-items-center">
           <NavDropdown 
             title={
               <span className="rivaayat-nav-link d-inline-flex align-items-center">
@@ -126,6 +124,9 @@ const NavbarPrivate = ({ username, onLogout }) => {
               <FaSignOutAlt className="me-1" /> Logout
             </NavDropdown.Item>
           </NavDropdown>
+          <div className="ms-3">
+            <CartIcon />
+          </div>
         </Nav>
       </Container>
     </Navbar>

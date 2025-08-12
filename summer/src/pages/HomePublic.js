@@ -41,9 +41,10 @@ const HomePublic = () => {
       <section 
         className="rivaayat-hero"
         style={{
-          backgroundImage: `linear-gradient(135deg, rgba(61, 64, 91, 0.8), rgba(87, 117, 144, 0.7)), url(${images[currentImage]})`,
+          backgroundImage: `linear-gradient(135deg, rgba(61,64,91,0.45), rgba(87,117,144,0.35)), url(${images[currentImage]})`,
           backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundPosition: 'center center',
+          imageRendering: 'crisp-edges',
           minHeight: '80vh',
           display: 'flex',
           alignItems: 'center',
@@ -168,7 +169,7 @@ const HomePublic = () => {
         </Container>
       </section>
 
-      {/* 🎪 Call to Action Section */}
+      {/* 🎪 Call to Action Section (no browse products for public) */}
       <section className="py-5 bg-ivory">
         <Container>
           <Row className="justify-content-center text-center">
@@ -183,9 +184,6 @@ const HomePublic = () => {
                 <div className="d-flex flex-wrap justify-content-center gap-3">
                   <Link to="/register" className="rivaayat-btn">
                     Create Account
-                  </Link>
-                  <Link to="/product" className="rivaayat-btn rivaayat-btn-outline">
-                    Browse Products
                   </Link>
                 </div>
               </div>

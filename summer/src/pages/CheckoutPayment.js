@@ -5,9 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { clearCart } from '../redux/cart/actions';
 import { serverEndpoint } from '../components/config';
 import { orderNotifications } from '../utils/notifications';
-import { FaCreditCard, FaExclamationTriangle, FaArrowLeft, FaSpinner } from 'react-icons/fa';
 import '../css/theme.css';
-import '../css/CheckoutFlow.css';
 
 function CheckoutPayment() {
   const cartItems = useSelector((state) => state?.cart?.items || []);
@@ -146,7 +144,7 @@ function CheckoutPayment() {
         handler: async function (response) {
           try {
             if (!validatePaymentData()) {
-              navigate('/checkout-flow');
+              navigate('/checkout/shipping');
               return;
             }
 
@@ -242,91 +240,34 @@ function CheckoutPayment() {
   };
 
   return (
-    <div className="checkout-container">
-      <div className="container">
-        <div className="checkout-header">
-          <h1 className="cinzel" style={{ color: 'var(--color-earth)' }}>
-            Payment Details
-          </h1>
-          <p style={{ color: 'var(--color-earth)' }}>
-            Complete your purchase securely
-          </p>
-        </div>
-
-        <div className="checkout-form-container">
-          <h2 className="cinzel mb-4 text-center" style={{ color: 'var(--color-earth)' }}>
-            <FaCreditCard className="me-2" />
-            Secure Payment
-          </h2>
-
-          <div className="checkout-summary">
-            <h3 className="checkout-summary-title">Order Summary</h3>
-            {cartItems.map((item, index) => (
-              <div key={index} className="checkout-item">
-                <img 
-                  src={item.image} 
-                  alt={item.name} 
-                  className="checkout-item-image"
-                  onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/60x60?text=Product';
-                  }}
-                />
-                <div className="checkout-item-details">
-                  <div className="checkout-item-name">{item.name}</div>
-                  <div className="checkout-item-price">₹{item.price}</div>
-                </div>
-                <span className="checkout-item-quantity">Qty: {item.quantity}</span>
-              </div>
-            ))}
-            <div className="checkout-total">
-              <span className="checkout-total-label">Total Amount:</span>
-              <span className="checkout-total-amount">₹{totalAmount.toFixed(2)}</span>
+    <div className="container py-5 text-center">
+      <div className="scroll-dropdown mx-auto p-4" style={{ maxWidth: 420 }}>
+        <h2 className="cinzel mb-4" style={{ color: 'var(--color-maroon)' }}>
+          <span role="img" aria-label="scroll">📜</span> Payment
+        </h2>
+        <h3 className="cinzel mb-4" style={{ color: 'var(--color-gold)' }}>
+          <span role="img" aria-label="money">💰</span> Pay ₹{totalAmount.toFixed(2)}
+        </h3>
+        {paymentError && (
+          <div className="alert alert-danger mt-3" role="alert">
+            {paymentError}
+          </div>
+        )}
+        <button
+          className="btn btn-dark w-100 scroll-dropdown"
+          onClick={handlePayment}
+          disabled={isLoading || isRazorpayOpen || totalAmount <= 0}
+          style={{ fontFamily: 'Cinzel Decorative, serif', fontSize: '1.1rem', color: 'var(--color-gold)', border: '2px solid var(--color-gold)' }}
+        >
+          <span role="img" aria-label="diya">🪔</span> {isLoading ? 'Processing...' : 'Pay with Razorpay'}
+        </button>
+        {isLoading && (
+          <div className="mt-3">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
             </div>
           </div>
-
-          {paymentError && (
-            <div className="checkout-error">
-              <FaExclamationTriangle />
-              {paymentError}
-            </div>
-          )}
-
-          <div className="payment-methods">
-            <div className="payment-method selected">
-              <div className="payment-method-icon">💳</div>
-              <div className="payment-method-details">
-                <div className="payment-method-name">Razorpay Secure Payment</div>
-                <div className="payment-method-description">Credit/Debit Cards, UPI, Net Banking</div>
-              </div>
-            </div>
-          </div>
-
-          <button
-            className="checkout-btn"
-            onClick={handlePayment}
-            disabled={isLoading || isRazorpayOpen || totalAmount <= 0}
-          >
-            {isLoading ? (
-              <>
-                <div className="checkout-spinner"></div>
-                Processing Payment...
-              </>
-            ) : (
-              <>
-                Pay ₹{totalAmount.toFixed(2)}
-                <FaCreditCard />
-              </>
-            )}
-          </button>
-
-          <button 
-            onClick={() => navigate('/checkout-flow')}
-            className="checkout-btn checkout-btn-secondary mt-3"
-          >
-            <FaArrowLeft />
-            Back to Shipping
-          </button>
-        </div>
+        )}
       </div>
     </div>
   );

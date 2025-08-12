@@ -6,11 +6,9 @@ import {
   clearCartFromBackend,
   persistCartToBackend,
 } from '../redux/cart/actions';
-import { FaShoppingCart, FaTrash, FaArrowRight, FaExclamationTriangle } from 'react-icons/fa';
 
-import '../css/CartPage.css';
+import '../css/CartPage.css'; // Optional custom CSS
 import '../css/theme.css';
-import '../css/CheckoutFlow.css';
 
 function CartPage() {
   const cart = useSelector((state) => state.cart?.items || []);
@@ -43,7 +41,7 @@ function CartPage() {
 
   const handleCheckout = () => {
     // playBell();
-    navigate('/checkout-flow');
+    navigate('/checkout/shipping');
   };
 
   const total = cart.reduce(
@@ -52,36 +50,12 @@ function CartPage() {
   );
 
   return (
-    <div className="checkout-container">
-      <div className="container">
-        <div className="checkout-header">
-          <h1 className="cinzel" style={{ color: 'var(--color-earth)' }}>
-            <FaShoppingCart className="me-2" />
-            Your Shopping Cart
-          </h1>
-          <p style={{ color: 'var(--color-earth)' }}>
-            Review your items before checkout
-          </p>
-        </div>
+    <div className="container py-5">
+      <h2 className="cinzel mb-4 text-center" style={{ color: 'var(--color-maroon)' }}>🛒 Your Cart</h2>
 
-        {cart.length === 0 ? (
-          <div className="checkout-form-container text-center">
-            <div className="checkout-error">
-              <FaExclamationTriangle />
-              Your cart is empty
-            </div>
-            <p className="mt-3" style={{ color: 'var(--color-earth)' }}>
-              Add some products to your cart to continue shopping.
-            </p>
-            <button 
-              onClick={() => navigate('/product')}
-              className="checkout-btn"
-            >
-              Continue Shopping
-              <FaArrowRight />
-            </button>
-          </div>
-        ) : (
+      {cart.length === 0 ? (
+        <p className="text-center">Your cart is empty.</p>
+      ) : (
         <>
           <div className="row g-4">
             {cart.map((item) => (
@@ -126,36 +100,29 @@ function CartPage() {
             ))}
           </div>
 
-          <div className="checkout-form-container">
-            <div className="checkout-summary">
-              <h3 className="checkout-summary-title">Cart Summary</h3>
-              <div className="checkout-total">
-                <span className="checkout-total-label">Total Amount:</span>
-                <span className="checkout-total-amount">₹{total.toFixed(2)}</span>
-              </div>
-            </div>
-
-            <div className="d-flex gap-3 justify-content-center">
+          <div className="mt-5 d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <h4 className="cinzel fw-bold royal-total mb-0" style={{ color: 'var(--color-gold)' }}>
+              <span role="img" aria-label="diya">🪔</span> Total: ₹{total.toFixed(2)}
+            </h4>
+            <div className="d-flex gap-3">
               <button
-                className="checkout-btn checkout-btn-secondary"
+                className="btn btn-outline-secondary"
                 onClick={handleClearCart}
               >
-                <FaTrash />
                 Clear Cart
               </button>
               <button
-                className="checkout-btn"
+                className="btn btn-dark scroll-dropdown px-4 py-2"
                 onClick={handleCheckout}
                 disabled={cart.length === 0}
+                style={{ fontFamily: 'Cinzel Decorative, serif', fontSize: '1.1rem', color: 'var(--color-gold)', border: '2px solid var(--color-gold)' }}
               >
-                Proceed to Checkout
-                <FaArrowRight />
+                <span role="img" aria-label="scroll">📜</span> Proceed to Checkout
               </button>
             </div>
           </div>
         </>
       )}
-      </div>
     </div>
   );
 }

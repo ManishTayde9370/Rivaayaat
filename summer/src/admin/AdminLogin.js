@@ -1,6 +1,7 @@
 // src/pages/AdminLogin.js
 import React, { useState } from 'react';
 import axios from 'axios';
+import { serverEndpoint } from '../components/config';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
@@ -47,7 +48,7 @@ const AdminLogin = () => {
     try {
       // First, attempt login
       const loginResponse = await axios.post(
-        'http://localhost:5000/api/auth/login',
+        `${serverEndpoint}/api/auth/login`,
         { identity: identity.trim(), password },
         { withCredentials: true }
       );
@@ -58,7 +59,7 @@ const AdminLogin = () => {
 
       // Then verify user details and admin status
       const userRes = await axios.get(
-        'http://localhost:5000/api/auth/is-user-logged-in',
+        `${serverEndpoint}/api/auth/is-user-logged-in`,
         { withCredentials: true }
       );
 
@@ -80,7 +81,7 @@ const AdminLogin = () => {
       // Verify admin privileges
       if (!user.isAdmin) {
         // Clear any existing session
-        await axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true });
+        await axios.post(`${serverEndpoint}/api/auth/logout`, {}, { withCredentials: true });
         throw new Error('Access denied. Admin privileges required.');
       }
 

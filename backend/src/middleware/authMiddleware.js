@@ -71,7 +71,7 @@ const verifyTokenPayload = (token) => {
 
 const authMiddleware = {
   // ✅ Enhanced middleware: Authenticated users only
-  requireAuth: (req, res, next) => {
+  requireAuth: async (req, res, next) => {
     const token = getTokenFromRequest(req);
 
     if (!token) {
@@ -83,6 +83,18 @@ const authMiddleware = {
 
     try {
       req.user = verifyTokenPayload(token);
+      // Ensure user still exists and is not blocked
+      try {
+        const User = require('../model/Users');
+        const dbUser = await User.findById(req.user._id).select('isBlocked isAdmin email name username');
+        if (!dbUser) {
+          return res.status(401).json({ success: false, message: 'User no longer exists' });
+        }
+        if (dbUser.isBlocked) {
+          return res.status(403).json({ success: false, message: 'Account has been blocked' });
+        }
+        req.user = { ...req.user, email: dbUser.email, name: dbUser.name, username: dbUser.username, isAdmin: dbUser.isAdmin };
+      } catch (_) {}
       next();
     } catch (error) {
       return res.status(401).json({
@@ -93,7 +105,7 @@ const authMiddleware = {
   },
 
   // ✅ Enhanced middleware: Admins only with audit logging
-  requireAdmin: (req, res, next) => {
+  requireAdmin: async (req, res, next) => {
     const token = getTokenFromRequest(req);
 
     if (!token) {
@@ -106,7 +118,29 @@ const authMiddleware = {
     try {
       const user = verifyTokenPayload(token);
 
-      if (!user.isAdmin) {
+      // Confirm admin status from DB and ensure not blocked
+      try {
+        const User = require('../model/Users');
+        const dbUser = await User.findById(user._id).select('isAdmin isBlocked email name username');
+        if (!dbUser) {
+          return res.status(401).json({ success: false, message: 'User no longer exists' });
+        }
+        if (dbUser.isBlocked) {
+          return res.status(403).json({ success: false, message: 'Account has been blocked' });
+        }
+        if (!dbUser.isAdmin) {
+          logAdminAction(req, 'UNAUTHORIZED_ACCESS_ATTEMPT', { attemptedAction: req.originalUrl });
+          return res.status(403).json({ success: false, message: 'Access denied. Admin privileges required.' });
+        }
+        req.user = { ...user, email: dbUser.email, name: dbUser.name, username: dbUser.username, isAdmin: dbUser.isAdmin };
+      } catch (_) {
+        if (!user.isAdmin) {
+          logAdminAction(req, 'UNAUTHORIZED_ACCESS_ATTEMPT', { attemptedAction: req.originalUrl });
+          return res.status(403).json({ success: false, message: 'Access denied. Admin privileges required.' });
+        }
+      }
+
+      if (!req.user?.isAdmin) {
         logAdminAction(req, 'UNAUTHORIZED_ACCESS_ATTEMPT', { 
           attemptedAction: req.originalUrl 
         });
@@ -116,8 +150,7 @@ const authMiddleware = {
           message: 'Access denied. Admin privileges required.',
         });
       }
-
-      req.user = user;
+      
       
       // ✅ Log admin actions
       if (req.method !== 'GET') {

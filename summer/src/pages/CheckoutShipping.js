@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { setShippingAddress } from '../redux/shipping/actions';
 import { useNavigate } from 'react-router-dom';
-import { FaMapMarkerAlt, FaArrowRight, FaExclamationTriangle } from 'react-icons/fa';
 import '../css/theme.css';
-import '../css/CheckoutFlow.css';
 
 const CheckoutShipping = () => {
   const [address, setAddress] = useState('');
@@ -54,97 +52,77 @@ const CheckoutShipping = () => {
   };
 
   return (
-    <div className="checkout-container">
-      <div className="container">
-        <div className="checkout-header">
-          <h1 className="cinzel" style={{ color: 'var(--color-earth)' }}>
-            Shipping Address
-          </h1>
-          <p style={{ color: 'var(--color-earth)' }}>
-            Please provide your delivery details
-          </p>
-        </div>
-
-        <div className="checkout-form-container">
-          <h2 className="cinzel mb-4 text-center" style={{ color: 'var(--color-earth)' }}>
-            <FaMapMarkerAlt className="me-2" />
-            Delivery Information
-          </h2>
-          
-          {formError && (
-            <div className="checkout-error">
-              <FaExclamationTriangle />
-              {formError}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <div className="checkout-form-group">
-              <label htmlFor="address" className="checkout-form-label">Address</label>
-              <input
-                id="address"
-                type="text"
-                className="checkout-form-input"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="123 Main Street"
-                required
-              />
-            </div>
-            <div className="checkout-form-group">
-              <label htmlFor="city" className="checkout-form-label">City</label>
-              <input
-                id="city"
-                type="text"
-                className="checkout-form-input"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="Mumbai"
-                required
-              />
-            </div>
-            <div className="checkout-form-group">
-              <label htmlFor="postalCode" className="checkout-form-label">Postal Code</label>
-              <input
-                id="postalCode"
-                type="text"
-                className="checkout-form-input"
-                value={postalCode}
-                onChange={(e) => setPostalCode(e.target.value)}
-                placeholder="400001"
-                required
-              />
-            </div>
-            <div className="checkout-form-group">
-              <label htmlFor="email" className="checkout-form-label">Email</label>
-              <input
-                id="email"
-                type="email"
-                className="checkout-form-input"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="user@example.com"
-                required
-              />
-            </div>
-            <div className="checkout-form-group">
-              <label htmlFor="mobile" className="checkout-form-label">Mobile Number</label>
-              <input
-                id="mobile"
-                type="tel"
-                className="checkout-form-input"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-                placeholder="9876543210"
-                required
-              />
-            </div>
-            <button type="submit" className="checkout-btn">
-              Continue to Payment
-              <FaArrowRight />
-            </button>
-          </form>
-        </div>
+    <div className="container py-5">
+      <h2 className="cinzel mb-4 text-center" style={{ color: 'var(--color-maroon)' }}>
+        <span role="img" aria-label="scroll">📜</span> Shipping Address
+      </h2>
+      {formError && <div className="alert alert-danger">{formError}</div>}
+      <div className="scroll-dropdown mx-auto p-4" style={{ maxWidth: 420 }}>
+        <form onSubmit={handleSubmit} className="d-flex flex-column gap-3">
+          <div>
+            <label htmlFor="address" className="cinzel" style={{ color: 'var(--color-gold)' }}>Address</label>
+            <input
+              id="address"
+              type="text"
+              className="form-control"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="123 Main St"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="city" className="cinzel" style={{ color: 'var(--color-gold)' }}>City</label>
+            <input
+              id="city"
+              type="text"
+              className="form-control"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="City Name"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="postalCode" className="cinzel" style={{ color: 'var(--color-gold)' }}>Postal Code</label>
+            <input
+              id="postalCode"
+              type="text"
+              className="form-control"
+              value={postalCode}
+              onChange={(e) => setPostalCode(e.target.value)}
+              placeholder="400001"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="email" className="cinzel" style={{ color: 'var(--color-gold)' }}>Email</label>
+            <input
+              id="email"
+              type="email"
+              className="form-control"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="user@example.com"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="mobile" className="cinzel" style={{ color: 'var(--color-gold)' }}>Mobile Number</label>
+            <input
+              id="mobile"
+              type="tel"
+              className="form-control"
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value)}
+              placeholder="9876543210"
+              required
+            />
+          </div>
+          <button type="submit" className="btn btn-dark w-100 scroll-dropdown" style={{ fontFamily: 'Cinzel Decorative, serif', fontSize: '1.1rem', color: 'var(--color-gold)', border: '2px solid var(--color-gold)' }}>
+            <span role="img" aria-label="diya">🪔</span> Continue to Payment
+          </button>
+        </form>
       </div>
     </div>
   );
