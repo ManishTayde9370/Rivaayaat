@@ -14,6 +14,11 @@ const securityMiddleware = require('./src/middleware/securityMiddleware');
 
 const app = express();
 
+// In dev behind proxies (WSL/Reverse Proxy), trust X-Forwarded-* headers for rate limit to work
+if (process.env.NODE_ENV !== 'production') {
+  app.set('trust proxy', 1);
+}
+
 // 🔗 Routes
 const authRoutes = require('./src/routes/authRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');

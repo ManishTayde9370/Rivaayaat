@@ -149,8 +149,8 @@ body {
 
 .rivaayat-btn-outline {
   background: transparent;
-  color: var(--color-terracotta);
-  border: 2px solid var(--color-terracotta);
+  color: #000;
+  border: 4px solid var(--color-terracotta);
 }
 
 .rivaayat-btn-outline:hover {

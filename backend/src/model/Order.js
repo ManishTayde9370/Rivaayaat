@@ -13,6 +13,8 @@ const orderSchema = new mongoose.Schema(
       state: { type: String },
       postalCode: { type: String, required: true },
       country: { type: String, default: 'India' },
+      email: { type: String },
+      mobile: { type: String },
     },
     items: [
       {

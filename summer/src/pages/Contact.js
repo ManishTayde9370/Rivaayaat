@@ -93,7 +93,7 @@ const Contact = () => {
             </div>
             <button 
               type="submit" 
-              className="btn btn-dark" 
+              className="btn btn-secondary" 
               disabled={loading}
             >
               {loading ? 'Sending...' : 'Send Message'}

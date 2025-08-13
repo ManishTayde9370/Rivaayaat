@@ -35,19 +35,20 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       
-      const [usersRes, productsRes, ordersRes, messagesRes] = await Promise.all([
+      const [usersRes, productsRes, ordersRes, messagesRes, recentOrdersRes] = await Promise.all([
         axios.get(`${serverEndpoint}/api/admin/users/analytics`, { withCredentials: true }),
         axios.get(`${serverEndpoint}/api/products`, { withCredentials: true }),
         axios.get(`${serverEndpoint}/api/admin/orders/analytics`, { withCredentials: true }),
-        axios.get(`${serverEndpoint}/api/contact/messages`, { withCredentials: true })
+        axios.get(`${serverEndpoint}/api/contact/messages`, { withCredentials: true }),
+        axios.get(`${serverEndpoint}/api/admin/orders/recent`, { withCredentials: true })
       ]);
 
       const statsData = {
         totalUsers: usersRes.data?.analytics?.totalUsers || 0,
         totalProducts: productsRes.data?.products?.length || 0,
         totalOrders: ordersRes.data?.analytics?.totalOrders || 0,
-        totalMessages: messagesRes.data?.messages?.length || 0,
-        recentOrders: ordersRes.data?.recentOrders || [],
+        totalMessages: Array.isArray(messagesRes.data) ? messagesRes.data.length : (messagesRes.data?.messages?.length || 0),
+        recentOrders: recentOrdersRes.data?.orders || [],
         recentUsers: usersRes.data?.recentUsers || []
       };
       
@@ -221,27 +222,7 @@ const AdminDashboard = () => {
         ))}
       </Row>
 
-      {/* Quick Actions */}
-      <Row className="mb-5">
-        <Col lg={12}>
-          <h3 className="cinzel text-earth mb-4 text-center">
-            Quick Actions
-          </h3>
-        </Col>
-        {quickActions.map((action, index) => (
-          <Col lg={4} md={6} className="mb-4" key={index}>
-            <Link to={action.link} className="text-decoration-none">
-              <div className="rivaayat-card text-center h-100 rivaayat-transition">
-                <div className="rivaayat-badge mb-3" style={{ fontSize: '2rem' }}>
-                  {action.icon}
-                </div>
-                <h5 className="cinzel text-maroon mb-2">{action.title}</h5>
-                <p className="inter text-peacock mb-0">{action.description}</p>
-              </div>
-            </Link>
-          </Col>
-        ))}
-      </Row>
+      {/* Quick Actions removed as requested */}
 
       {/* Recent Activity */}
       <Row>
@@ -258,7 +239,7 @@ const AdminDashboard = () => {
                                         <p className="inter text-forest mb-0">Order #{order._id?.slice(-6)}</p>
                   <small className="text-muted">{order.status}</small>
                     </div>
-                    <span className="rivaayat-badge">₹{order.total}</span>
+                    <span className="rivaayat-badge">₹{(order.amountPaid || order.total || 0).toLocaleString()}</span>
                   </div>
                 ))}
               </div>

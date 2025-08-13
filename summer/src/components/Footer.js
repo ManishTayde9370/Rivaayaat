@@ -137,7 +137,7 @@ const Footer = () => {
         <Row className="align-items-center">
           <Col md={6} className="text-center text-md-start">
             <p className="inter text-sand mb-0">
-              © 2025 Rivaayat. All rights reserved. Made with <FaHeart className="text-danger" /> in India
+              © 2025 Rivaayat. All rights reserved.
             </p>
           </Col>
           <Col md={6} className="text-center text-md-end">

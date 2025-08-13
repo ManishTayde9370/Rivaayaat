@@ -290,6 +290,8 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
         state: shippingAddress.state ? String(shippingAddress.state).trim() : '',
         postalCode: String(shippingAddress.postalCode).trim(),
         country: shippingAddress.country || 'India',
+        email: shippingAddress.email ? String(shippingAddress.email).trim() : undefined,
+        mobile: shippingAddress.mobile ? String(shippingAddress.mobile).trim() : undefined,
       },
       isPaid: true,
       paidAt: new Date(),

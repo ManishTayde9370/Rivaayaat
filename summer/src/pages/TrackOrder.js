@@ -17,7 +17,7 @@ const TrackOrder = () => {
   useEffect(() => {
     if (userDetails?._id) {
       setRecentLoading(true);
-      axios.get(`${serverEndpoint}/api/checkout/orders`, { withCredentials: true })
+      axios.get(`${serverEndpoint}/api/orders`, { withCredentials: true })
         .then(res => setRecentOrders(res.data.orders || []))
         .catch(() => setRecentOrders([]))
         .finally(() => setRecentLoading(false));
@@ -30,9 +30,9 @@ const TrackOrder = () => {
     setResult(null);
     setTrackError(null);
     try {
-      // No dedicated tracking endpoint exists; fetch and filter recent orders instead
-      const res = await axios.get(`${serverEndpoint}/api/checkout/orders`, { withCredentials: true });
-      const match = (res.data.orders || []).find(o => o._id === orderId && (o.user?.email === email || email === userDetails?.email));
+      // Use dedicated tracking endpoint to validate by email and order ID
+      const res = await axios.post(`${serverEndpoint}/api/orders/track`, { orderId, email });
+      const match = res.data.order;
       if (match) setResult(match); else throw new Error('Not found');
     } catch (err) {
       setTrackError('Order not found or tracking failed. Please check your details and try again.');

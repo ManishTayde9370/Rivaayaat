@@ -9,6 +9,7 @@ const Store = require('../model/Store');
 const FAQ = require('../model/FAQ');
 const FAQQuestion = require('../model/FAQQuestion');
 const User = require('../model/Users');
+const { requireAuth } = require('../middleware/authMiddleware');
 
 // --- Track Order ---
 const trackOrderValidator = [
@@ -38,17 +39,21 @@ router.post('/orders/track', trackOrderValidator, async (req, res) => {
 });
 
 // --- User Orders (Public) ---
-router.get('/orders', async (req, res) => {
+// Protect user orders to prevent IDOR: only allow authenticated user to fetch own orders
+router.get('/orders', requireAuth, async (req, res) => {
   try {
-    const { userId, status, start, end } = req.query;
-    let query = { user: userId };
+    const { status, start, end } = req.query;
+    const userId = req.user._id;
+
+    const query = { user: userId };
     if (status) query.status = status;
     if (start || end) {
       query.createdAt = {};
       if (start) query.createdAt.$gte = new Date(start);
       if (end) query.createdAt.$lte = new Date(end);
     }
-    const orders = await Order.find(query);
+
+    const orders = await Order.find(query).sort({ createdAt: -1 });
     return res.json({ success: true, orders });
   } catch (err) {
     console.error('❌ Error fetching orders:', err);

@@ -119,7 +119,7 @@ const CheckoutShipping = () => {
               required
             />
           </div>
-          <button type="submit" className="btn btn-dark w-100 scroll-dropdown" style={{ fontFamily: 'Cinzel Decorative, serif', fontSize: '1.1rem', color: 'var(--color-gold)', border: '2px solid var(--color-gold)' }}>
+          <button type="submit" className="btn btn-secondary w-100 scroll-dropdown" style={{ fontFamily: 'Cinzel Decorative, serif', fontSize: '1.1rem', color: 'var(--color-gold)', border: '2px solid var(--color-gold)' }}>
             <span role="img" aria-label="diya">🪔</span> Continue to Payment
           </button>
         </form>

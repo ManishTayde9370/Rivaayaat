@@ -8,7 +8,7 @@ import { saveAs } from 'file-saver';
 import { FaBox, FaRupeeSign, FaClock, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import '../css/admin-dashboard.css';
 
-const statusOptions = ['Pending', 'Processing', 'Delivered', 'Cancelled'];
+const statusOptions = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
 const pageSizeOptions = [10, 20, 50, 100];
 
 const ManageOrders = () => {
@@ -161,7 +161,8 @@ const ManageOrders = () => {
   // Helper to fetch all orders for stats
   const fetchAllOrdersForStats = async () => {
     try {
-      const res = await axios.get(`${serverEndpoint}/api/admin/orders`, { params: { page: 1, limit: 10000 }, withCredentials: true });
+      // Backend validates limit <= 1000; use maximum allowed
+      const res = await axios.get(`${serverEndpoint}/api/admin/orders`, { params: { page: 1, limit: 1000 }, withCredentials: true });
       if (res.data.success) {
         return res.data.orders || [];
       } else {
@@ -205,6 +206,7 @@ const ManageOrders = () => {
     switch (status) {
       case 'Pending': return <span className="badge bg-warning text-dark">Pending</span>;
       case 'Processing': return <span className="badge bg-info text-dark">Processing</span>;
+      case 'Shipped': return <span className="badge bg-primary">Shipped</span>;
       case 'Delivered': return <span className="badge bg-success">Delivered</span>;
       case 'Cancelled': return <span className="badge bg-danger">Cancelled</span>;
       default: return <span className="badge bg-secondary">{status}</span>;

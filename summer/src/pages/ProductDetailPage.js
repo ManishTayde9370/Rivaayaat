@@ -14,6 +14,7 @@ import ProductReviewForm from '../components/ProductReviewForm';
 import ProductReviews from '../components/ProductReviews';
 import { cartNotifications } from '../utils/notifications';
 import '../css/theme.css';
+import '../css/ProductPage.css';
 
 const API_BASE_URL = serverEndpoint;
 
@@ -30,7 +31,7 @@ const ProductDetailPage = () => {
 
   const wishlist = useSelector((state) => state.wishlist.items);
   const isInWishlist = wishlist.some((item) => item._id === id);
-  const user = useSelector((state) => state.user.user);
+  const user = useSelector((state) => state.user);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -214,7 +215,7 @@ const ProductDetailPage = () => {
 
           <div className="d-flex gap-3 mt-3">
             <button
-              className="btn btn-dark rounded-pill px-4 diya-flicker"
+              className="btn btn-secondary rounded-pill px-4 diya-flicker"
               onClick={handleAddToCart}
               disabled={product.stock === 0}
             >
@@ -286,6 +287,33 @@ const ProductDetailPage = () => {
       
 
       {/* Reviews Section */}
+      <div className="my-5">
+        <div className="miniature-border p-4" style={{ background: 'var(--color-ivory)' }}>
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h3 className="cinzel mb-0" style={{ color: 'var(--color-maroon)' }}>
+              Customer Reviews
+            </h3>
+          </div>
+
+          {(user ? true : false) && (
+            <div className="mb-4">
+              <ProductReviewForm
+                productId={id}
+                onReviewSubmitted={handleReviewSubmitted}
+              />
+            </div>
+          )}
+          {!user && (
+            <div className="text-muted small">Login to write a review</div>
+          )}
+
+          <ProductReviews
+            reviews={product.reviews || []}
+            averageRating={product.averageRating || 0}
+            numReviews={product.numReviews || 0}
+          />
+        </div>
+      </div>
       
       </div>
     </>

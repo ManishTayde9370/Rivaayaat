@@ -23,6 +23,8 @@ const AdminContactMessages = () => {
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [filterStatus, setFilterStatus] = useState('all'); // all, unread, read
+  const [sortBy, setSortBy] = useState('newest'); // newest, oldest, name, email
+  const [autoMarkReadOnOpen, setAutoMarkReadOnOpen] = useState(true);
 
   useEffect(() => {
     fetchMessages();
@@ -41,8 +43,9 @@ const AdminContactMessages = () => {
         throw new Error(data.error || 'Failed to fetch messages.');
       }
       const data = await res.json();
-      // Ensure data is always an array
-      setMessages(Array.isArray(data) ? data : []);
+      // API returns either array or {messages: []}
+      const list = Array.isArray(data) ? data : (Array.isArray(data.messages) ? data.messages : []);
+      setMessages(list);
     } catch (err) {
       setError(err.message);
       setMessages([]); // Set empty array on error
@@ -71,9 +74,12 @@ const AdminContactMessages = () => {
     }
   };
 
-  const handleViewMessage = (message) => {
+  const handleViewMessage = async (message) => {
     setSelectedMessage(message);
     setShowModal(true);
+    if (autoMarkReadOnOpen && !message.read) {
+      await handleMarkAsRead(message._id);
+    }
   };
 
   const handleMarkAsRead = async (id) => {
@@ -95,7 +101,7 @@ const AdminContactMessages = () => {
   };
 
   // Ensure messages is always an array before filtering
-  const filteredMessages = Array.isArray(messages) ? messages.filter((msg) => {
+  let filteredMessages = Array.isArray(messages) ? messages.filter((msg) => {
     const q = search.toLowerCase();
     const matchesSearch = 
       (msg.name || '').toLowerCase().includes(q) ||
@@ -110,6 +116,20 @@ const AdminContactMessages = () => {
     }
     return matchesSearch;
   }) : [];
+
+  // Sort
+  filteredMessages = filteredMessages.sort((a, b) => {
+    if (sortBy === 'newest') {
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    } else if (sortBy === 'oldest') {
+      return new Date(a.createdAt) - new Date(b.createdAt);
+    } else if (sortBy === 'name') {
+      return String(a.name || '').localeCompare(String(b.name || ''));
+    } else if (sortBy === 'email') {
+      return String(a.email || '').localeCompare(String(b.email || ''));
+    }
+    return 0;
+  });
 
   const unreadCount = Array.isArray(messages) ? messages.filter(msg => !msg.read).length : 0;
   const totalCount = Array.isArray(messages) ? messages.length : 0;
@@ -173,7 +193,7 @@ const AdminContactMessages = () => {
             />
           </div>
         </div>
-        <div className="filter-controls">
+        <div className="filter-controls d-flex align-items-center gap-2">
           <select 
             value={filterStatus} 
             onChange={(e) => setFilterStatus(e.target.value)}
@@ -183,6 +203,20 @@ const AdminContactMessages = () => {
             <option value="unread">Unread Only</option>
             <option value="read">Read Only</option>
           </select>
+          <select 
+            value={sortBy} 
+            onChange={(e) => setSortBy(e.target.value)}
+            className="filter-select"
+          >
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="name">Name (A-Z)</option>
+            <option value="email">Email (A-Z)</option>
+          </select>
+          <label className="d-flex align-items-center gap-1 small">
+            <input type="checkbox" checked={autoMarkReadOnOpen} onChange={(e) => setAutoMarkReadOnOpen(e.target.checked)} />
+            Auto mark read
+          </label>
         </div>
       </div>
 
@@ -227,7 +261,7 @@ const AdminContactMessages = () => {
                       <div className="sender-info">
                         <FaUser className="info-icon" />
                         <span className="sender-name">{msg.name}</span>
-                        {!msg.read && <Badge bg="danger" className="unread-badge">New</Badge>}
+                {!msg.read && <Badge bg="danger" className="unread-badge">New</Badge>}
                       </div>
                       <div className="sender-email">
                         <FaAt className="info-icon" />
@@ -270,15 +304,20 @@ const AdminContactMessages = () => {
                   
                   <div className="message-content">
                     <div className="message-preview">
-                      {msg.message.length > 150 
+                      {(msg.message || '').length > 150 
                         ? `${msg.message.substring(0, 150)}...`
                         : msg.message
                       }
                     </div>
                   </div>
                   
-                  {!msg.read && (
-                    <div className="message-footer">
+                  <div className="message-footer d-flex justify-content-between align-items-center">
+                    <div>
+                      <Badge bg={msg.read ? 'secondary' : 'warning'}>
+                        {msg.read ? 'Read' : 'Unread'}
+                      </Badge>
+                    </div>
+                    {!msg.read && (
                       <Button
                         variant="outline-secondary"
                         size="sm"
@@ -286,8 +325,8 @@ const AdminContactMessages = () => {
                       >
                         Mark as Read
                       </Button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </Card.Body>
               </Card>
             ))}

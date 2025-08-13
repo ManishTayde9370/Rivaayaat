@@ -112,7 +112,7 @@ function CartPage() {
                 Clear Cart
               </button>
               <button
-                className="btn btn-dark scroll-dropdown px-4 py-2"
+                className="btn btn-secondary scroll-dropdown px-4 py-2"
                 onClick={handleCheckout}
                 disabled={cart.length === 0}
                 style={{ fontFamily: 'Cinzel Decorative, serif', fontSize: '1.1rem', color: 'var(--color-gold)', border: '2px solid var(--color-gold)' }}

@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 
-const secret = process.env.JWT_SECRET || 'your-fallback-secret';
+// Use the same fallback as authController to avoid token mismatch
+const secret = process.env.JWT_SECRET || 'fallback-secret';
 const cookieName = 'token';
 
 // ✅ Rate limiting for admin actions

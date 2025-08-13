@@ -19,7 +19,8 @@ exports.submitContactMessage = async (req, res) => {
 exports.getAllContactMessages = async (req, res) => {
   try {
     const messages = await ContactMessage.find().sort({ createdAt: -1 });
-    res.json({ success: true, messages });
+    // Return array directly for frontend compatibility
+    res.json(messages);
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to fetch messages.', error: err.message });
   }

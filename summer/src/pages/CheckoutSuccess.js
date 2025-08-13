@@ -85,7 +85,7 @@ function CheckoutSuccess() {
         <span role="img" aria-label="download">📥</span> Download Invoice
       </button>
       <button
-        className="btn btn-dark mt-4 ms-3 scroll-dropdown"
+        className="btn btn-secondary mt-4 ms-3 scroll-dropdown"
         onClick={() => navigate('/')}
         style={{ fontFamily: 'Cinzel Decorative, serif', fontSize: '1.1rem', color: 'var(--color-gold)', border: '2px solid var(--color-gold)' }}
       >

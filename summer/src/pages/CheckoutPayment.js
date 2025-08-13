@@ -254,7 +254,7 @@ function CheckoutPayment() {
           </div>
         )}
         <button
-          className="btn btn-dark w-100 scroll-dropdown"
+          className="btn btn-secondary w-100 scroll-dropdown"
           onClick={handlePayment}
           disabled={isLoading || isRazorpayOpen || totalAmount <= 0}
           style={{ fontFamily: 'Cinzel Decorative, serif', fontSize: '1.1rem', color: 'var(--color-gold)', border: '2px solid var(--color-gold)' }}

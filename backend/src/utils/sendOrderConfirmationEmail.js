@@ -4,13 +4,27 @@ const fs = require('fs');
 const path = require('path');
 
 const sendOrderConfirmationEmail = async (userEmail, order) => {
+  // Validate email credentials
+  const emailUser = process.env.EMAIL_USER;
+  const emailPass = process.env.EMAIL_PASS;
+  if (!emailUser || !emailPass) {
+    console.warn('⚠️ EMAIL_USER or EMAIL_PASS not configured. Skipping email send.');
+    return;
+  }
+
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
+      user: emailUser,
+      pass: emailPass,
     },
   });
+
+  try {
+    await transporter.verify();
+  } catch (verifyErr) {
+    console.warn('⚠️ SMTP verification failed. Email will likely not be sent:', verifyErr.message);
+  }
 
   // Generate PDF invoice in memory
   const doc = new PDFDocument({ margin: 40 });
@@ -70,9 +84,16 @@ const sendOrderConfirmationEmail = async (userEmail, order) => {
     (p) => `<li>${p.name} × ${p.quantity} = ₹${(p.price * p.quantity).toLocaleString('en-IN')}</li>`
   ).join('');
 
+  // Prefer user's account email, fall back to shipping email
+  const destinationEmail = userEmail || order?.shippingAddress?.email;
+  if (!destinationEmail) {
+    console.warn('⚠️ No destination email found on order. Skipping email send.');
+    return;
+  }
+
   const mailOptions = {
-    from: `"Shop" <${process.env.EMAIL_USER}>`,
-    to: userEmail,
+    from: `"Shop" <${emailUser}>`,
+    to: destinationEmail,
     subject: '🛒 Order Invoice',
     html: `
       <h2>Thank you for your order!</h2>
@@ -97,7 +118,12 @@ const sendOrderConfirmationEmail = async (userEmail, order) => {
     ],
   };
 
-  await transporter.sendMail(mailOptions);
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log('✅ Order email sent to', destinationEmail);
+  } catch (sendErr) {
+    console.error('❌ Failed to send order email:', sendErr.message);
+  }
 };
 
 module.exports = sendOrderConfirmationEmail;
