@@ -135,7 +135,7 @@ const Login = () => {
         className="rivaayat-card login-card"
       >
         <h2 className="rivaayat-heading text-amber">Login</h2>
-        <p className="rivaayat-subheading text-sand">Sign in to your account</p>
+        <p className="rivaayat-subheading text-earth">Sign in to your account</p>
 
         <form onSubmit={handleSubmit}>
           <div className="mb-3 input-group">
@@ -180,7 +180,7 @@ const Login = () => {
           <div className="text-center my-3" style={{ color: 'var(--color-amber)', fontWeight: 'bold', position: 'relative' }}>
             <hr style={{ borderColor: 'var(--color-amber)' }} />
             <span style={{
-              backgroundColor: 'var(--color-cream)',
+              backgroundColor: 'var(--color-white)',
               padding: '0 10px',
               position: 'absolute',
               top: '-13px',
@@ -195,7 +195,7 @@ const Login = () => {
           </div>
 
           <div className="mt-3 text-center">
-            <span className="text-sand">Don't have an account? </span>
+            <span className="text-black">Don't have an account? </span>
             <Link to="/register" className="rivaayat-link">Register</Link>
           </div>
 

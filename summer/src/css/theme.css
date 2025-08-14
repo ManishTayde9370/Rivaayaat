@@ -161,12 +161,23 @@ body {
 /* 🕉️ Cultural Motifs & Decorations */
 .rivaayat-motif {
   position: relative;
-  background: linear-gradient(135deg, var(--color-cream), var(--color-sand));
+  background: linear-gradient(135deg, var(--color-cream), var(--color-clay));
   border-radius: var(--border-radius-large);
   padding: 2rem;
   margin: 2rem 0;
   box-shadow: var(--shadow-soft);
 }
+
+
+.rivaayat-card1{
+  position: relative;
+  background: linear-gradient(135deg, var(--color-cream), var(--color-clay));
+  border-radius: var(--border-radius-large);
+  padding: 2rem;
+  margin: 2rem 0;
+  box-shadow: var(--shadow-soft); 
+}
+
 
 /* 🎪 Cultural Animations */
 @keyframes diya-flicker {
@@ -376,16 +387,18 @@ body {
 }
 
 /* 🎨 Cultural Grid Layout */
-.rivaayat-grid {
+/* .rivaayat-grid {
   display: grid;
   gap: 2rem;
-}
+} */
 
 /* 🏺 Cultural Hero Section */
 .rivaayat-hero {
   background: linear-gradient(135deg, rgba(61, 64, 91, 0.9), rgba(87, 117, 144, 0.8));
   color: var(--color-sand);
   padding: 4rem 0;
+  display: flex;
+
   text-align: center;
   position: relative;
   overflow: hidden;

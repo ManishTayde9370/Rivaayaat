@@ -55,7 +55,7 @@ const Register = () => {
       >
         
         <h2 className="rivaayat-heading text-amber">Register</h2>
-        <p className="rivaayat-subheading text-sand">Create your account</p>
+        <p className="rivaayat-subheading text-earth">Create your account</p>
 
         <form onSubmit={handleSubmit}>
           <div className="mb-3 input-group">
@@ -136,7 +136,7 @@ const Register = () => {
           <button type="submit" className="rivaayat-btn w-100">Register</button>
 
           <div className="mt-3 text-center">
-            <span className="text-sand">Already have an account? </span>
+            <span className="text-black">Already have an account? </span>
             <Link to="/login" className="rivaayat-link">Login</Link>
           </div>
         </form>
