@@ -23,8 +23,8 @@ async function seed() {
   // Store
   await Store.deleteMany({});
   await Store.insertMany([
-    { name: 'Rivaayat Flagship Store', address: '123 Heritage Lane, Jaipur' },
-    { name: 'Rivaayat Mumbai', address: '456 Tradition St, Mumbai' }
+    { name: 'Rivaayaat Flagship Store', address: '123 Heritage Lane, Jaipur' },
+    { name: 'Rivaayaat Mumbai', address: '456 Tradition St, Mumbai' }
   ]);
   console.log('Seeded Store');
 

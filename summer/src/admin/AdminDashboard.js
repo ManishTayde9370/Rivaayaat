@@ -131,8 +131,8 @@ const AdminDashboard = () => {
     return (
       <div className="container py-5">
         <div className="text-center">
-          <div className="rivaayat-motif">
-            <div className="rivaayat-loader mb-3" />
+          <div className="Rivaayaat-motif">
+            <div className="Rivaayaat-loader mb-3" />
             <h4 className="cinzel text-earth mb-2">Loading Dashboard</h4>
             <p className="inter text-forest">Please wait...</p>
           </div>
@@ -145,19 +145,19 @@ const AdminDashboard = () => {
     <div className="container py-5">
       {/* Header */}
               <div className="text-center mb-5">
-          <h1 className="rivaayat-heading text-earth">
+          <h1 className="Rivaayaat-heading text-earth">
             Admin Dashboard
           </h1>
-          <p className="rivaayat-subheading text-forest">
-            Manage your Rivaayat platform
+          <p className="Rivaayaat-subheading text-forest">
+            Manage your Rivaayaat platform
           </p>
         </div>
 
       {/* Stats Overview */}
       <Row className="mb-5">
         <Col lg={3} md={6} className="mb-4">
-          <div className="rivaayat-card text-center">
-            <div className="rivaayat-badge rivaayat-badge-maroon mb-3" style={{ fontSize: '2rem' }}>
+          <div className="Rivaayaat-card text-center">
+            <div className="Rivaayaat-badge Rivaayaat-badge-maroon mb-3" style={{ fontSize: '2rem' }}>
               <FaUsers />
             </div>
             <h3 className="cinzel text-earth mb-2">{stats.totalUsers}</h3>
@@ -165,8 +165,8 @@ const AdminDashboard = () => {
           </div>
         </Col>
         <Col lg={3} md={6} className="mb-4">
-          <div className="rivaayat-card text-center">
-            <div className="rivaayat-badge rivaayat-badge-peacock mb-3" style={{ fontSize: '2rem' }}>
+          <div className="Rivaayaat-card text-center">
+            <div className="Rivaayaat-badge Rivaayaat-badge-peacock mb-3" style={{ fontSize: '2rem' }}>
               <FaBox />
             </div>
             <h3 className="cinzel text-forest mb-2">{stats.totalProducts}</h3>
@@ -174,8 +174,8 @@ const AdminDashboard = () => {
           </div>
         </Col>
         <Col lg={3} md={6} className="mb-4">
-          <div className="rivaayat-card text-center">
-            <div className="rivaayat-badge rivaayat-badge-turmeric mb-3" style={{ fontSize: '2rem' }}>
+          <div className="Rivaayaat-card text-center">
+            <div className="Rivaayaat-badge Rivaayaat-badge-turmeric mb-3" style={{ fontSize: '2rem' }}>
               <FaShoppingCart />
             </div>
             <h3 className="cinzel text-amber mb-2">{stats.totalOrders}</h3>
@@ -183,8 +183,8 @@ const AdminDashboard = () => {
           </div>
         </Col>
         <Col lg={3} md={6} className="mb-4">
-          <div className="rivaayat-card text-center">
-            <div className="rivaayat-badge rivaayat-badge-indigo mb-3" style={{ fontSize: '2rem' }}>
+          <div className="Rivaayaat-card text-center">
+            <div className="Rivaayaat-badge Rivaayaat-badge-indigo mb-3" style={{ fontSize: '2rem' }}>
               <FaEnvelope />
             </div>
             <h3 className="cinzel text-warm-gray mb-2">{stats.totalMessages}</h3>
@@ -202,18 +202,18 @@ const AdminDashboard = () => {
         </Col>
         {dashboardCards.map((card, index) => (
           <Col lg={6} className="mb-4" key={index}>
-            <div className="rivaayat-card h-100">
+            <div className="Rivaayaat-card h-100">
               <div className="d-flex justify-content-between align-items-start mb-3">
-                <div className="rivaayat-badge" style={{ fontSize: '1.5rem' }}>
+                <div className="Rivaayaat-badge" style={{ fontSize: '1.5rem' }}>
                   {card.icon}
                 </div>
-                <span className="rivaayat-badge rivaayat-badge-maroon">
+                <span className="Rivaayaat-badge Rivaayaat-badge-maroon">
                   {card.badge}
                 </span>
               </div>
               <h4 className="cinzel text-earth mb-3">{card.title}</h4>
               <p className="inter text-forest mb-4">{card.description}</p>
-              <Link to={card.link} className="rivaayat-btn btn-sm">
+              <Link to={card.link} className="Rivaayaat-btn btn-sm">
                 <FaEye className="me-2" />
                 Manage
               </Link>
@@ -227,7 +227,7 @@ const AdminDashboard = () => {
       {/* Recent Activity */}
       <Row>
         <Col lg={6} className="mb-4">
-          <div className="rivaayat-card">
+          <div className="Rivaayaat-card">
             <h4 className="cinzel text-earth mb-3">
               Recent Orders
             </h4>
@@ -239,21 +239,21 @@ const AdminDashboard = () => {
                                         <p className="inter text-forest mb-0">Order #{order._id?.slice(-6)}</p>
                   <small className="text-muted">{order.status}</small>
                     </div>
-                    <span className="rivaayat-badge">₹{(order.amountPaid || order.total || 0).toLocaleString()}</span>
+                    <span className="Rivaayaat-badge">₹{(order.amountPaid || order.total || 0).toLocaleString()}</span>
                   </div>
                 ))}
               </div>
             ) : (
                               <p className="inter text-forest">No recent orders</p>
             )}
-            <Link to="/admin/orders" className="rivaayat-btn btn-sm mt-3">
+            <Link to="/admin/orders" className="Rivaayaat-btn btn-sm mt-3">
               View All Orders
             </Link>
           </div>
         </Col>
         
         <Col lg={6} className="mb-4">
-          <div className="rivaayat-card">
+          <div className="Rivaayaat-card">
             <h4 className="cinzel text-earth mb-3">
               Recent Users
             </h4>
@@ -265,7 +265,7 @@ const AdminDashboard = () => {
                                         <p className="inter text-forest mb-0">{user.name || user.email}</p>
                   <small className="text-muted">{user.email}</small>
                     </div>
-                    <span className="rivaayat-badge rivaayat-badge-maroon">
+                    <span className="Rivaayaat-badge Rivaayaat-badge-maroon">
                       {new Date(user.createdAt).toLocaleDateString()}
                     </span>
                   </div>
@@ -274,7 +274,7 @@ const AdminDashboard = () => {
             ) : (
                               <p className="inter text-forest">No recent users</p>
             )}
-            <Link to="/admin/users" className="rivaayat-btn btn-sm mt-3">
+            <Link to="/admin/users" className="Rivaayaat-btn btn-sm mt-3">
               View All Users
             </Link>
           </div>

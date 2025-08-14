@@ -4,7 +4,7 @@ require('dotenv').config();
 // Set default environment variables for development if not present
 process.env.PORT = process.env.PORT || 5000;
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
-process.env.MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/rivaayat';
+process.env.MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/Rivaayaat';
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'dev-jwt-secret-key-change-in-production';
 // For development, use test keys if available, otherwise provide helpful error
 process.env.RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || 'rzp_test_dummy';

@@ -22,7 +22,7 @@ PORT=5000
 NODE_ENV=development
 
 # Database Configuration
-MONGO_URI=mongodb://localhost:27017/rivaayat
+MONGO_URI=mongodb://localhost:27017/Rivaayaat
 
 # JWT Configuration
 JWT_SECRET=your-super-secret-jwt-key
@@ -45,7 +45,7 @@ CLOUDINARY_API_SECRET=your_api_secret
 ### Option 1: Local MongoDB
 1. Install MongoDB locally
 2. Start MongoDB service
-3. The server will connect to `mongodb://localhost:27017/rivaayat`
+3. The server will connect to `mongodb://localhost:27017/Rivaayaat`
 
 ### Option 2: MongoDB Atlas (Cloud)
 1. Create a free account at [MongoDB Atlas](https://www.mongodb.com/atlas)
@@ -77,7 +77,7 @@ CLOUDINARY_API_SECRET=your_api_secret
 
 The server uses these defaults for development:
 - Port: 5000
-- Database: mongodb://localhost:27017/rivaayat
+- Database: mongodb://localhost:27017/Rivaayaat
 - JWT Secret: dev-jwt-secret-key-change-in-production
 - Environment: development
 

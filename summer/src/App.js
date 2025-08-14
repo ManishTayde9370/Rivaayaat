@@ -1,6 +1,6 @@
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, Suspense } from 'react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
@@ -52,9 +52,13 @@ import TrackOrder from './pages/TrackOrder';
 import NavbarPrivate from './components/NavbarPrivate';
 import { fetchWishlist } from './redux/wishlist/actions';
 import { toast } from 'react-toastify';
+import Spinner from './components/spinner';
 
 function App() {
   const [sessionChecked, setSessionChecked] = useState(false);
+  const [pendingRequests, setPendingRequests] = useState(0);
+  const [showGlobalSpinner, setShowGlobalSpinner] = useState(false);
+  const spinnerDelayRef = useRef(null);
   const userDetails = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
@@ -86,6 +90,54 @@ function App() {
     restoreSession();
   }, [dispatch]);
 
+  // Global axios loading spinner via interceptors
+  useEffect(() => {
+    const requestInterceptorId = axios.interceptors.request.use(
+      (config) => {
+        setPendingRequests((count) => count + 1);
+        return config;
+      },
+      (error) => {
+        setPendingRequests((count) => Math.max(0, count - 1));
+        return Promise.reject(error);
+      }
+    );
+
+    const responseInterceptorId = axios.interceptors.response.use(
+      (response) => {
+        setPendingRequests((count) => Math.max(0, count - 1));
+        return response;
+      },
+      (error) => {
+        setPendingRequests((count) => Math.max(0, count - 1));
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      axios.interceptors.request.eject(requestInterceptorId);
+      axios.interceptors.response.eject(responseInterceptorId);
+    };
+  }, []);
+
+  // Avoid flicker: only show spinner if request takes >300ms
+  useEffect(() => {
+    if (pendingRequests > 0) {
+      if (!spinnerDelayRef.current) {
+        spinnerDelayRef.current = setTimeout(() => {
+          setShowGlobalSpinner(true);
+          spinnerDelayRef.current = null;
+        }, 300);
+      }
+    } else {
+      setShowGlobalSpinner(false);
+      if (spinnerDelayRef.current) {
+        clearTimeout(spinnerDelayRef.current);
+        spinnerDelayRef.current = null;
+      }
+    }
+  }, [pendingRequests]);
+
   // Socket.IO real-time updates
   useEffect(() => {
     if (!userDetails?._id) return;
@@ -112,10 +164,11 @@ function App() {
   const isLoggedIn = !!userDetails?.email;
   const isAdmin = userDetails?.isAdmin;
 
-  if (!sessionChecked) return <div>Loading...</div>;
+  if (!sessionChecked) return <Spinner />;
 
   return (
     <>
+      <Suspense fallback={<Spinner />}>
       <Routes>
         <Route
           path="/"
@@ -437,6 +490,9 @@ function App() {
         <Route path="/privacy-policy" element={<Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}><PrivacyPolicy /></Applayout>} />
         <Route path="/track-order" element={<Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}><TrackOrder /></Applayout>} />
       </Routes>
+      </Suspense>
+
+      {showGlobalSpinner && <Spinner overlay />}
 
       <ToastContainer position="top-right" autoClose={3000} />
     </>

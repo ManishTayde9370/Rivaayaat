@@ -50,7 +50,7 @@ const AdminLayout = ({ children, userDetails, onLogout }) => {
         <div className="sidebar-header">
           <div className="brand">
             <FaCrown className="brand-icon" />
-            <span className="brand-text">Rivaayat Admin</span>
+            <span className="brand-text">Rivaayaat Admin</span>
           </div>
           <button 
             className="sidebar-toggle"

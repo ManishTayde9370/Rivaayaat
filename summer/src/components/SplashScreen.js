@@ -6,8 +6,8 @@ const SplashScreen = () => {
   return (
     <div className="splash-screen d-flex justify-content-center align-items-center vh-100">
       <div className="text-center fade-in">
-        <img src={logo} alt="Rivaayat Logo" className="brand-logo mb-4" />
-        <h1 className="display-5">✨ Welcome to Rivaayat ✨</h1>
+        <img src={logo} alt="Rivaayaat Logo" className="brand-logo mb-4" />
+        <h1 className="display-5">✨ Welcome to Rivaayaat ✨</h1>
         <p className="lead">Rooted in tradition. Designed for today.</p>
       </div>
     </div>

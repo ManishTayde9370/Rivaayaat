@@ -132,21 +132,21 @@ const Login = () => {
         initial={{ y: 40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.7 }}
-        className="rivaayat-card login-card"
+        className="Rivaayaat-card login-card"
       >
-        <h2 className="rivaayat-heading text-amber">Login</h2>
-        <p className="rivaayat-subheading text-earth">Sign in to your account</p>
+        <h2 className="Rivaayaat-heading text-amber">Login</h2>
+        <p className="Rivaayaat-subheading text-earth">Sign in to your account</p>
 
         <form onSubmit={handleSubmit}>
           <div className="mb-3 input-group">
-            <span className="input-group-text rivaayat-input-icon">
+            <span className="input-group-text Rivaayaat-input-icon">
               <FaUserAlt />
             </span>
             <input
               type="text"
               name="identity"
               placeholder="Username / Email / Phone"
-              className={`rivaayat-input form-control ${errors.identity ? 'is-invalid' : ''}`}
+              className={`Rivaayaat-input form-control ${errors.identity ? 'is-invalid' : ''}`}
               value={identity}
               onChange={(e) => setIdentity(e.target.value)}
             />
@@ -154,19 +154,19 @@ const Login = () => {
           {errors.identity && <div className="text-danger small mb-2">{errors.identity}</div>}
 
           <div className="mb-3 input-group">
-            <span className="input-group-text rivaayat-input-icon">
+            <span className="input-group-text Rivaayaat-input-icon">
               <FaLock />
             </span>
             <input
               type={showPwd ? 'text' : 'password'}
               name="password"
               placeholder="Password"
-              className={`rivaayat-input form-control ${errors.password ? 'is-invalid' : ''}`}
+              className={`Rivaayaat-input form-control ${errors.password ? 'is-invalid' : ''}`}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
             <span
-              className="input-group-text rivaayat-input-icon"
+              className="input-group-text Rivaayaat-input-icon"
               onClick={() => setShowPwd(!showPwd)}
               style={{ cursor: 'pointer' }}
             >
@@ -175,7 +175,7 @@ const Login = () => {
           </div>
           {errors.password && <div className="text-danger small mb-2">{errors.password}</div>}
 
-          <button type="submit" className="rivaayat-btn w-100">Login</button>
+          <button type="submit" className="Rivaayaat-btn w-100">Login</button>
 
           <div className="text-center my-3" style={{ color: 'var(--color-amber)', fontWeight: 'bold', position: 'relative' }}>
             <hr style={{ borderColor: 'var(--color-amber)' }} />
@@ -196,7 +196,7 @@ const Login = () => {
 
           <div className="mt-3 text-center">
             <span className="text-black">Don't have an account? </span>
-            <Link to="/register" className="rivaayat-link">Register</Link>
+            <Link to="/register" className="Rivaayaat-link">Register</Link>
           </div>
 
           {message && <div className="alert alert-danger mt-3">{message}</div>}

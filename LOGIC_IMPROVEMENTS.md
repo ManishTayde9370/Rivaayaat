@@ -1,7 +1,7 @@
 # 🔧 Logic Improvements Summary
 
 ## Overview
-This document outlines all the critical logic gaps that were identified and fixed in the Rivaayat e-commerce project.
+This document outlines all the critical logic gaps that were identified and fixed in the Rivaayaat e-commerce project.
 
 ## 🚨 Critical Issues Fixed
 

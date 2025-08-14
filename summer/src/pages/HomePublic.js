@@ -53,10 +53,10 @@ const HomePublic = () => {
   
 
   return (
-    <div className="rivaayat-home">
+    <div className="Rivaayaat-home">
       {/* 🏺 Hero Section */}
       <section
-  className="rivaayat-hero"
+  className="Rivaayaat-hero"
   style={{
     backgroundImage: `linear-gradient(135deg, rgba(61,64,91,0.45), rgba(87,117,144,0.35)), url(${images[currentImage]})`,
     backgroundSize: 'cover',
@@ -69,13 +69,13 @@ const HomePublic = () => {
     position: 'relative'
   }}
 >
-  <div className="rivaayat-hero-content text-center">
+  <div className="Rivaayaat-hero-content text-center">
     <Container>
       <Row className="justify-content-center">
         <Col lg={8}>
           <div className="scroll-reveal">
-            <h1 className="rivaayat-heading text-sand mb-4">
-              Welcome to <span className="text-amber">Rivaayat</span>
+            <h1 className="Rivaayaat-heading text-sand mb-4">
+              Welcome to <span className="text-amber">Rivaayaat</span>
             </h1>
             <p className="playfair text-sand mb-4" style={{ fontSize: '1.2rem', lineHeight: 1.8 }}>
               Discover the beauty of Indian heritage through handcrafted treasures
@@ -85,7 +85,7 @@ const HomePublic = () => {
               Explore curated collections that tell stories of India's rich cultural heritage.
             </p>
             <div className="d-flex flex-wrap justify-content-center gap-3">
-              <Link to="/login" className="rivaayat-btn">
+              <Link to="/login" className="Rivaayaat-btn">
                 <FaPlay className="me-2" />
                 Start Shopping
               </Link>
@@ -103,20 +103,20 @@ const HomePublic = () => {
         <Container>
           <Row className="justify-content-center mb-5">
             <Col lg={8} className="text-center">
-              <h2 className="rivaayat-heading text-earth">
-                Why Choose Rivaayat?
+              <h2 className="Rivaayaat-heading text-earth">
+                Why Choose Rivaayaat?
               </h2>
-              <p className="rivaayat-subheading text-forest">
+              <p className="Rivaayaat-subheading text-forest">
                 Experience the finest handcrafted products with authentic cultural heritage
               </p>
             </Col>
           </Row>
           
-          <Row className="rivaayat-grid g-4">
+          <Row className="Rivaayaat-grid g-4">
   {features.map((feature, index) => (
     <Col key={index} lg={4} md={6} sm={12}>
       <Card
-        className="rivaayat-card h-100 text-center scroll-reveal shadow-sm border-0"
+        className="Rivaayaat-card h-100 text-center scroll-reveal shadow-sm border-0"
         style={{ animationDelay: `${index * 0.1}s` }}
       >
         <Card.Body className="d-flex flex-column align-items-center justify-content-center p-4">
@@ -153,7 +153,7 @@ const HomePublic = () => {
             <Row className="align-items-center">
               
               <Col lg={6} className="text-center mb-4 mb-lg-0">
-  <div className="rivaayat-motif">
+  <div className="Rivaayaat-motif">
     <h3
       className="cinzel mb-4"
       style={{ color: '#000' }} // earthy brown
@@ -168,7 +168,7 @@ const HomePublic = () => {
         color: '#8B5E3C'
       }}
     >
-      Rivaayat celebrates India's rich heritage by connecting you with skilled artisans 
+      Rivaayaat celebrates India's rich heritage by connecting you with skilled artisans 
       and their timeless crafts. Every product tells a story of tradition, skill, and cultural pride.
     </p>
     <p
@@ -184,25 +184,25 @@ const HomePublic = () => {
 </Col>
 
               <Col lg={6}>
-  <div className="rivaayat-card1 bg-cream" style={{ color: '#000' }}>
+  <div className="Rivaayaat-card1 bg-cream" style={{ color: '#000' }}>
     <h4 className="cinzel mb-3">
       Our Promise
     </h4>
     <ul className="list-unstyled">
       <li className="mb-3 d-flex align-items-center">
-        <span className="rivaayat-badge me-3">🕉️</span>
+        <span className="Rivaayaat-badge me-3">🕉️</span>
         <span className="inter">Authentic handcrafted products</span>
       </li>
       <li className="mb-3 d-flex align-items-center">
-        <span className="rivaayat-badge me-3">🎨</span>
+        <span className="Rivaayaat-badge me-3">🎨</span>
         <span className="inter">Direct support to artisans</span>
       </li>
       <li className="mb-3 d-flex align-items-center">
-        <span className="rivaayat-badge me-3">📖</span>
+        <span className="Rivaayaat-badge me-3">📖</span>
         <span className="inter">Cultural stories and heritage</span>
       </li>
       <li className="mb-3 d-flex align-items-center">
-        <span className="rivaayat-badge me-3">🌟</span>
+        <span className="Rivaayaat-badge me-3">🌟</span>
         <span className="inter">Quality and craftsmanship</span>
       </li>
     </ul>
@@ -218,7 +218,7 @@ const HomePublic = () => {
         <Container>
           <Row className="justify-content-center text-center">
             <Col lg={8}>
-              <div className="rivaayat-motif">
+              <div className="Rivaayaat-motif">
                                   <h3 className="cinzel text-earth mb-4">
                     Ready to Explore?
                   </h3>
@@ -226,7 +226,7 @@ const HomePublic = () => {
                     Join our community and discover the beauty of Indian heritage through handcrafted treasures.
                   </p>
                 <div className="d-flex flex-wrap justify-content-center gap-3">
-                  <Link to="/register" className="rivaayat-btn">
+                  <Link to="/register" className="Rivaayaat-btn">
                     Create Account
                   </Link>
                 </div>

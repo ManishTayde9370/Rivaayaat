@@ -25,7 +25,7 @@ const HomePrivate = () => {
         }}
       >
         <h1 className="mb-4" style={{ fontFamily: 'Georgia', fontWeight: 'bold', color: '#fcecc5' }}>
-          Welcome Back to <span style={{ color: '#fff' }}>Rivaayat</span> 👋
+          Welcome Back to <span style={{ color: '#fff' }}>Rivaayaat</span> 👋
         </h1>
 
         <p className="lead mb-4" style={{ color: '#f8f1d9' }}>

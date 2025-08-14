@@ -107,7 +107,7 @@ const Contact = () => {
           <h5>Phone</h5>
           <p>+91 98765 43210</p>
           <h5>Email</h5>
-          <p>care@rivaayaat.com</p>
+          <p>care@Rivaayat.com</p>
           <h5>Find Us</h5>
           <div style={{ width: '100%', height: 200, background: '#eee', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888' }}>
             [Map Placeholder]

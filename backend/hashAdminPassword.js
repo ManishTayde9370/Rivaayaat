@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const User = require('./src/model/Users'); // adjust path if needed
 
 const run = async () => {
-  await mongoose.connect('mongodb://localhost:27017/rivaayat'); // adjust URI if needed
+  await mongoose.connect('mongodb://localhost:27017/Rivaayaat'); // adjust URI if needed
 
   const plainPassword = 'admin123';
   const hashed = await bcrypt.hash(plainPassword, 10);

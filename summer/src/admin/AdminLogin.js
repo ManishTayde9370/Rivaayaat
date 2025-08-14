@@ -134,7 +134,7 @@ const AdminLogin = () => {
             <div className="brand-icon">
               <FaCrown />
             </div>
-            <h1 className="brand-title">Rivaayat</h1>
+            <h1 className="brand-title">Rivaayaat</h1>
             <p className="brand-subtitle">Admin Portal</p>
           </div>
         </div>

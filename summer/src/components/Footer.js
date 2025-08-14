@@ -6,28 +6,28 @@ import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
-    <footer className="rivaayat-footer">
+    <footer className="Rivaayaat-footer">
       <Container>
         <Row className="mb-4">
           <Col lg={4} className="mb-4">
             <div className="text-center text-lg-start">
                               <h4 className="cinzel text-amber mb-3">
-                  🕉️ Rivaayat
+                  🕉️ Rivaayaat
                 </h4>
                 <p className="playfair text-sand mb-4" style={{ fontSize: '1rem', lineHeight: 1.6 }}>
                   Celebrating India's rich heritage through handcrafted treasures and authentic cultural experiences.
                 </p>
               <div className="d-flex justify-content-center justify-content-lg-start gap-3">
-                <a href="#" className="rivaayat-badge rivaayat-badge-maroon">
+                <a href="#" className="Rivaayaat-badge Rivaayaat-badge-maroon">
                   <FaFacebookF />
                 </a>
-                <a href="#" className="rivaayat-badge rivaayat-badge-maroon">
+                <a href="#" className="Rivaayaat-badge Rivaayaat-badge-maroon">
                   <FaTwitter />
                 </a>
-                <a href="#" className="rivaayat-badge rivaayat-badge-maroon">
+                <a href="#" className="Rivaayaat-badge Rivaayaat-badge-maroon">
                   <FaInstagram />
                 </a>
-                <a href="#" className="rivaayat-badge rivaayat-badge-maroon">
+                <a href="#" className="Rivaayaat-badge Rivaayaat-badge-maroon">
                   <FaYoutube />
                 </a>
               </div>
@@ -121,10 +121,10 @@ const Footer = () => {
               <Form.Control 
                 type="email" 
                 placeholder="Your email" 
-                className="rivaayat-input"
+                className="Rivaayaat-input"
                 size="sm"
               />
-              <Button className="rivaayat-btn btn-sm">
+              <Button className="Rivaayaat-btn btn-sm">
                 Subscribe
               </Button>
             </Form>
@@ -137,12 +137,12 @@ const Footer = () => {
         <Row className="align-items-center">
           <Col md={6} className="text-center text-md-start">
             <p className="inter text-sand mb-0">
-              © 2025 Rivaayat. All rights reserved.
+              © 2025 Rivaayaat. All rights reserved.
             </p>
           </Col>
           <Col md={6} className="text-center text-md-end">
             <p className="inter text-sand mb-0">
-              care@rivaayat.com | 10am - 7pm, Monday - Saturday
+              care@Rivaayaat.com | 10am - 7pm, Monday - Saturday
             </p>
           </Col>
         </Row>

@@ -40,7 +40,7 @@ const Blogs = () => {
 
   return (
     <div className="container py-5">
-      <h1 className="mb-4 rivaayat-heading">Blogs</h1>
+      <h1 className="mb-4 Rivaayaat-heading">Blogs</h1>
       {userDetails?.name && <p className="mb-4">Welcome, {userDetails.name}! Here are the latest stories for you.</p>}
       {error && <div className="alert alert-danger">{error}</div>}
       {loading ? <div className="d-flex justify-content-center my-5"><LoadingBar /></div> : (

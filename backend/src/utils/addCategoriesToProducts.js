@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Product = require('../model/Product');
 
-// Sample categories for Rivaayat (traditional Indian products)
+// Sample categories for Rivaayaat (traditional Indian products)
 const categories = [
   'Handcrafted Apparel',
   'Traditional Jewelry', 
@@ -36,7 +36,7 @@ const addCategoriesToProducts = async () => {
     console.log('🔄 Starting category assignment...');
     
     // Connect to MongoDB
-    const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/rivaayat';
+    const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/Rivaayaat';
     await mongoose.connect(MONGO_URI);
     console.log('✅ Connected to MongoDB');
 

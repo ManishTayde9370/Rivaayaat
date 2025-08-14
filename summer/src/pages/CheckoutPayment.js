@@ -138,7 +138,7 @@ function CheckoutPayment() {
         key: keyData.key,
         amount: order.amount,
         currency: 'INR',
-        name: 'Rivaayaat',
+        name: 'Rivaayat',
         description: 'Order Payment',
         order_id: order.id,
         handler: async function (response) {

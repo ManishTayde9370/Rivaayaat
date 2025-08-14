@@ -2,7 +2,7 @@ import React from 'react';
 import '../css/theme.css';
 
 const timeline = [
-  { year: '2018', event: 'Rivaayat founded to revive India’s royal crafts.' },
+  { year: '2018', event: 'Rivaayaat founded to revive India’s royal crafts.' },
   { year: '2019', event: 'First artisan partnership in Varanasi.' },
   { year: '2020', event: 'Launched “Festive Hampers” for Diwali.' },
   { year: '2022', event: 'Reached 10,000+ happy customers.' },

@@ -7,7 +7,7 @@ const Timeline = () => {
       <div className="timeline-item">
         <div className="timeline-content">
           <h5>2022</h5>
-          <p>Conceptualized Rivaayat and started a small cultural blog.</p>
+          <p>Conceptualized Rivaayaat and started a small cultural blog.</p>
         </div>
       </div>
       <div className="timeline-item">

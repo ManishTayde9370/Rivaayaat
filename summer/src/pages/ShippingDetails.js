@@ -2,7 +2,7 @@ import React from 'react';
 
 const ShippingDetails = () => (
   <div className="container py-5">
-    <h1 className="mb-4 rivaayat-heading">Shipping Details</h1>
+    <h1 className="mb-4 Rivaayaat-heading">Shipping Details</h1>
     <p>We deliver across India and internationally. Here are our standard shipping rates and timelines:</p>
     <table className="table table-bordered mb-4" style={{ maxWidth: 600, background: '#fff8f0', border: '1.5px solid var(--border-color)' }}>
       <thead>

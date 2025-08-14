@@ -6,12 +6,12 @@ import '../css/theme.css';
 
 const NavbarPublic = () => {
   return (
-    <Navbar expand="lg" className="rivaayat-nav py-3">
+    <Navbar expand="lg" className="Rivaayaat-nav py-3">
       <Container>
         <Navbar.Brand as={Link} to="/" className="d-flex align-items-center">
           <img
             src={logo}
-            alt="Rivaayat Logo"
+            alt="Rivaayaat Logo"
             style={{ height: 45 }}
             className="diya-flicker"
           />
@@ -21,15 +21,15 @@ const NavbarPublic = () => {
         
         <Navbar.Collapse id="navbar-nav" className="justify-content-end">
           <Nav className="ms-auto">
-            <Nav.Link as={Link} to="/" className="rivaayat-nav-link">
+            <Nav.Link as={Link} to="/" className="Rivaayaat-nav-link">
               <FaHome className="me-1" /> Home
             </Nav.Link>
             
-            <Nav.Link as={Link} to="/login" className="rivaayat-nav-link">
+            <Nav.Link as={Link} to="/login" className="Rivaayaat-nav-link">
               <FaSignInAlt className="me-1" /> Login
             </Nav.Link>
             
-            <Nav.Link as={Link} to="/register" className="rivaayat-nav-link">
+            <Nav.Link as={Link} to="/register" className="Rivaayaat-nav-link">
               <FaUserPlus className="me-1" /> Register
             </Nav.Link>
           </Nav>

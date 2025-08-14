@@ -10,7 +10,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: 'rivaayat_products',
+    folder: 'Rivaayaat_products',
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
   },
 });

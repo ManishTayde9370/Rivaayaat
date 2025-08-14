@@ -50,8 +50,8 @@ const Careers = () => {
 
   return (
     <div className="container py-5">
-      <h1 className="mb-4 rivaayat-heading">Careers</h1>
-      <h4 className="rivaayat-heading" style={{ fontSize: '1.3em' }}>Open Positions</h4>
+      <h1 className="mb-4 Rivaayaat-heading">Careers</h1>
+      <h4 className="Rivaayaat-heading" style={{ fontSize: '1.3em' }}>Open Positions</h4>
       <ul className="list-group mb-4">
         {positions.map((pos, i) => (
           <li className="list-group-item d-flex justify-content-between align-items-center" key={i} style={{ borderRadius: 8, background: '#fff8f0', border: '1.5px solid var(--border-color)', marginBottom: 8 }}>
@@ -60,7 +60,7 @@ const Careers = () => {
           </li>
         ))}
       </ul>
-      <h4 className="rivaayat-heading" style={{ fontSize: '1.3em' }}>Your Applications</h4>
+      <h4 className="Rivaayaat-heading" style={{ fontSize: '1.3em' }}>Your Applications</h4>
       <ul className="list-group mb-4" style={{ maxWidth: 500 }}>
         {applications.length === 0 ? <li className="list-group-item">No applications yet.</li> : applications.map((app, i) => (
           <li className="list-group-item" key={i}>
@@ -69,7 +69,7 @@ const Careers = () => {
           </li>
         ))}
       </ul>
-      <h4 className="rivaayat-heading mt-4" style={{ fontSize: '1.3em' }}>Apply Now</h4>
+      <h4 className="Rivaayaat-heading mt-4" style={{ fontSize: '1.3em' }}>Apply Now</h4>
       <form onSubmit={handleSubmit} style={{ maxWidth: 400, background: '#fff8f0', borderRadius: 12, border: '1.5px solid var(--border-color)', padding: 24 }}>
         <div className="mb-3">
           <label htmlFor="name" className="form-label">Name</label>
@@ -92,7 +92,7 @@ const Careers = () => {
           <label htmlFor="message" className="form-label">Why do you want to join us?</label>
           <textarea className="form-control" id="message" name="message" rows={3} value={form.message} onChange={handleChange} required />
         </div>
-        <button type="submit" className="rivaayat-btn" disabled={loading}>{loading ? 'Submitting...' : 'Submit Application'}</button>
+        <button type="submit" className="Rivaayaat-btn" disabled={loading}>{loading ? 'Submitting...' : 'Submit Application'}</button>
         {submitted && <div className="alert alert-success mt-3">Thank you for applying! We'll be in touch soon.</div>}
       </form>
     </div>

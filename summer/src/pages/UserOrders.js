@@ -24,11 +24,11 @@ const UserOrders = () => {
 
   return (
     <div className="container py-5">
-      <h1 className="rivaayat-heading mb-4">My Orders</h1>
+      <h1 className="Rivaayaat-heading mb-4">My Orders</h1>
       {orders.length === 0 ? (
         <div className="alert alert-info">No orders yet.</div>
       ) : (
-        <div className="rivaayat-card p-3">
+        <div className="Rivaayaat-card p-3">
           {orders.map(o => (
             <div key={o._id} className="d-flex justify-content-between align-items-center border-bottom py-2">
               <div>

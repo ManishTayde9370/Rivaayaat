@@ -224,13 +224,13 @@ const Product = () => {
       
       return (
         <div className="col-md-6 col-lg-4 mb-4" key={product._id}>
-          <div className="rivaayat-product-card h-100">
+          <div className="Rivaayaat-product-card h-100">
             <div className="position-relative">
               <Zoom>
                 <img
                   src={product.images?.[0] || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4='}
                   alt={product.name}
-                  className="rivaayat-product-image"
+                  className="Rivaayaat-product-image"
                   loading="lazy"
                   onError={(e) => {
                     e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4=';
@@ -240,7 +240,7 @@ const Product = () => {
               
               {/* Wishlist Button */}
               <button
-                className="position-absolute top-0 end-0 m-2 rivaayat-btn rivaayat-btn-outline"
+                className="position-absolute top-0 end-0 m-2 Rivaayaat-btn Rivaayaat-btn-outline"
                 style={{ padding: '0.5rem', borderRadius: '50%', width: '40px', height: '40px' }}
                 onClick={(e) => {
                   e.preventDefault();
@@ -258,20 +258,20 @@ const Product = () => {
               
               {/* Stock Badge */}
               {product.stock <= 0 && (
-                <span className="position-absolute top-0 start-0 m-2 rivaayat-badge rivaayat-badge-maroon">
+                <span className="position-absolute top-0 start-0 m-2 Rivaayaat-badge Rivaayaat-badge-maroon">
                   Out of Stock
                 </span>
               )}
               
               {product.stock > 0 && product.stock <= 5 && (
-                <span className="position-absolute top-0 start-0 m-2 rivaayat-badge">
+                <span className="position-absolute top-0 start-0 m-2 Rivaayaat-badge">
                   Only {product.stock} left
                 </span>
               )}
             </div>
             
-            <div className="rivaayat-product-content d-flex flex-column">
-              <h6 className="rivaayat-product-title text-truncate" title={product.name}>
+            <div className="Rivaayaat-product-content d-flex flex-column">
+              <h6 className="Rivaayaat-product-title text-truncate" title={product.name}>
                 {product.name}
               </h6>
               
@@ -282,9 +282,9 @@ const Product = () => {
               
               <div className="product-details mb-3">
                 <div className="d-flex justify-content-between align-items-center mb-2">
-                  <span className="rivaayat-product-price">₹{product.price}</span>
+                  <span className="Rivaayaat-product-price">₹{product.price}</span>
                   {product.category && (
-                    <span className="rivaayat-badge rivaayat-badge-indigo">{product.category}</span>
+                    <span className="Rivaayaat-badge Rivaayaat-badge-indigo">{product.category}</span>
                   )}
                 </div>
                 
@@ -297,13 +297,13 @@ const Product = () => {
                 <div className="row g-2">
                   <div className="col-6">
                     <button
-                      className="rivaayat-btn btn-sm w-100 d-flex align-items-center justify-content-center"
+                      className="Rivaayaat-btn btn-sm w-100 d-flex align-items-center justify-content-center"
                       onClick={() => handleAddToCart(product)}
                       disabled={product.stock <= 0 || isAddingToCartThis || !userDetails?.email}
                     >
                       {isAddingToCartThis ? (
                         <>
-                          <span className="rivaayat-loader me-1" />
+                          <span className="Rivaayaat-loader me-1" />
                           Adding...
                         </>
                       ) : (
@@ -317,7 +317,7 @@ const Product = () => {
                   <div className="col-6">
                     <Link
                       to={`/product/${product._id}`}
-                      className="rivaayat-btn rivaayat-btn-outline btn-sm w-100 d-flex align-items-center justify-content-center"
+                      className="Rivaayaat-btn Rivaayaat-btn-outline btn-sm w-100 d-flex align-items-center justify-content-center"
                     >
                       <FaEye className="me-1" />
                       View
@@ -362,7 +362,7 @@ const Product = () => {
         <ul className="pagination justify-content-center">
           <li className={`page-item ${current === 1 ? 'disabled' : ''}`}>
             <button
-              className="page-link rivaayat-btn rivaayat-btn-outline"
+              className="page-link Rivaayaat-btn Rivaayaat-btn-outline"
               onClick={() => handlePageChange(current - 1)}
               disabled={current === 1}
               style={{ margin: '0 0.25rem' }}
@@ -377,7 +377,7 @@ const Product = () => {
                 <span className="page-link inter text-peacock">...</span>
               ) : (
                 <button
-                  className={`page-link ${page === current ? 'rivaayat-btn' : 'rivaayat-btn rivaayat-btn-outline'}`}
+                  className={`page-link ${page === current ? 'Rivaayaat-btn' : 'Rivaayaat-btn Rivaayaat-btn-outline'}`}
                   onClick={() => handlePageChange(page)}
                   style={{ margin: '0 0.25rem' }}
                 >
@@ -389,7 +389,7 @@ const Product = () => {
           
           <li className={`page-item ${current === totalPages ? 'disabled' : ''}`}>
             <button
-              className="page-link rivaayat-btn rivaayat-btn-outline"
+              className="page-link Rivaayaat-btn Rivaayaat-btn-outline"
               onClick={() => handlePageChange(current + 1)}
               disabled={current === totalPages}
               style={{ margin: '0 0.25rem' }}
@@ -407,8 +407,8 @@ const Product = () => {
     return (
       <div className="container py-5">
         <div className="text-center">
-          <div className="rivaayat-motif">
-            <div className="rivaayat-loader mb-3" />
+          <div className="Rivaayaat-motif">
+            <div className="Rivaayaat-loader mb-3" />
             <h4 className="cinzel text-maroon mb-2">Loading Cultural Treasures</h4>
             <p className="inter text-peacock">Discovering handcrafted stories...</p>
           </div>
@@ -422,10 +422,10 @@ const Product = () => {
     return (
       <div className="container py-5">
         <div className="text-center">
-          <div className="rivaayat-card bg-turmeric text-black">
+          <div className="Rivaayaat-card bg-turmeric text-black">
             <h4 className="cinzel text-maroon mb-3">🕉️ Cultural Connection Lost</h4>
             <p className="inter mb-3">{error}</p>
-            <button className="rivaayat-btn" onClick={handleRetry}>
+            <button className="Rivaayaat-btn" onClick={handleRetry}>
               Reconnect
             </button>
           </div>
@@ -438,24 +438,24 @@ const Product = () => {
     <div className="container py-5">
       {/* Header */}
       <div className="text-center mb-5">
-                  <h1 className="rivaayat-heading text-earth">
+                  <h1 className="Rivaayaat-heading text-earth">
             Our Products
           </h1>
-          <p className="rivaayat-subheading text-forest">
+          <p className="Rivaayaat-subheading text-forest">
             Discover handcrafted treasures with authentic cultural heritage
           </p>
       </div>
 
       {/* Search Results Header */}
       {searchTerm && (
-        <div className="rivaayat-card mb-4">
+        <div className="Rivaayaat-card mb-4">
           <h3 className="cinzel text-earth mb-2">Search Results for "{searchTerm}"</h3>
           <p className="inter text-forest">{products.length} products found</p>
         </div>
       )}
       
       {notFound && (
-        <div className="rivaayat-card bg-amber text-earth">
+        <div className="Rivaayaat-card bg-amber text-earth">
           <h5 className="cinzel mb-2">No products found</h5>
           <p className="inter mb-0">No products found for your search. Showing all products instead.</p>
         </div>
@@ -477,19 +477,19 @@ const Product = () => {
       {/* Filter Loading Indicator */}
       {filtersLoading && (
         <div className="text-center mb-3">
-          <div className="rivaayat-loader" />
+          <div className="Rivaayaat-loader" />
           <span className="ms-2 inter text-forest">Applying filters...</span>
         </div>
       )}
 
       {/* Error Banner (when there are existing products) */}
       {error && products.length > 0 && (
-        <div className="rivaayat-card bg-turmeric text-black">
+        <div className="Rivaayaat-card bg-turmeric text-black">
           <h5 className="cinzel mb-2">⚠️ Notice</h5>
           <p className="inter mb-0">{error}</p>
           <button
             type="button"
-            className="rivaayat-btn btn-sm mt-2"
+            className="Rivaayaat-btn btn-sm mt-2"
             onClick={() => setError(null)}
           >
             Dismiss
@@ -529,7 +529,7 @@ const Product = () => {
         </>
       ) : (
         <div className="text-center py-5">
-          <div className="rivaayat-motif">
+          <div className="Rivaayaat-motif">
             <div className="mb-4">
                               <FaFilter size={48} className="text-forest" />
             </div>
@@ -537,7 +537,7 @@ const Product = () => {
             <p className="inter text-forest mb-4">Try adjusting your filters or search terms</p>
             {Object.keys(filters).length > 0 && (
               <button
-                className="rivaayat-btn rivaayat-btn-outline"
+                className="Rivaayaat-btn Rivaayaat-btn-outline"
                 onClick={() => setFilters({})}
               >
                 Clear Filters

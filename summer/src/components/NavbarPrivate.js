@@ -49,12 +49,12 @@ const NavbarPrivate = ({ username, onLogout }) => {
   };
 
   return (
-    <Navbar expand="lg" className="rivaayat-nav py-3">
+    <Navbar expand="lg" className="Rivaayaat-nav py-3">
       <Container>
         <Navbar.Brand as={Link} to="/homeprivate" className="d-flex align-items-center">
           <img 
             src={logo} 
-            alt="Rivaayat Logo" 
+            alt="Rivaayaat Logo" 
             style={{ height: 45 }}
             className="diya-flicker"
           />
@@ -64,15 +64,15 @@ const NavbarPrivate = ({ username, onLogout }) => {
         
         <Navbar.Collapse id="user-navbar-nav" className="justify-content-between">
           <Nav className="me-auto">
-            <Nav.Link as={Link} to="/" className="rivaayat-nav-link">
+            <Nav.Link as={Link} to="/" className="Rivaayaat-nav-link">
               <FaHome className="me-1" /> Home
             </Nav.Link>
             
-            <Nav.Link as={Link} to="/product" className="rivaayat-nav-link">
+            <Nav.Link as={Link} to="/product" className="Rivaayaat-nav-link">
               <FaShoppingBag className="me-1" /> Shop
             </Nav.Link>
             
-            <Nav.Link as={Link} to="/dashboard" className="rivaayat-nav-link">
+            <Nav.Link as={Link} to="/dashboard" className="Rivaayaat-nav-link">
               <FaUserCircle className="me-1" /> Dashboard
             </Nav.Link>
           </Nav>
@@ -82,14 +82,14 @@ const NavbarPrivate = ({ username, onLogout }) => {
             <FormControl
               type="search"
               placeholder="Search products..."
-              className="rivaayat-input me-2"
+              className="Rivaayaat-input me-2"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{ minWidth: '200px' }}
             />
             <button 
               type="submit" 
-              className="rivaayat-btn"
+              className="Rivaayaat-btn"
               style={{ padding: '0.75rem 1rem' }}
             >
               <FaSearch />
@@ -102,12 +102,12 @@ const NavbarPrivate = ({ username, onLogout }) => {
         <Nav className="ms-auto align-items-center">
           <NavDropdown 
             title={
-              <span className="rivaayat-nav-link d-inline-flex align-items-center">
+              <span className="Rivaayaat-nav-link d-inline-flex align-items-center">
                 <FaUser className="me-1" />
                 {username}
               </span>
             } 
-            className="rivaayat-nav-link"
+            className="Rivaayaat-nav-link"
             id="user-dropdown"
           >
             <NavDropdown.Item as={Link} to="/dashboard" className="cinzel">

@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
 transporter.sendMail({
   from: `"Test" <${process.env.EMAIL_USER}>`,
   to: process.env.EMAIL_USER, // send to yourself
-  subject: 'Test Email from Rivaayaat Backend',
+  subject: 'Test Email from Rivaayat Backend',
   text: 'This is a test email to verify your SMTP credentials and network.',
 }, (err, info) => {
   if (err) {

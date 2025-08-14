@@ -1,5 +1,5 @@
 @echo off
-echo 🚀 Starting Rivaayat Backend Server...
+echo 🚀 Starting Rivaayaat Backend Server...
 echo.
 
 cd backend

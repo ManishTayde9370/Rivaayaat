@@ -37,13 +37,13 @@ function CheckoutSuccess() {
       <h2 className="cinzel text-success mb-3" style={{ color: 'var(--color-emerald)' }}>
         <span role="img" aria-label="confetti">🎉</span> Order Placed Successfully!
       </h2>
-      <p className="mt-3 cinzel" style={{ color: 'var(--color-maroon)' }}>Thank you for shopping with Rivaayaat.</p>
+      <p className="mt-3 cinzel" style={{ color: 'var(--color-maroon)' }}>Thank you for shopping with Rivaayat.</p>
       <div className="miniature-border mt-4 p-4 shadow-sm scroll-dropdown" id="invoice-section" style={{ maxWidth: 600, margin: '0 auto', textAlign: 'left', background: 'var(--color-ivory)' }}>
         <div className="d-flex align-items-center mb-3 gap-3">
           <img src={brandLogo} alt="Brand Logo" style={{ width: 60, height: 60, objectFit: 'contain' }} />
           <div>
-            <h3 className="cinzel mb-0" style={{ color: 'var(--color-maroon)', fontWeight: 'bold' }}>Rivaayaat</h3>
-            <span style={{ color: 'var(--color-peacock)' }}>www.rivaayaat.com</span>
+            <h3 className="cinzel mb-0" style={{ color: 'var(--color-maroon)', fontWeight: 'bold' }}>Rivaayat</h3>
+            <span style={{ color: 'var(--color-peacock)' }}>www.Rivaayat.com</span>
           </div>
         </div>
         <hr />

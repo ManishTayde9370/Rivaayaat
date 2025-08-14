@@ -36,7 +36,7 @@ const sendOrderConfirmationEmail = async (userEmail, order) => {
   if (fs.existsSync(logoPath)) {
     doc.image(logoPath, 40, 40, { width: 60 });
   }
-  doc.fontSize(22).text('Rivaayaat', 110, 40, { continued: true }).fontSize(12).text('  www.rivaayaat.com');
+  doc.fontSize(22).text('Rivaayat', 110, 40, { continued: true }).fontSize(12).text('  www.Rivaayat.com');
   doc.moveDown();
   doc.fontSize(16).text('Order Invoice', { underline: true });
   doc.moveDown();

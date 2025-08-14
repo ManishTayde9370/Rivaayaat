@@ -14,16 +14,16 @@ const OrderItem = ({ order }) => (
   </div>
 );
 
-// Sample Rivaayat Product Card
-export function RivaayatProductCard({ product }) {
+// Sample Rivaayaat Product Card
+export function RivaayaatProductCard({ product }) {
   return (
-    <div className="rivaayat-card">
+    <div className="Rivaayaat-card">
       <img src={product.image} alt={product.name} style={{ width: '100%', borderRadius: '8px', marginBottom: '1em' }} />
-      <h2 className="rivaayat-heading">{product.name}</h2>
+      <h2 className="Rivaayaat-heading">{product.name}</h2>
       <p style={{ color: 'var(--accent-color)', fontWeight: 'bold' }}>₹{product.price}</p>
       <p>{product.description}</p>
       {product.artisan && <p style={{ fontStyle: 'italic', color: 'var(--primary-color)' }}>By: {product.artisan}</p>}
-      <button className="rivaayat-btn">Add to Cart</button>
+      <button className="Rivaayaat-btn">Add to Cart</button>
     </div>
   );
 }

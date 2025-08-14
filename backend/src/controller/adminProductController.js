@@ -78,7 +78,7 @@ exports.updateProduct = async (req, res) => {
             const parts = imgUrl.split('/');
             const fileName = parts[parts.length - 1]; // abcxyz.jpg
             const publicIdWithExt = fileName.split('.')[0]; // abcxyz
-            const folder = 'rivaayaat_products'; // Your folder name
+            const folder = 'Rivaayat_products'; // Your folder name
             const public_id = `${folder}/${publicIdWithExt}`;
 
             await cloudinary.uploader.destroy(public_id);
@@ -119,7 +119,7 @@ exports.deleteProduct = async (req, res) => {
           const parts = imgUrl.split('/');
           const fileName = parts[parts.length - 1]; // abcxyz.jpg
           const publicIdWithExt = fileName.split('.')[0]; // abcxyz
-          const folder = 'rivaayaat_products';
+          const folder = 'Rivaayat_products';
           const public_id = `${folder}/${publicIdWithExt}`;
 
           await cloudinary.uploader.destroy(public_id);

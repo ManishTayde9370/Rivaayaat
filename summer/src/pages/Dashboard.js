@@ -153,7 +153,7 @@ const Dashboard = ({ onLogout }) => {
   // Memoized components to prevent unnecessary re-renders
   const ProfileSection = useMemo(() => (
     <div className="col-md-4">
-      <div className="rivaayat-card h-100">
+      <div className="Rivaayaat-card h-100">
         <div className="d-flex align-items-center mb-3">
           <FaUser size={28} style={{ color: 'var(--accent-color)', marginRight: 10 }} />
           <h5 className="mb-0" style={{ fontWeight: 600, color: 'var(--primary-color)' }}>Profile</h5>
@@ -227,7 +227,7 @@ const Dashboard = ({ onLogout }) => {
               <FaPhone className="me-2" style={{ color: 'var(--accent-color)' }} />
               <span>{userDetails?.phone || 'Not provided'}</span>
             </div>
-            <button className="rivaayat-btn btn-sm d-flex align-items-center" onClick={() => setEdit(true)}>
+            <button className="Rivaayaat-btn btn-sm d-flex align-items-center" onClick={() => setEdit(true)}>
               <FaEdit className="me-2" /> Edit Profile
             </button>
           </>
@@ -238,7 +238,7 @@ const Dashboard = ({ onLogout }) => {
 
   const OrdersSection = useMemo(() => (
     <div className="col-md-4">
-      <div className="rivaayat-card h-100">
+      <div className="Rivaayaat-card h-100">
         <div className="d-flex align-items-center justify-content-between mb-3">
           <div className="d-flex align-items-center">
             <FaBoxOpen size={28} style={{ color: 'var(--accent-color)', marginRight: 10 }} />
@@ -288,7 +288,7 @@ const Dashboard = ({ onLogout }) => {
 
   const WishlistSection = useMemo(() => (
     <div className="col-md-4">
-      <div className="rivaayat-card h-100">
+      <div className="Rivaayaat-card h-100">
         <div className="d-flex align-items-center mb-3">
           <FaHeart size={28} style={{ color: 'var(--accent-color)', marginRight: 10 }} />
           <h5 className="mb-0" style={{ fontWeight: 600, color: 'var(--primary-color)' }}>Wishlist</h5>
@@ -314,9 +314,9 @@ const Dashboard = ({ onLogout }) => {
   return (
     <div className="container py-5">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="rivaayat-heading mb-0">My Account</h1>
+        <h1 className="Rivaayaat-heading mb-0">My Account</h1>
         {onLogout && (
-          <button className="rivaayat-btn d-flex align-items-center" onClick={onLogout} style={{ minWidth: 110 }} aria-label="Logout">
+          <button className="Rivaayaat-btn d-flex align-items-center" onClick={onLogout} style={{ minWidth: 110 }} aria-label="Logout">
             <FaSignOutAlt className="me-2" /> Logout
           </button>
         )}

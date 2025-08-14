@@ -43,7 +43,7 @@ const TrackOrder = () => {
 
   return (
     <div className="container py-5">
-      <h1 className="mb-4 rivaayat-heading">Track Order</h1>
+      <h1 className="mb-4 Rivaayaat-heading">Track Order</h1>
       <form className="mb-4" onSubmit={handleSubmit} style={{ maxWidth: 400 }}>
         <div className="mb-3">
           <label htmlFor="orderId" className="form-label">Order ID</label>
@@ -53,7 +53,7 @@ const TrackOrder = () => {
           <label htmlFor="email" className="form-label">Email</label>
           <input type="email" className="form-control" id="email" value={email} onChange={e => setEmail(e.target.value)} required />
         </div>
-        <button type="submit" className="rivaayat-btn" disabled={loading}>{loading ? 'Tracking...' : 'Track Order'}</button>
+        <button type="submit" className="Rivaayaat-btn" disabled={loading}>{loading ? 'Tracking...' : 'Track Order'}</button>
       </form>
       {trackError && <div className="alert alert-danger" style={{ maxWidth: 400 }}>{trackError}</div>}
       {result && (

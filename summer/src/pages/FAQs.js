@@ -14,7 +14,7 @@ const faqs = [
 const FAQs = () => {
   return (
     <div className="container py-5">
-      <h1 className="rivaayat-heading mb-4">FAQs</h1>
+      <h1 className="Rivaayaat-heading mb-4">FAQs</h1>
       <div className="accordion" id="faqAccordion">
         {faqs.map((item, idx) => (
           <div className="accordion-item" key={idx}>

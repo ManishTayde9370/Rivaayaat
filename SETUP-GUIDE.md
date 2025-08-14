@@ -1,4 +1,4 @@
-# 🚀 Rivaayat E-commerce Setup Guide
+# 🚀 Rivaayaat E-commerce Setup Guide
 
 ## ✅ **Quick Fix for Current Issues**
 
@@ -50,7 +50,7 @@ npm start
 ### **For Development (Auto-configured)**
 The backend automatically uses these default values:
 - **Port**: 5000
-- **MongoDB**: `mongodb://localhost:27017/rivaayat`
+- **MongoDB**: `mongodb://localhost:27017/Rivaayaat`
 - **JWT Secret**: `dev-jwt-secret-key-change-in-production`
 - **Payment Gateway**: Dummy credentials (for testing)
 
@@ -75,7 +75,7 @@ CLOUDINARY_API_SECRET=your_api_secret
 ### **Option 1: Local MongoDB**
 1. Install MongoDB Community Edition
 2. Start MongoDB service
-3. Create database: `rivaayat`
+3. Create database: `Rivaayaat`
 
 ### **Option 2: MongoDB Atlas (Cloud)**
 1. Create free account at [MongoDB Atlas](https://www.mongodb.com/atlas)
@@ -175,6 +175,6 @@ If you encounter any issues:
 
 ---
 
-**🎉 Your Rivaayat e-commerce platform should now be fully functional!**
+**🎉 Your Rivaayaat e-commerce platform should now be fully functional!**
 
 
