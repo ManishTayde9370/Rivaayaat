@@ -129,10 +129,10 @@ const authController = {
       const token = jwt.sign(payload, secret, { expiresIn: '1h' });
 
       res.cookie(cookieName, token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Lax',
-        path: '/',
+       httpOnly: true,
+secure: process.env.NODE_ENV === 'production',
+path: '/',
+sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
         maxAge: 3600000, // 1 hour
       });
 
@@ -208,9 +208,9 @@ const authController = {
 
       res.cookie(cookieName, token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Lax',
-        path: '/',
+secure: process.env.NODE_ENV === 'production',
+path: '/',
+sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
         maxAge: 3600000,
       });
 
