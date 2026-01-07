@@ -91,7 +91,7 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
     const adminDb = mongoose.connection.db.admin();
     const serverStatus = await adminDb.serverStatus();
     useTransaction = serverStatus.repl && serverStatus.repl.ismaster;
-  } catch (error) {
+  } catch {
     // If we can't check server status, assume no replica set
     useTransaction = false;
   }

@@ -1,5 +1,4 @@
 const rateLimit = require('express-rate-limit');
-const helmet = require('helmet');
 
 // ✅ Rate limiting for different endpoints
 const createRateLimit = (windowMs, max, message) => {
@@ -130,6 +129,7 @@ const securityMiddleware = {
   },
 
   // 🛡️ Error handling middleware
+  /* eslint-disable-next-line no-unused-vars */
   errorHandler: (err, req, res, next) => {
     console.error('❌ Error:', err);
 

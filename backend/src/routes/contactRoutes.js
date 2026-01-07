@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const contactController = require('../controller/contactController');
-const { requireAdmin, requireAuth } = require('../middleware/authMiddleware');
+const { requireAdmin } = require('../middleware/authMiddleware');
 const { body, validationResult } = require('express-validator');
-const ContactMessage = require('../model/ContactMessage');
 
 // Public: Submit contact message
 const contactValidator = [
@@ -32,6 +31,7 @@ router.get('/messages', requireAdmin, async (req, res) => {
       return res.json(result);
     }
   } catch (err) {
+    console.error('❌ Failed to fetch messages:', err);
     if (!res.headersSent) {
       return res.status(500).json({ error: 'Failed to fetch messages.' });
     }
@@ -55,6 +55,7 @@ router.patch('/messages/:id/read', requireAdmin, async (req, res) => {
     }
     return res.json({ success: true });
   } catch (err) {
+    console.error('❌ Failed to mark message as read:', err);
     return res.status(500).json({ success: false, message: 'Failed to mark as read.' });
   }
 });

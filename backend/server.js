@@ -6,8 +6,6 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const path = require('path');
 const helmet = require('helmet');
-const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
 const http = require('http');
 const { Server } = require('socket.io');
 const securityMiddleware = require('./src/middleware/securityMiddleware');
@@ -72,10 +70,17 @@ app.use(securityMiddleware.errorHandler);
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: [
+      'http://localhost:3000',            // dev
+      'https://rivaayaat.netlify.app'     // production
+    ],
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
   }
 });
+
+
 
 const userSockets = new Map();
 

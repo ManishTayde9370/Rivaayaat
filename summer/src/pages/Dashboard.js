@@ -12,7 +12,8 @@ import { authNotifications } from '../utils/notifications';
 
 const Dashboard = ({ onLogout }) => {
   const userDetails = useSelector(state => state.user);
-  const wishlist = useSelector(state => state.wishlist.items) || [];
+  // const wishlist = useSelector(state => state.wishlist.items) || [];
+  const wishlist = useSelector(state => state.wishlist.items);
   const wishlistLoading = useSelector(state => state.wishlist.loading);
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);

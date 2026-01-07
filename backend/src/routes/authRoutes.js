@@ -30,15 +30,7 @@ const registerValidator = [
     .notEmpty().withMessage('Name is required'),
 ];
 
-// ✅ Profile update validation middleware
-const profileUpdateValidator = [
-  body('name')
-    .optional()
-    .notEmpty().withMessage('Name cannot be empty'),
-  body('phone')
-    .optional()
-    .matches(/^[0-9+\-\s()]*$/).withMessage('Invalid phone number format'),
-];
+
 
 // Rate limiters - Updated for development
 const loginLimiter = rateLimit({

@@ -5,7 +5,6 @@ const router = express.Router();
 const { 
   requireAdmin, 
   sanitizeInput, 
-  limitRequestSize, 
   adminRateLimit 
 } = require('../middleware/authMiddleware');
 const adminController = require('../controller/adminController');
@@ -287,6 +286,7 @@ router.get('/health',
 );
 
 // ✅ Error handling middleware for admin routes
+/* eslint-disable-next-line no-unused-vars */
 router.use((error, req, res, next) => {
   console.error('❌ Admin route error:', error);
   res.status(500).json({

@@ -95,7 +95,9 @@ const authMiddleware = {
           return res.status(403).json({ success: false, message: 'Account has been blocked' });
         }
         req.user = { ...req.user, email: dbUser.email, name: dbUser.name, username: dbUser.username, isAdmin: dbUser.isAdmin };
-      } catch (_) {}
+      } catch {
+        // ignore DB lookup errors for performance/resilience
+      }
       next();
     } catch (error) {
       return res.status(401).json({
@@ -134,7 +136,7 @@ const authMiddleware = {
           return res.status(403).json({ success: false, message: 'Access denied. Admin privileges required.' });
         }
         req.user = { ...user, email: dbUser.email, name: dbUser.name, username: dbUser.username, isAdmin: dbUser.isAdmin };
-      } catch (_) {
+      } catch {
         if (!user.isAdmin) {
           logAdminAction(req, 'UNAUTHORIZED_ACCESS_ATTEMPT', { attemptedAction: req.originalUrl });
           return res.status(403).json({ success: false, message: 'Access denied. Admin privileges required.' });
@@ -177,7 +179,7 @@ const authMiddleware = {
     if (token) {
       try {
         req.user = verifyTokenPayload(token);
-      } catch (_) {
+      } catch {
         req.user = null; // silently ignore invalid tokens
       }
     }

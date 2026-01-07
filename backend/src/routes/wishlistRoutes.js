@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../model/Users');
-const Product = require('../model/Product');
 const { requireAuth } = require('../middleware/authMiddleware');
 
 // @POST /api/wishlist/:productId - Toggle wishlist item

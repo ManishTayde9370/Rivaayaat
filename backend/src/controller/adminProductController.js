@@ -83,7 +83,7 @@ exports.updateProduct = async (req, res) => {
 
             await cloudinary.uploader.destroy(public_id);
           } catch (err) {
-            console.warn(`⚠️ Failed to delete image from Cloudinary: ${imgUrl}`);
+            console.warn(`⚠️ Failed to delete image from Cloudinary: ${imgUrl}`, err);
           }
         }
       }
@@ -124,7 +124,7 @@ exports.deleteProduct = async (req, res) => {
 
           await cloudinary.uploader.destroy(public_id);
         } catch (err) {
-          console.warn(`⚠️ Failed to delete image from Cloudinary: ${imgUrl}`);
+          console.warn(`⚠️ Failed to delete image from Cloudinary: ${imgUrl}`, err);
         }
       }
     }
