@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: rivaayaat-backend
+    env: node
+    plan: starter
+    region: oregon
+    buildCommand: npm install
+    startCommand: npm start
+    repo: .
+    rootDir: backend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ENABLE_SCHEDULED_RUNNER
+        value: "false"
+      - key: FRONTEND_ORIGIN
+        value: "https://your-netlify-site.netlify.app"
+
+  - type: worker
+    name: rivaayaat-backend-worker
+    env: node
+    plan: starter
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ENABLE_SCHEDULED_RUNNER
+        value: "true"
+      - key: FRONTEND_ORIGIN
+        value: "https://your-netlify-site.netlify.app"
+
+# Note: Sensitive values (MONGO_URI, JWT_SECRET, CLOUDINARY_API_SECRET, SMTP_PASS, etc.) should be set in Render Dashboard as secure environment variables rather than stored in this file.

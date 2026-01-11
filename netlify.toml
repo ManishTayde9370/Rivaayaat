@@ -1,0 +1,17 @@
+[build]
+  command = "npm run build"
+  publish = "build"
+
+[build.environment]
+  # Set these in Netlify UI; these defaults are for local reference
+  REACT_APP_SERVER_ENDPOINT = "https://your-render-backend.onrender.com"
+  REACT_APP_GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID"
+
+[context.production.environment]
+  REACT_APP_SERVER_ENDPOINT = "https://your-render-backend.onrender.com"
+
+# Optional: redirects for client-side routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
