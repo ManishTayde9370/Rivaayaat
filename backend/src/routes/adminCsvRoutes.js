@@ -2,7 +2,6 @@ const express = require('express');
 const multer = require('multer');
 const router = express.Router();
 const CSVImportTemplate = require('../model/CSVImportTemplate');
-const Product = require('../model/Product');
 const { requireAdmin } = require('../middleware/authMiddleware');
 
 const upload = multer({ storage: multer.memoryStorage() });

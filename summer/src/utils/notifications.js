@@ -530,9 +530,11 @@ export const customToastStyles = {
   },
 };
 
-export default {
+const exportedNotifications = {
   adminNotifications,
   userNotifications,
   toastConfig,
   customToastStyles,
-}; 
+};
+
+export default exportedNotifications; 

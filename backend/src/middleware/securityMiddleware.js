@@ -97,12 +97,12 @@ const securityMiddleware = {
 
   // 🛡️ CORS configuration
   corsConfig: {
-    origin: process.env.NODE_ENV === 'production' 
-      ? ['https://yourdomain.com'] 
+    origin: process.env.NODE_ENV === 'production'
+      ? (process.env.FRONTEND_ORIGIN ? process.env.FRONTEND_ORIGIN.split(',') : ['https://rivaayaat.netlify.app'])
       : ['http://localhost:3000', 'http://127.0.0.1:3000'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Cookie'],
     exposedHeaders: ['Set-Cookie'],
   },
 

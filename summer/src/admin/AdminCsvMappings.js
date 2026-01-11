@@ -11,6 +11,8 @@ const AdminCsvMappings = () => {
   const [mappingJson, setMappingJson] = useState('{}');
   const [loading, setLoading] = useState(false);
 
+  const [editingId, setEditingId] = useState(null);
+
   const fetch = async () => {
     setLoading(true);
     try {
@@ -23,7 +25,9 @@ const AdminCsvMappings = () => {
 
   useEffect(() => { fetch(); }, []);
 
-  const [editingId, setEditingId] = useState(null);
+  if (loading) {
+    return <div className="admin-card">Loading templates…</div>;
+  }
 
   const saveTemplate = async () => {
     try {

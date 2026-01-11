@@ -2,7 +2,6 @@ const request = require('supertest');
 const express = require('express');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
-const multer = require('multer');
 
 jest.mock('../src/middleware/authMiddleware', () => ({
   requireAdmin: (req, res, next) => { req.user = { _id: 'test' }; return next(); }
@@ -18,7 +17,6 @@ beforeAll(async () => {
 
   app = express();
   app.use(express.json());
-  const bodyParser = multer().single('file');
 
   const adminProducts = require('../src/routes/adminProductRoutes');
   app.use('/api/admin/products', adminProducts);

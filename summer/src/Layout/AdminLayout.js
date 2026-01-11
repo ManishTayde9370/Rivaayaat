@@ -9,8 +9,6 @@ import {
   FaUsers, 
   FaBox, 
   FaShoppingCart, 
-  FaEnvelope, 
-  FaChartBar, 
   FaCog, 
   FaSignOutAlt,
   FaBell,

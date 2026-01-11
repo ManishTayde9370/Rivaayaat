@@ -10,6 +10,7 @@ const AdminScheduledExports = () => {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: '', cron: '0 0 * * *', destination: 'email', emails: '', s3: { bucket: '', prefix: '' }, retry: { enabled: false, maxAttempts: 3, backoffSeconds: 60 } });
+  const [viewRunsFor, setViewRunsFor] = useState(null);
 
   const fetch = async () => {
     setLoading(true);
@@ -20,6 +21,8 @@ const AdminScheduledExports = () => {
 
   useEffect(() => { fetch(); }, []);
 
+  if (loading) { return <div className="admin-card">Loading…</div>; }
+
   const create = async () => {
     try {
       const payload = { ...form, emails: form.emails ? form.emails.split(',').map(e => e.trim()) : [] };
@@ -29,8 +32,6 @@ const AdminScheduledExports = () => {
       fetch();
     } catch (err) { showNotification.error('Failed to create schedule'); }
   };
-
-  const [viewRunsFor, setViewRunsFor] = useState(null);
 
   const remove = async (id) => { try { await axios.delete(`${API}/${id}`, { withCredentials: true }); showNotification.info('Schedule removed'); fetch(); } catch (err) { showNotification.error('Failed to remove schedule'); } };
 

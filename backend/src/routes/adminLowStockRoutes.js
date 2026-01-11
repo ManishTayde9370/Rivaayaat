@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const LowStockAlert = require('../model/LowStockAlert');
-const Product = require('../model/Product');
 const { requireAdmin } = require('../middleware/authMiddleware');
 
 // GET /api/admin/low-stock - list alerts

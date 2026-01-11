@@ -1,8 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { clearCart } from '../redux/cart/actions';
 import { serverEndpoint } from '../components/config';
 import { orderNotifications } from '../utils/notifications';
 import '../css/theme.css';
@@ -11,7 +10,6 @@ function CheckoutPayment() {
   const cartItems = useSelector((state) => state?.cart?.items || []);
   const user = useSelector((state) => state?.user?.user || null);
   const shippingAddress = useSelector((state) => state.shipping?.address || null);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const paymentSuccessRef = useRef(false);
   const razorpayInstanceRef = useRef(null);

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Container, Spinner, Alert, Button, Form, InputGroup, Card, Badge } from 'react-bootstrap';
+import { Alert, Button, Card, Badge } from 'react-bootstrap';
 import { 
   FaEnvelope, 
   FaSearch, 
@@ -9,8 +9,7 @@ import {
   FaCalendarAlt,
   FaUser,
   FaAt,
-  FaComments,
-  FaFilter
+  FaComments
 } from 'react-icons/fa';
 import LoadingBar from '../components/LoadingBar';
 

@@ -13,14 +13,11 @@ const pageSizeOptions = [10, 20, 50, 100];
 
 const ManageOrders = () => {
   const [orders, setOrders] = useState([]);
-  const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [recentOrders, setRecentOrders] = useState([]); // Ensure it's always an array
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [monthFilter, setMonthFilter] = useState('');
-  const [emailFilter, setEmailFilter] = useState('');
   const [allOrders, setAllOrders] = useState([]);
 
   // Separate filter state for analytics and for all orders
@@ -30,43 +27,42 @@ const ManageOrders = () => {
   const [ordersEmailFilter, setOrdersEmailFilter] = useState('');
 
   useEffect(() => {
-    fetchOrders();
+    // Inline fetchOrders to avoid missing dependency warnings
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = { page, limit };
+        if (ordersMonthFilter) params.month = ordersMonthFilter;
+        if (ordersEmailFilter) params.email = ordersEmailFilter;
+        const res = await axios.get(`${serverEndpoint}/api/admin/orders`, { params, withCredentials: true });
+        if (res.data.success) {
+          setOrders(res.data.orders || []);
+          // total is now derived from allOrders; keep local total if backend provides it
+        } else {
+          setError('Failed to fetch orders');
+        }
+      } catch (err) {
+        console.error('Failed to fetch orders:', err);
+        setError('Failed to fetch orders');
+      } finally {
+        setLoading(false);
+      }
+    })();
+
+    // Still fetch recent orders and all orders for stats
     fetchRecentOrders();
     fetchAllOrdersForStats().then(setAllOrders);
-  }, [page, limit, monthFilter, emailFilter]);
+  }, [page, limit, ordersMonthFilter, ordersEmailFilter]);
 
-  // ✅ Ensure recentOrders is always an array
+  // Ensure recentOrders is always an array
   useEffect(() => {
     if (!Array.isArray(recentOrders)) {
-      console.log('recentOrders is not an array, resetting to empty array');
       setRecentOrders([]);
     }
   }, [recentOrders]);
 
-  const fetchOrders = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const params = {
-        page,
-        limit,
-      };
-      if (monthFilter) params.month = monthFilter;
-      if (emailFilter) params.email = emailFilter;
-      const res = await axios.get(`${serverEndpoint}/api/admin/orders`, { params, withCredentials: true });
-      if (res.data.success) {
-        setOrders(res.data.orders || []);
-        setTotal(res.data.total || 0);
-      } else {
-        setError('Failed to fetch orders');
-      }
-    } catch (err) {
-      console.error('Failed to fetch orders:', err);
-      setError('Failed to fetch orders');
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const fetchRecentOrders = async () => {
     try {
@@ -96,19 +92,7 @@ const ManageOrders = () => {
   }) : [];
 
   // Update order status
-  const handleStatusChange = async (id, newStatus) => {
-    try {
-      const res = await axios.patch(`${serverEndpoint}/api/admin/orders/${id}/status`, { status: newStatus }, { withCredentials: true });
-      if (res.data.success) {
-        setOrders(prev => prev.map(o => o._id === id ? { ...o, status: newStatus } : o));
-      } else {
-        alert('Failed to update status');
-      }
-    } catch (err) {
-      console.error('Failed to update order status:', err);
-      alert('Failed to update status');
-    }
-  };
+
 
   // Export to CSV
   const exportCSV = () => {

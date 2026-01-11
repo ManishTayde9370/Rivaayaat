@@ -1,12 +1,12 @@
 import React from 'react';
 
 const CsvPreviewModal = ({ isOpen, preview = [], errors = [], onClose, onConfirm, isImporting }) => {
+  const [filter, setFilter] = React.useState('all');
+
   if (!isOpen) return null;
   const fields = new Set();
   preview.forEach(p => Object.keys(p.productData).forEach(f => fields.add(f)));
   const cols = Array.from(fields);
-
-  const [filter, setFilter] = React.useState('all');
 
   const filtered = preview.filter(r => (filter === 'all') || (filter === 'errors' && r.errors && r.errors.length));
 

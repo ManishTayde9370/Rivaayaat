@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { showNotification } from '../utils/notifications';
 
@@ -8,7 +8,7 @@ const ScheduledExportRunsModal = ({ scheduleId, onClose }) => {
   const [runs, setRuns] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchRuns = async () => {
+  const fetchRuns = useCallback(async () => {
     setLoading(true);
     try {
       const res = await axios.get(`${API_BASE}/${scheduleId}/runs`, { withCredentials: true });
@@ -18,9 +18,11 @@ const ScheduledExportRunsModal = ({ scheduleId, onClose }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [scheduleId]);
 
-  useEffect(() => { if (scheduleId) fetchRuns(); }, [scheduleId]);
+  useEffect(() => {
+    if (scheduleId) fetchRuns();
+  }, [scheduleId, fetchRuns]);
 
   const retry = async (runId) => {
     try {

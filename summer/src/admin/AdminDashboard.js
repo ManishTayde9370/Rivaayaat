@@ -1,15 +1,12 @@
 // src/admin/AdminDashboard.js
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card } from 'react-bootstrap';
+import { Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { 
   FaUsers, 
   FaBox, 
   FaShoppingCart, 
   FaEnvelope, 
-  FaChartBar, 
-  FaCog, 
-  FaPlus,
   FaEye
 } from 'react-icons/fa';
 import axios from 'axios';
@@ -103,29 +100,7 @@ const AdminDashboard = () => {
     }
   ];
 
-  const quickActions = [
-    {
-      title: 'Add Product',
-      description: 'Create a new product',
-      icon: <FaPlus />,
-      link: '/admin/add-product',
-      color: 'maroon'
-    },
-    {
-      title: 'View Analytics',
-      description: 'Check platform statistics',
-      icon: <FaChartBar />,
-      link: '/admin/analytics',
-      color: 'peacock'
-    },
-    {
-      title: 'Settings',
-      description: 'Manage platform settings',
-      icon: <FaCog />,
-      link: '/admin/settings',
-      color: 'turmeric'
-    }
-  ];
+
 
   if (loading) {
     return (

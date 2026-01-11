@@ -2,7 +2,7 @@ const isUrl = (s) => {
   try {
     const u = new URL(s);
     return ['http:', 'https:'].includes(u.protocol);
-  } catch (err) { return false; }
+  } catch { return false; }
 };
 
 const parseLine = (line) => {

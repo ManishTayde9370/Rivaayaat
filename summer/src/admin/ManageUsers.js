@@ -3,7 +3,7 @@ import { Table, Button, Spinner, Alert, Form, InputGroup, Modal, Pagination, Bad
 import axios from 'axios';
 import { serverEndpoint } from '../components/config';
 import { saveAs } from 'file-saver';
-import { Bar, Pie, Line } from 'react-chartjs-2';
+
 import { 
   FaUsers, 
   FaSearch, 
@@ -33,8 +33,6 @@ const ManageUsers = () => {
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [productTrends, setProductTrends] = useState([]);
-  const [trendsLoading, setTrendsLoading] = useState(false);
   
   // ✅ New pagination state
   const [pagination, setPagination] = useState({
@@ -61,7 +59,6 @@ const ManageUsers = () => {
 
   useEffect(() => {
     fetchUsers();
-    fetchProductTrends();
     // eslint-disable-next-line
   }, [pagination.page, pagination.limit, search, filters]);
 
@@ -98,19 +95,7 @@ const ManageUsers = () => {
     }
   };
 
-  const fetchProductTrends = async () => {
-    setTrendsLoading(true);
-    try {
-      const params = {};
-      const res = await axios.get(`${serverEndpoint}/api/admin/product-trends`, { params, withCredentials: true });
-      setProductTrends(res.data.trends || []);
-    } catch (err) {
-      console.error('Failed to fetch product trends:', err);
-      setProductTrends([]);
-    } finally {
-      setTrendsLoading(false);
-    }
-  };
+
 
   // ✅ Enhanced filtering with debounce
   const handleSearchChange = (e) => {

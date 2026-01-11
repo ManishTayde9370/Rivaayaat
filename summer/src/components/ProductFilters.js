@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaFilter, FaSearch, FaTimes, FaSort } from 'react-icons/fa';
+import { FaFilter, FaSearch, FaTimes } from 'react-icons/fa';
 import axios from 'axios';
 import { serverEndpoint } from './config';
 
@@ -10,7 +10,7 @@ const ProductFilters = ({ onFiltersChange, currentFilters = {} }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [loading, setLoading] = useState(false);
+
 
   const [filters, setFilters] = useState({
     category: currentFilters.category || 'all',
@@ -40,23 +40,23 @@ const ProductFilters = ({ onFiltersChange, currentFilters = {} }) => {
 
   // Search suggestions
   useEffect(() => {
-    if (searchTerm.length >= 2) {
-      fetchSuggestions();
-    } else {
+    if (searchTerm.length < 2) {
       setSuggestions([]);
+      return;
     }
-  }, [searchTerm]);
 
-  const fetchSuggestions = async () => {
-    try {
-      const response = await axios.get(
-        `${serverEndpoint}/api/products/search/suggestions?q=${searchTerm}`
-      );
-      setSuggestions(response.data.suggestions);
-    } catch (err) {
-      console.error('Failed to fetch suggestions:', err);
-    }
-  };
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await axios.get(`${serverEndpoint}/api/products/search/suggestions?q=${encodeURIComponent(searchTerm)}`);
+        if (!cancelled) setSuggestions(response.data.suggestions || []);
+      } catch (err) {
+        if (!cancelled) console.error('Failed to fetch suggestions:', err);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [searchTerm]);
 
   const handleFilterChange = (key, value) => {
     const newFilters = { ...filters, [key]: value };

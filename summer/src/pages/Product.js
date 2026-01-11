@@ -14,9 +14,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 import '../css/ProductPage.css';
-import LoadingBar from '../components/LoadingBar';
 import ProductFilters from '../components/ProductFilters';
-import { cartNotifications, showNotification } from '../utils/notifications';
+import { showNotification } from '../utils/notifications';
 
 // Debounce function for search and filter operations
 const useDebounce = (value, delay) => {
@@ -51,14 +50,12 @@ const Product = () => {
   const [pagination, setPagination] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [addingToCart, setAddingToCart] = useState(new Set());
-  const [retryCount, setRetryCount] = useState(0);
-  
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
   const userDetails = useSelector(state => state.user);
-  const wishlist = useSelector(state => state.wishlist.items) || [];
-  
+  const wishlist = useSelector(state => state.wishlist.items || []);
+
   const searchResults = location.state?.searchResults;
   const searchTerm = location.state?.searchTerm;
   const notFound = location.state?.notFound;
@@ -99,7 +96,7 @@ const Product = () => {
       if (response.data?.success) {
         setProducts(response.data.products || []);
         setPagination(response.data.pagination || {});
-        setRetryCount(0); // Reset retry count on success
+  
       } else {
         throw new Error(response.data?.message || 'Failed to fetch products');
       }
@@ -133,12 +130,14 @@ const Product = () => {
     } else {
       fetchProducts(1, debouncedFilters);
     }
-    
-    // Only fetch wishlist if user is logged in
+  }, [searchResults, debouncedFilters, fetchProducts]);
+
+  // Only fetch wishlist if user is logged in
+  useEffect(() => {
     if (userDetails?.email) {
       dispatch(fetchWishlist());
     }
-  }, []);
+  }, [dispatch, userDetails?.email]);
 
   // Handle filter and page changes
   useEffect(() => {
@@ -153,7 +152,7 @@ const Product = () => {
     if (!searchResults && currentPage > 1) {
       fetchProducts(currentPage, debouncedFilters, true);
     }
-  }, [currentPage, fetchProducts, searchResults]);
+  }, [currentPage, fetchProducts, searchResults, debouncedFilters]);
 
   // Optimized add to cart function
   const handleAddToCart = useCallback(async (product) => {
@@ -212,7 +211,6 @@ const Product = () => {
 
   // Retry function for error states
   const handleRetry = useCallback(() => {
-    setRetryCount(prev => prev + 1);
     fetchProducts(currentPage, debouncedFilters);
   }, [fetchProducts, currentPage, debouncedFilters]);
 

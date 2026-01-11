@@ -26,7 +26,6 @@ const ProductDetailPage = () => {
   const [product, setProduct] = useState(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [error, setError] = useState(null);
-  const [showReviewForm, setShowReviewForm] = useState(false);
   const [showBackstory, setShowBackstory] = useState(false);
   const [soundPlaying, setSoundPlaying] = useState(false);
 
@@ -113,7 +112,6 @@ const ProductDetailPage = () => {
       }
     };
     fetchProduct();
-    setShowReviewForm(false);
   };
 
   if (error) {

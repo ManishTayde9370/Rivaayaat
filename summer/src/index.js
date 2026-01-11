@@ -7,6 +7,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 import store from './store';
+import './utils/axiosSetup';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;

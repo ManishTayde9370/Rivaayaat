@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { serverEndpoint } from '../components/config';
-import { showNotification, adminNotifications } from '../utils/notifications';
+import { showNotification } from '../utils/notifications';
 
 const API = `${serverEndpoint}/api/admin/low-stock`;
 

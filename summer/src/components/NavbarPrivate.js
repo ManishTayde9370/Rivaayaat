@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Navbar, Nav, Container, Form, FormControl, NavDropdown } from 'react-bootstrap';
-import { FaSearch, FaUser, FaSignOutAlt, FaShoppingCart, FaHome, FaShoppingBag, FaUserCircle } from 'react-icons/fa';
+import { FaSearch, FaUser, FaSignOutAlt, FaHome, FaShoppingBag, FaUserCircle } from 'react-icons/fa';
 import logo from '../assets/brandlogo.png';
 import '../css/theme.css';
 import CartIcon from './CartIcon';

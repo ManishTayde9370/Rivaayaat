@@ -55,9 +55,7 @@ import ReturnRefundPolicy from './pages/ReturnRefundPolicy';
 import TermsOfUse from './pages/TermsOfUse';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TrackOrder from './pages/TrackOrder';
-import NavbarPrivate from './components/NavbarPrivate';
-import { fetchWishlist } from './redux/wishlist/actions';
-import { toast } from 'react-toastify';
+
 import Spinner from './components/spinner';
 
 function App() {

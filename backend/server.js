@@ -12,10 +12,8 @@ const securityMiddleware = require('./src/middleware/securityMiddleware');
 
 const app = express();
 
-// In dev behind proxies (WSL/Reverse Proxy), trust X-Forwarded-* headers for rate limit to work
-if (process.env.NODE_ENV !== 'production') {
-  app.set('trust proxy', 1);
-}
+// Trust proxy headers (Render and other PaaS place a reverse proxy in front of the app)
+app.set('trust proxy', 1);
 
 // 🔗 Routes
 const authRoutes = require('./src/routes/authRoutes');
@@ -70,6 +68,9 @@ app.use('/api/checkout', checkoutRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/stock-notify', stockNotificationRoutes);
 
+// Health check endpoint
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
 // 🛡️ 404 Handler
 app.use(securityMiddleware.notFoundHandler);
 
@@ -78,12 +79,13 @@ app.use(securityMiddleware.errorHandler);
 
 // 🔌 Socket.IO Setup
 const server = http.createServer(app);
+const allowedOrigins = process.env.FRONTEND_ORIGIN
+  ? process.env.FRONTEND_ORIGIN.split(',')
+  : ['http://localhost:3000', 'https://rivaayaat.netlify.app'];
+
 const io = new Server(server, {
   cors: {
-    origin: [
-      'http://localhost:3000',            // dev
-      'https://rivaayaat.netlify.app'     // production
-    ],
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
@@ -116,16 +118,23 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/Rivaayaat'
 mongoose.connect(MONGO_URI)
   .then(() => {
     console.log('✅ Connected to MongoDB');
-    // Initialize scheduled export runner
+
+    // Initialize scheduled export runner only when explicitly enabled in PRODUCTION via env var
     try {
-      const scheduledRunner = require('./src/utils/scheduledExportRunner');
-      scheduledRunner.init();
+      const shouldRunScheduled = process.env.ENABLE_SCHEDULED_RUNNER === 'true' || process.env.NODE_ENV !== 'production';
+      if (shouldRunScheduled) {
+        const scheduledRunner = require('./src/utils/scheduledExportRunner');
+        scheduledRunner.init();
+        console.log('✅ Scheduled runner initialized');
+      } else {
+        console.log('ℹ️ Scheduled runner disabled (set ENABLE_SCHEDULED_RUNNER=true to enable)');
+      }
     } catch (err) {
       console.warn('⚠️ Failed to start scheduled runner:', err.message);
     }
 
     server.listen(PORT, () => {
-      console.log(`🚀 Server running at http://localhost:${PORT}`);
+      console.log(`🚀 Server running on port ${PORT}`);
     });
   })
   .catch((err) => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
-import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube, FaHeart } from 'react-icons/fa';
+import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube } from 'react-icons/fa';
 import '../css/theme.css';
 import { Link } from 'react-router-dom';
 
@@ -18,18 +18,18 @@ const Footer = () => {
                   Celebrating India's rich heritage through handcrafted treasures and authentic cultural experiences.
                 </p>
               <div className="d-flex justify-content-center justify-content-lg-start gap-3">
-                <a href="#" className="Rivaayaat-badge Rivaayaat-badge-maroon">
+                <button aria-label="Facebook" className="Rivaayaat-badge Rivaayaat-badge-maroon">
                   <FaFacebookF />
-                </a>
-                <a href="#" className="Rivaayaat-badge Rivaayaat-badge-maroon">
+                </button>
+                <button aria-label="Twitter" className="Rivaayaat-badge Rivaayaat-badge-maroon">
                   <FaTwitter />
-                </a>
-                <a href="#" className="Rivaayaat-badge Rivaayaat-badge-maroon">
+                </button>
+                <button aria-label="Instagram" className="Rivaayaat-badge Rivaayaat-badge-maroon">
                   <FaInstagram />
-                </a>
-                <a href="#" className="Rivaayaat-badge Rivaayaat-badge-maroon">
+                </button>
+                <button aria-label="YouTube" className="Rivaayaat-badge Rivaayaat-badge-maroon">
                   <FaYoutube />
-                </a>
+                </button>
               </div>
             </div>
           </Col>
