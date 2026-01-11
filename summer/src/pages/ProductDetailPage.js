@@ -12,7 +12,8 @@ import { FaInstagram, FaFacebook, FaGlobe, FaStar, FaVolumeUp } from 'react-icon
 import LoadingBar from '../components/LoadingBar';
 import ProductReviewForm from '../components/ProductReviewForm';
 import ProductReviews from '../components/ProductReviews';
-import { cartNotifications } from '../utils/notifications';
+import Recommendations from '../components/Recommendations';
+import { cartNotifications, showNotification } from '../utils/notifications';
 import '../css/theme.css';
 import '../css/ProductPage.css';
 
@@ -28,6 +29,9 @@ const ProductDetailPage = () => {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [showBackstory, setShowBackstory] = useState(false);
   const [soundPlaying, setSoundPlaying] = useState(false);
+
+  const [subscribed, setSubscribed] = useState(false);
+  const [subLoading, setSubLoading] = useState(false);
 
   const wishlist = useSelector((state) => state.wishlist.items);
   const isInWishlist = wishlist.some((item) => item._id === id);
@@ -48,6 +52,22 @@ const ProductDetailPage = () => {
 
     fetchProduct();
   }, [id]);
+
+  // Check if user is subscribed to back-in-stock notifications for this product
+  useEffect(() => {
+    const checkSubscription = async () => {
+      if (!id) return;
+      try {
+        const res = await axios.get(`${API_BASE_URL}/api/stock-notify/my/${id}`, { withCredentials: true });
+        setSubscribed(Boolean(res.data.subscribed));
+      } catch (err) {
+        // ignore silently
+        setSubscribed(false);
+      }
+    };
+
+    checkSubscription();
+  }, [id, user]);
 
   // // Bell sound for add-to-cart
   // const playBell = () => {
@@ -228,6 +248,36 @@ const ProductDetailPage = () => {
             >
               Buy Now
             </button>
+
+            {/* Back-in-stock subscribe button */}
+            {product.stock === 0 && (
+              <button
+                className={`btn ${subscribed ? 'btn-success' : 'btn-outline-primary'} rounded-pill px-4`}
+                onClick={async () => {
+                  if (!user) { navigate('/login'); return; }
+                  setSubLoading(true);
+                  try {
+                    if (!subscribed) {
+                      await axios.post(`${API_BASE_URL}/api/stock-notify/${id}`, {}, { withCredentials: true });
+                      showNotification.success('✅ Subscribed to stock notification');
+                      setSubscribed(true);
+                    } else {
+                      await axios.delete(`${API_BASE_URL}/api/stock-notify/${id}`, { withCredentials: true });
+                      showNotification.info('🗑️ Unsubscribed from stock notification');
+                      setSubscribed(false);
+                    }
+                  } catch (err) {
+                    showNotification.error('❌ Failed to update subscription');
+                  } finally {
+                    setSubLoading(false);
+                  }
+                }}
+                disabled={subLoading}
+              >
+                {subLoading ? '...' : (subscribed ? 'Subscribed' : 'Notify me when in stock')}
+              </button>
+            )}
+
             <button
               className={`btn rounded-pill px-4 ${isInWishlist ? 'btn-outline-danger' : 'btn-outline-secondary'}`}
               onClick={handleToggleWishlist}
@@ -285,6 +335,11 @@ const ProductDetailPage = () => {
       )}
 
       
+
+      {/* Recommendations */}
+      <div className="my-5">
+        <Recommendations productId={id} />
+      </div>
 
       {/* Reviews Section */}
       <div className="my-5">

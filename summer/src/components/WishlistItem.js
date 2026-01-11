@@ -1,13 +1,19 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
-import { removeFromWishlist } from '../redux/wishlist/actions';
+import { useDispatch, useSelector } from 'react-redux';
+import { removeFromWishlist, moveWishlistItemToCart } from '../redux/wishlist/actions';
 import { FaTrash } from 'react-icons/fa';
 
 const WishlistItem = ({ item }) => {
   const dispatch = useDispatch();
+  const wishlistLoading = useSelector(state => state.wishlist.loading);
 
   const handleRemove = () => {
     dispatch(removeFromWishlist(item._id));
+  };
+
+  const handleMoveToCart = async () => {
+    // Delegate to wishlist action that moves the item to cart and handles removal
+    await dispatch(moveWishlistItemToCart(item));
   };
 
   return (
@@ -31,14 +37,26 @@ const WishlistItem = ({ item }) => {
           <span>Added: {item.addedAt ? new Date(item.addedAt).toLocaleDateString() : 'N/A'}</span>
         </div>
       </div>
-      <button
-        className="btn btn-sm btn-outline-danger"
-        onClick={handleRemove}
-        aria-label={`Remove ${item.name} from wishlist`}
-        style={{ minWidth: 'auto' }}
-      >
-        <FaTrash />
-      </button>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button
+          className="btn btn-sm btn-outline-primary"
+          onClick={handleMoveToCart}
+          aria-label={`Move ${item.name} to cart`}
+          style={{ minWidth: 'auto' }}
+          disabled={wishlistLoading}
+        >
+          {wishlistLoading ? '...' : 'Add'}
+        </button>
+        <button
+          className="btn btn-sm btn-outline-danger"
+          onClick={handleRemove}
+          aria-label={`Remove ${item.name} from wishlist`}
+          style={{ minWidth: 'auto' }}
+          disabled={wishlistLoading}
+        >
+          <FaTrash />
+        </button>
+      </div>
     </div>
   );
 };

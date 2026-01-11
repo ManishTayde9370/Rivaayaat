@@ -297,27 +297,38 @@ router.post('/:id/reviews', requireAuth, async (req, res) => {
       });
     }
 
-    // Add new review
+    // Determine moderation behavior
+    const moderationEnabled = process.env.REVIEW_MODERATION === 'true';
+    const approved = !moderationEnabled;
+
+    // Add new review (may be pending if moderation enabled)
     const newReview = {
       user: req.user._id,
       username: req.user.name || req.user.username,
       rating: parseInt(rating),
       comment: comment.trim(),
+      approved,
       createdAt: new Date()
     };
 
     product.reviews.push(newReview);
 
-    // Calculate new average rating
-    const totalRating = product.reviews.reduce((sum, review) => sum + review.rating, 0);
-    product.averageRating = totalRating / product.reviews.length;
-    product.numReviews = product.reviews.length;
+    // Recalculate using only approved reviews
+    const approvedReviews = product.reviews.filter(r => r.approved);
+    if (approvedReviews.length > 0) {
+      const totalRating = approvedReviews.reduce((sum, review) => sum + review.rating, 0);
+      product.averageRating = totalRating / approvedReviews.length;
+      product.numReviews = approvedReviews.length;
+    } else {
+      product.averageRating = 0;
+      product.numReviews = 0;
+    }
 
     await product.save();
 
     return res.json({
       success: true,
-      message: 'Review added successfully',
+      message: approved ? 'Review added successfully' : 'Review submitted and pending moderation',
       review: newReview,
       averageRating: product.averageRating,
       numReviews: product.numReviews
@@ -360,14 +371,16 @@ router.delete('/:productId/reviews/:reviewId', requireAuth, async (req, res) => 
     // Remove the review
     product.reviews.splice(reviewIndex, 1);
 
-    // Recalculate average rating
-    if (product.reviews.length > 0) {
-      const totalRating = product.reviews.reduce((sum, review) => sum + review.rating, 0);
-      product.averageRating = totalRating / product.reviews.length;
+    // Recalculate average rating using only approved reviews
+    const approvedReviews = product.reviews.filter(r => r.approved);
+    if (approvedReviews.length > 0) {
+      const totalRating = approvedReviews.reduce((sum, review) => sum + review.rating, 0);
+      product.averageRating = totalRating / approvedReviews.length;
+      product.numReviews = approvedReviews.length;
     } else {
       product.averageRating = 0;
+      product.numReviews = 0;
     }
-    product.numReviews = product.reviews.length;
 
     await product.save();
 
@@ -386,7 +399,37 @@ router.delete('/:productId/reviews/:reviewId', requireAuth, async (req, res) => 
   }
 });
 
-// 📦 GET single product by ID (must be last to avoid conflicts with other routes)
+// � GET related products for recommendations
+router.get('/:id/related', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const limit = parseInt(req.query.limit) || 6;
+    const product = await Product.findById(id).select('category price');
+    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+
+    let related = [];
+    if (product.category) {
+      related = await Product.find({ _id: { $ne: id }, category: product.category, stock: { $gt: 0 } })
+        .sort({ averageRating: -1, numReviews: -1 })
+        .limit(limit);
+    }
+
+    if (related.length < limit) {
+      const need = limit - related.length;
+      const fallback = await Product.find({ _id: { $ne: id }, stock: { $gt: 0 } })
+        .sort({ averageRating: -1, numReviews: -1 })
+        .limit(need);
+      related = related.concat(fallback.filter(f => !related.some(r => r._id.equals(f._id))));
+    }
+
+    return res.json({ success: true, related });
+  } catch (err) {
+    console.error('❌ Error fetching related products:', err);
+    return res.status(500).json({ success: false, related: [] });
+  }
+});
+
+// �📦 GET single product by ID (must be last to avoid conflicts with other routes)
 router.get('/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);

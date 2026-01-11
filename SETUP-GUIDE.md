@@ -68,6 +68,11 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
+# Email settings for transactional emails (optional but required for stock notifications)
+EMAIL_USER=your_email_account@example.com  # SMTP user (Gmail or other SMTP)
+EMAIL_PASS=your_email_app_password_or_smtp_password
+# Optional: frontend base URL used in email links
+FRONTEND_URL=https://your-frontend-url.example.com  # if omitted, default frontend URL is used
 ```
 
 ## 🗄️ **MongoDB Setup**

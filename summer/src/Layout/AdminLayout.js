@@ -14,6 +14,7 @@ import {
   FaCog, 
   FaSignOutAlt,
   FaBell,
+  FaComment,
   FaUser,
   FaChevronDown,
   FaCrown
@@ -32,8 +33,14 @@ const AdminLayout = ({ children, userDetails, onLogout }) => {
   const navigationItems = [
     { title: 'Dashboard', path: '/admin', icon: <FaHome /> },
     { title: 'Products', path: '/admin/products', icon: <FaBox /> },
+    { title: 'Import / Export', path: '/admin/products/import-export', icon: <FaBox /> },
+    { title: 'CSV Mappings', path: '/admin/csv-mappings', icon: <FaCog /> },
+    { title: 'Scheduled Exports', path: '/admin/scheduled-exports', icon: <FaCog /> },
     { title: 'Orders', path: '/admin/orders', icon: <FaShoppingCart /> },
     { title: 'Users', path: '/admin/users', icon: <FaUsers /> },
+    { title: 'Low Stock', path: '/admin/low-stock', icon: <FaBell /> },
+    { title: 'Reviews', path: '/admin/reviews', icon: <FaComment /> },
+    { title: 'Stock Alerts', path: '/admin/stock-notifications', icon: <FaBell /> },
   ];
 
   const isActiveRoute = (path) => {

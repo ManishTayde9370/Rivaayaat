@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { serverEndpoint } from '../../components/config';
 import { wishlistNotifications } from '../../utils/notifications';
+import { addToCartWithValidation } from '../cart/actions';
 
 // Action types
 export const SET_WISHLIST = 'SET_WISHLIST';
@@ -94,6 +95,29 @@ export const fetchWishlist = () => async (dispatch) => {
       wishlistNotifications.loadError();
       dispatch(setWishlist([]));
     }
+  } finally {
+    dispatch(setWishlistLoading(false));
+  }
+};
+
+// Move an item from wishlist to cart (frontend flow)
+export const moveWishlistItemToCart = (item) => async (dispatch) => {
+  try {
+    dispatch(setWishlistLoading(true));
+
+    // Attempt to add to cart using cart action which validates and persists
+    const added = await dispatch(addToCartWithValidation(item));
+
+    if (added) {
+      // Remove from wishlist only if added successfully
+      await dispatch(removeFromWishlist(item._id || item.productId));
+    }
+
+    return added;
+  } catch (err) {
+    console.error('Move wishlist to cart error:', err);
+    wishlistNotifications.updateError('Failed to move item to cart');
+    return false;
   } finally {
     dispatch(setWishlistLoading(false));
   }

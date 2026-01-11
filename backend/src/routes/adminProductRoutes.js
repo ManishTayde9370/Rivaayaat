@@ -11,6 +11,15 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }, // Max 5MB per image
 });
 
+// CSV upload (memory storage)
+const uploadCsv = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+
+// 📄 Export products CSV
+router.get('/export-csv', requireAdmin, productController.exportProductsCSV);
+
+// 🔁 Import products CSV
+router.post('/import-csv', requireAdmin, uploadCsv.single('file'), productController.importProductsCSV);
+
 // ➕ Create Product
 router.post(
   '/',

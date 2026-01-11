@@ -33,6 +33,12 @@ import AddProduct from './admin/AddProduct';
 import AdminContactMessages from './admin/AdminContactMessages';
 import ManageOrders from './admin/ManageOrders';
 import ManageUsers from './admin/ManageUsers';
+import AdminStockNotifications from './admin/AdminStockNotifications';
+import AdminLowStockAlerts from './admin/AdminLowStockAlerts';
+import AdminReviewModeration from './admin/AdminReviewModeration';
+import AdminProductImportExport from './admin/AdminProductImportExport';
+import AdminCsvMappings from './admin/AdminCsvMappings';
+import AdminScheduledExports from './admin/AdminScheduledExports';
 import AdminSettings from './admin/AdminSettings';
 
 import { serverEndpoint } from './components/config';
@@ -418,6 +424,84 @@ function App() {
             isAdmin ? (
               <AdminLayout userDetails={userDetails} onLogout={handleLogout}>
                 <ManageUsers />
+              </AdminLayout>
+            ) : (
+              <Navigate to="/adminlogin" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/admin/stock-notifications"
+          element={
+            isAdmin ? (
+              <AdminLayout userDetails={userDetails} onLogout={handleLogout}>
+                <AdminStockNotifications />
+              </AdminLayout>
+            ) : (
+              <Navigate to="/adminlogin" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/admin/low-stock"
+          element={
+            isAdmin ? (
+              <AdminLayout userDetails={userDetails} onLogout={handleLogout}>
+                <AdminLowStockAlerts />
+              </AdminLayout>
+            ) : (
+              <Navigate to="/adminlogin" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/admin/products/import-export"
+          element={
+            isAdmin ? (
+              <AdminLayout userDetails={userDetails} onLogout={handleLogout}>
+                <AdminProductImportExport />
+              </AdminLayout>
+            ) : (
+              <Navigate to="/adminlogin" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/admin/csv-mappings"
+          element={
+            isAdmin ? (
+              <AdminLayout userDetails={userDetails} onLogout={handleLogout}>
+                <AdminCsvMappings />
+              </AdminLayout>
+            ) : (
+              <Navigate to="/adminlogin" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/admin/scheduled-exports"
+          element={
+            isAdmin ? (
+              <AdminLayout userDetails={userDetails} onLogout={handleLogout}>
+                <AdminScheduledExports />
+              </AdminLayout>
+            ) : (
+              <Navigate to="/adminlogin" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/admin/reviews"
+          element={
+            isAdmin ? (
+              <AdminLayout userDetails={userDetails} onLogout={handleLogout}>
+                <AdminReviewModeration />
               </AdminLayout>
             ) : (
               <Navigate to="/adminlogin" replace />

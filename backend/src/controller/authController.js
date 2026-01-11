@@ -115,9 +115,8 @@ const authController = {
         return res.status(401).json({ success: false, message: 'Invalid credentials' });
       }
 
-      // Update lastLogin
-      user.lastLogin = new Date();
-      await user.save();
+      // Update lastLogin atomically to avoid full-document validation errors
+      await User.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } });
 
       const payload = {
         _id: user._id,
@@ -195,6 +194,8 @@ sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
             message: 'Account has been blocked. Please contact support.' 
           });
         }
+        // Update lastLogin atomically for existing users
+        await User.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } });
       }
 
       const tokenPayload = {

@@ -27,6 +27,11 @@ const cartRoutes = require('./src/routes/cartRoutes');
 const wishlistRoutes = require('./src/routes/wishlistRoutes');
 const checkoutRoutes = require('./src/routes/checkoutRoutes');
 const contactRoutes = require('./src/routes/contactRoutes');
+const stockNotificationRoutes = require('./src/routes/stockNotificationRoutes');
+const adminLowStockRoutes = require('./src/routes/adminLowStockRoutes');
+const adminReviewRoutes = require('./src/routes/adminReviewRoutes');
+const adminCsvRoutes = require('./src/routes/adminCsvRoutes');
+const adminExportRoutes = require('./src/routes/adminExportRoutes');
 
 // 🧱 Security Middleware
 app.use(helmet(securityMiddleware.helmetConfig));
@@ -53,12 +58,17 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin/products', adminProductRoutes);
+app.use('/api/admin/low-stock', adminLowStockRoutes);
+app.use('/api/admin/reviews', adminReviewRoutes);
+app.use('/api/admin/csv', adminCsvRoutes);
+app.use('/api/admin/exports', adminExportRoutes);
 app.use('/api/products', publicProductRoutes);
 app.use('/api', publicRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/stock-notify', stockNotificationRoutes);
 
 // 🛡️ 404 Handler
 app.use(securityMiddleware.notFoundHandler);
@@ -106,6 +116,14 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/Rivaayaat'
 mongoose.connect(MONGO_URI)
   .then(() => {
     console.log('✅ Connected to MongoDB');
+    // Initialize scheduled export runner
+    try {
+      const scheduledRunner = require('./src/utils/scheduledExportRunner');
+      scheduledRunner.init();
+    } catch (err) {
+      console.warn('⚠️ Failed to start scheduled runner:', err.message);
+    }
+
     server.listen(PORT, () => {
       console.log(`🚀 Server running at http://localhost:${PORT}`);
     });

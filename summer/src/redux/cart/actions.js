@@ -182,7 +182,7 @@ export const addToCartWithValidation = (product) => async (dispatch, getState) =
     if (!validateCartItem(normalizedProduct)) {
       console.error('Invalid product data:', normalizedProduct);
       cartNotifications.addError('Invalid product data');
-      return;
+      return false;
     }
     
     // Check current cart state for stock validation
@@ -196,7 +196,7 @@ export const addToCartWithValidation = (product) => async (dispatch, getState) =
     // Basic stock check (should be validated on backend as well)
     if (normalizedProduct.stock && newQuantity > normalizedProduct.stock) {
       cartNotifications.stockError(normalizedProduct.name, normalizedProduct.stock);
-      return;
+      return false;
     }
     
     // Add to frontend state first
@@ -207,9 +207,13 @@ export const addToCartWithValidation = (product) => async (dispatch, getState) =
     
     // Persist to backend
     await dispatch(persistCartToBackend());
+
+    // Indicate success to callers
+    return true;
   } catch (err) {
     console.error('Failed to add to cart:', err);
     cartNotifications.addError();
+    return false;
   }
 };
 
