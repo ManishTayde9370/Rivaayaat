@@ -15,6 +15,30 @@ const app = express();
 // Trust proxy headers (Render and other PaaS place a reverse proxy in front of the app)
 app.set('trust proxy', 1);
 
+// Lightweight permissive CORS fallback (early) — echoes request Origin and handles OPTIONS.
+// This ensures preflight responses include CORS headers even if other middleware/errors run later.
+app.use((req, res, next) => {
+  const incomingOrigin = req.headers.origin;
+  const whitelist = process.env.FRONTEND_ORIGIN
+    ? process.env.FRONTEND_ORIGIN.split(',').map(s => s.trim())
+    : ['http://localhost:3000', 'https://rivaayaat.netlify.app'];
+
+  // Only set Access-Control-Allow-Origin when the request's origin is present and allowed
+  if (incomingOrigin && whitelist.indexOf(incomingOrigin) !== -1) {
+    res.header('Access-Control-Allow-Origin', incomingOrigin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+  // Always include these to help preflight checks
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,PATCH,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Cookie');
+  if (process.env.ENABLE_CORS_DEBUG === 'true') {
+    // eslint-disable-next-line no-console
+    console.log('CORS fallback:', { method: req.method, origin, path: req.path });
+  }
+  if (req.method === 'OPTIONS') return res.sendStatus(200);
+  next();
+});
+
 // 🔗 Routes
 const authRoutes = require('./src/routes/authRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
