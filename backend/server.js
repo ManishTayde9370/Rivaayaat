@@ -34,8 +34,6 @@ const adminExportRoutes = require('./src/routes/adminExportRoutes');
 // 🧱 Security Middleware
 app.use(helmet(securityMiddleware.helmetConfig));
 app.use(cors(securityMiddleware.corsConfig));
-// Ensure preflight requests are handled globally (use '/*' to avoid path-to-regexp '*' error)
-app.options('/*', cors(securityMiddleware.corsConfig));
 app.use(securityMiddleware.requestSizeLimit);
 app.use(securityMiddleware.sanitizeInput);
 
