@@ -105,8 +105,14 @@ const securityMiddleware = {
       origin: (origin, callback) => {
         // Allow requests with no origin (like server-to-server or curl)
         if (!origin) return callback(null, true);
-        if (whitelist.indexOf(origin) !== -1) return callback(null, true);
-        return callback(new Error('CORS policy: This origin is not allowed'));
+        const allowed = whitelist.indexOf(origin) !== -1;
+        // Optional debug logging when enabled via env
+        if (process.env.ENABLE_CORS_DEBUG === 'true') {
+          // eslint-disable-next-line no-console
+          console.log('CORS debug: origin=', origin, 'allowed=', allowed, 'whitelist=', whitelist);
+        }
+        // Call callback with boolean result (do not throw) to avoid error responses without CORS headers
+        return callback(null, allowed);
       },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
