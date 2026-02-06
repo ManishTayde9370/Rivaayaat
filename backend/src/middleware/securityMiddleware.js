@@ -96,15 +96,25 @@ const securityMiddleware = {
   },
 
   // 🛡️ CORS configuration
-  corsConfig: {
-    origin: process.env.NODE_ENV === 'production'
+  corsConfig: (() => {
+    const whitelist = process.env.NODE_ENV === 'production'
       ? (process.env.FRONTEND_ORIGIN ? process.env.FRONTEND_ORIGIN.split(',') : ['https://rivaayaat.netlify.app'])
-      : ['http://localhost:3000', 'http://127.0.0.1:3000'],
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Cookie'],
-    exposedHeaders: ['Set-Cookie'],
-  },
+      : ['http://localhost:3000', 'http://127.0.0.1:3000'];
+
+    return {
+      origin: (origin, callback) => {
+        // Allow requests with no origin (like server-to-server or curl)
+        if (!origin) return callback(null, true);
+        if (whitelist.indexOf(origin) !== -1) return callback(null, true);
+        return callback(new Error('CORS policy: This origin is not allowed'));
+      },
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Cookie'],
+      exposedHeaders: ['Set-Cookie'],
+      optionsSuccessStatus: 200,
+    };
+  })(),
 
   // 🛡️ Helmet configuration
   helmetConfig: {
