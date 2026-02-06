@@ -103,13 +103,7 @@ const securityMiddleware = {
       : 'http://localhost:3000';
 
     return {
-      origin: (origin, callback) => {
-        // Allow non-browser requests (curl, server-to-server) which have no Origin header
-        if (!origin) return callback(null, true);
-        // Only allow the single configured origin
-        const allowed = origin === allowedOrigin;
-        return callback(null, allowed);
-      },
+      origin: allowedOrigin,
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Cookie'],
