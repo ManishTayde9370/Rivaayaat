@@ -233,7 +233,7 @@ sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
     res.clearCookie(cookieName, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
       path: '/',
     });
 

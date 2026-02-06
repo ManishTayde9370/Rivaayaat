@@ -97,27 +97,23 @@ const securityMiddleware = {
 
   // 🛡️ CORS configuration
   corsConfig: (() => {
-    const whitelist = process.env.NODE_ENV === 'production'
-      ? (process.env.FRONTEND_ORIGIN ? process.env.FRONTEND_ORIGIN.split(',') : ['https://rivaayaat.netlify.app'])
-      : ['http://localhost:3000', 'http://127.0.0.1:3000'];
+    // Use a single origin string in production. Do NOT allow multiple origins or '*'.
+    const allowedOrigin = process.env.NODE_ENV === 'production'
+      ? (process.env.FRONTEND_ORIGIN ? process.env.FRONTEND_ORIGIN.trim() : 'https://rivaayaat.netlify.app')
+      : 'http://localhost:3000';
 
     return {
       origin: (origin, callback) => {
-        // Allow requests with no origin (like server-to-server or curl)
+        // Allow non-browser requests (curl, server-to-server) which have no Origin header
         if (!origin) return callback(null, true);
-        const allowed = whitelist.indexOf(origin) !== -1;
-        // Optional debug logging when enabled via env
-        if (process.env.ENABLE_CORS_DEBUG === 'true') {
-          // eslint-disable-next-line no-console
-          console.log('CORS debug: origin=', origin, 'allowed=', allowed, 'whitelist=', whitelist);
-        }
-        // Call callback with boolean result (do not throw) to avoid error responses without CORS headers
+        // Only allow the single configured origin
+        const allowed = origin === allowedOrigin;
         return callback(null, allowed);
       },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Cookie'],
-      exposedHeaders: ['Set-Cookie'],
+      exposedHeaders: [],
       optionsSuccessStatus: 200,
     };
   })(),
